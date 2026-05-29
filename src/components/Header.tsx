@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
@@ -14,8 +14,19 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const pathWithoutLocale = pathname.replace(new RegExp(`^/${locale}`), '') || '/';
+  const isHome = pathWithoutLocale === '/';
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navLinks = [
     { href: '/', label: t('home') },
@@ -31,11 +42,19 @@ export default function Header() {
     return pathWithoutLocale.startsWith(href);
   };
 
+  const isTransparent = isHome && !scrolled && !mobileOpen;
+
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-xl" style={{
-      backgroundColor: 'color-mix(in srgb, var(--color-bg-base) 85%, transparent)',
-      borderBottom: '1px solid var(--color-border)',
-    }}>
+    <>
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+      style={isTransparent ? {
+        backgroundColor: 'transparent',
+      } : {
+        backgroundColor: 'color-mix(in srgb, var(--color-bg-base) 85%, transparent)',
+        borderBottom: '1px solid var(--color-border)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      }}>
       <div className="container-main flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -43,7 +62,8 @@ export default function Header() {
             style={{ backgroundColor: 'var(--color-primary-600)', color: 'var(--color-text-on-primary)' }}>
             善
           </span>
-          <span className="font-semibold text-sm hidden sm:inline" style={{ color: 'var(--color-text-primary)' }}>
+          <span className="font-semibold text-sm hidden sm:inline"
+            style={{ color: isTransparent ? 'white' : 'var(--color-text-primary)' }}>
             {t('siteTitle')}
           </span>
         </Link>
@@ -57,22 +77,22 @@ export default function Header() {
               className="px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
               style={{
                 color: isActive(link.href)
-                  ? 'var(--color-primary-700)'
-                  : 'var(--color-text-secondary)',
+                  ? (isTransparent ? 'white' : 'var(--color-primary-700)')
+                  : (isTransparent ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)'),
                 backgroundColor: isActive(link.href)
-                  ? 'var(--color-primary-100)'
+                  ? (isTransparent ? 'rgba(255,255,255,0.15)' : 'var(--color-primary-100)')
                   : 'transparent',
               }}
               onMouseEnter={(e) => {
                 if (!isActive(link.href)) {
-                  e.currentTarget.style.backgroundColor = 'var(--color-bg-elevated)';
-                  e.currentTarget.style.color = 'var(--color-text-primary)';
+                  e.currentTarget.style.backgroundColor = isTransparent ? 'rgba(255,255,255,0.12)' : 'var(--color-bg-elevated)';
+                  e.currentTarget.style.color = isTransparent ? 'white' : 'var(--color-text-primary)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive(link.href)) {
                   e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  e.currentTarget.style.color = isTransparent ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)';
                 }
               }}
             >
@@ -87,14 +107,14 @@ export default function Header() {
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg transition-colors duration-200"
-            style={{ color: 'var(--color-text-secondary)' }}
+            style={{ color: isTransparent ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-bg-elevated)';
-              e.currentTarget.style.color = 'var(--color-text-primary)';
+              e.currentTarget.style.backgroundColor = isTransparent ? 'rgba(255,255,255,0.12)' : 'var(--color-bg-elevated)';
+              e.currentTarget.style.color = isTransparent ? 'white' : 'var(--color-text-primary)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = 'var(--color-text-secondary)';
+              e.currentTarget.style.color = isTransparent ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)';
             }}
             aria-label="Toggle theme"
           >
@@ -108,9 +128,9 @@ export default function Header() {
             <button
               onClick={() => setLangOpen(!langOpen)}
               className="p-2 rounded-lg text-sm font-medium transition-colors duration-200 hidden sm:flex items-center gap-1"
-              style={{ color: 'var(--color-text-secondary)' }}
+              style={{ color: isTransparent ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-bg-elevated)';
+                e.currentTarget.style.backgroundColor = isTransparent ? 'rgba(255,255,255,0.12)' : 'var(--color-bg-elevated)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
@@ -157,7 +177,7 @@ export default function Header() {
           <button
             className="md:hidden p-2 rounded-lg"
             onClick={() => setMobileOpen(!mobileOpen)}
-            style={{ color: 'var(--color-text-secondary)' }}
+            style={{ color: isTransparent ? 'rgba(255,255,255,0.9)' : 'var(--color-text-secondary)' }}
           >
             <MenuIcon open={mobileOpen} />
           </button>
@@ -210,6 +230,8 @@ export default function Header() {
         </div>
       )}
     </header>
+    {!isHome && <div className="h-16" />}
+    </>
   );
 }
 

@@ -67,6 +67,31 @@ jobs:
           target: "/opt/sinkai"
           strip_components: 1
 
+      - name: Check for SSL cert secrets
+        id: certs
+        run: |
+          if [ -n "${{ secrets.CF_ORIGIN_CERT }}" ]; then
+            echo "has_certs=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_certs=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure SSL certs on server
+        if: steps.certs.outputs.has_certs == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          envs: CF_ORIGIN_CERT,CF_ORIGIN_KEY
+          script: |
+            set -e
+            mkdir -p /opt/sinkai/ssl
+            printf '%s\n' "$CF_ORIGIN_CERT" > /opt/sinkai/ssl/cloudflare-origin.pem
+            printf '%s\n' "$CF_ORIGIN_KEY" > /opt/sinkai/ssl/cloudflare-origin.key
+            chmod 600 /opt/sinkai/ssl/cloudflare-origin.key
+            chmod 644 /opt/sinkai/ssl/cloudflare-origin.pem
+
       - name: Deploy on Hetzner
         uses: appleboy/ssh-action@v1.0.3
         with:

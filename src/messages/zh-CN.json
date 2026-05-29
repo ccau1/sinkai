@@ -33,13 +33,41 @@
     "statYearsDesc": "自1998年持续服务贵州贫困山区",
     "activitiesTitle": "我们的工作",
     "activities": {
-      "school": { "title": "希望小学落成", "desc": "贵州山区新建校舍让孩子们有了安全的学习环境" },
-      "field": { "title": "山区探访活动", "desc": "义工深入贫困家庭了解需求并派发物资" },
-      "elderly": { "title": "中秋敬老活动", "desc": "每年向香港独居长者派发中秋福袋传递温暖" },
-      "mooncake": { "title": "慈善月饼义卖", "desc": "义卖月饼收益全数拨作贵州建校用途" },
-      "students": { "title": "助学圆梦计划", "desc": "资助贫困学生完成学业改变命运" },
-      "survey": { "title": "贵州实地考察", "desc": "每年多次前往贵州亲身了解山区实况" }
-    }
+      "school": {
+        "title": "希望小学落成",
+        "desc": "贵州山区新建校舍让孩子们有了安全的学习环境"
+      },
+      "field": {
+        "title": "山区探访活动",
+        "desc": "义工深入贫困家庭了解需求并派发物资"
+      },
+      "elderly": {
+        "title": "中秋敬老活动",
+        "desc": "每年向香港独居长者派发中秋福袋传递温暖"
+      },
+      "mooncake": {
+        "title": "慈善月饼义卖",
+        "desc": "义卖月饼收益全数拨作贵州建校用途"
+      },
+      "students": {
+        "title": "助学圆梦计划",
+        "desc": "资助贫困学生完成学业改变命运"
+      },
+      "survey": {
+        "title": "贵州实地考察",
+        "desc": "每年多次前往贵州亲身了解山区实况"
+      }
+    },
+    "storyLabel": "我们的使命",
+    "impactLabel": "我们的影响",
+    "impactTitle": "真实的改变，真实的生命",
+    "workLabel": "我们的工作",
+    "quoteLabel": "义工心声",
+    "ctaTitle": "成为改变的一部分",
+    "ctaSubtitle": "您的每一分捐助，都将直接用于建校、助学，为最需要的人带来希望。",
+    "ctaVolunteer": "加入义工",
+    "schoolCaption": "希望小学落成典礼",
+    "schoolLocation": "中国贵州"
   },
   "about": {
     "pageTitle": "关于善启",

@@ -33,13 +33,41 @@
     "statYearsDesc": "Serving Guizhou's impoverished areas since 1998",
     "activitiesTitle": "Our Work",
     "activities": {
-      "school": { "title": "Hope School Opening", "desc": "New school buildings in Guizhou give children a safe learning environment" },
-      "field": { "title": "Mountain Area Visits", "desc": "Volunteers visit impoverished families, record needs and distribute supplies" },
-      "elderly": { "title": "Mid-Autumn Elderly Care", "desc": "Distributing festival gifts to elderly residents living alone in Hong Kong" },
-      "mooncake": { "title": "Charity Mooncake", "desc": "All mooncake proceeds fund school building in Guizhou" },
-      "students": { "title": "Dream Student Aid", "desc": "Sponsoring impoverished students to complete their education" },
-      "survey": { "title": "Guizhou Field Trips", "desc": "Regular visits to Guizhou to understand the reality on the ground" }
-    }
+      "school": {
+        "title": "Hope School Opening",
+        "desc": "New school buildings in Guizhou give children a safe learning environment"
+      },
+      "field": {
+        "title": "Mountain Area Visits",
+        "desc": "Volunteers visit impoverished families, record needs and distribute supplies"
+      },
+      "elderly": {
+        "title": "Mid-Autumn Elderly Care",
+        "desc": "Distributing festival gifts to elderly residents living alone in Hong Kong"
+      },
+      "mooncake": {
+        "title": "Charity Mooncake",
+        "desc": "All mooncake proceeds fund school building in Guizhou"
+      },
+      "students": {
+        "title": "Dream Student Aid",
+        "desc": "Sponsoring impoverished students to complete their education"
+      },
+      "survey": {
+        "title": "Guizhou Field Trips",
+        "desc": "Regular visits to Guizhou to understand the reality on the ground"
+      }
+    },
+    "storyLabel": "OUR MISSION",
+    "impactLabel": "OUR IMPACT",
+    "impactTitle": "Real Change, Real Lives",
+    "workLabel": "WHAT WE DO",
+    "quoteLabel": "VOLUNTEER VOICES",
+    "ctaTitle": "Be Part of the Change",
+    "ctaSubtitle": "Every dollar you donate goes directly to building schools, sponsoring students, and bringing hope to those who need it most.",
+    "ctaVolunteer": "Join as Volunteer",
+    "schoolCaption": "Hope Primary School Opening",
+    "schoolLocation": "Guizhou, China"
   },
   "about": {
     "pageTitle": "About Sin Kai",

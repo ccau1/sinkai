@@ -57,7 +57,17 @@
         "title": "貴州實地考察",
         "desc": "每年多次前往貴州親身瞭解山區實況"
       }
-    }
+    },
+    "storyLabel": "我們的使命",
+    "impactLabel": "我們的影響",
+    "impactTitle": "真實的改變，真實的生命",
+    "workLabel": "我們的工作",
+    "quoteLabel": "義工心聲",
+    "ctaTitle": "成為改變的一部分",
+    "ctaSubtitle": "您的每一分捐助，都將直接用於建校、助學，為最需要的人帶來希望。",
+    "ctaVolunteer": "加入義工",
+    "schoolCaption": "希望小學落成典禮",
+    "schoolLocation": "中國貴州"
   },
   "about": {
     "pageTitle": "關於善啓",
