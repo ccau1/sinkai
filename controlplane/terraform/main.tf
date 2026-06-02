@@ -1,0 +1,112 @@
+resource "hcloud_ssh_key" "deploy" {
+  name       = "dev-deploy"
+  public_key = file(var.ssh_public_key_path)
+}
+
+resource "hcloud_firewall" "web" {
+  name = "dev-firewall"
+
+  rule {
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "22"
+    source_ips  = ["0.0.0.0/0", "::/0"]
+    description = "SSH"
+  }
+
+  rule {
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "80"
+    source_ips  = ["0.0.0.0/0", "::/0"]
+    description = "HTTP"
+  }
+
+  rule {
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "443"
+    source_ips  = ["0.0.0.0/0", "::/0"]
+    description = "HTTPS"
+  }
+}
+
+# ── Dev Server ─────────────────────────────────────────────────
+
+resource "hcloud_server" "dev" {
+  name         = "dev"
+  server_type  = var.server_type
+  image        = "ubuntu-24.04"
+  location     = var.location
+  ssh_keys     = [hcloud_ssh_key.deploy.id]
+  firewall_ids = [hcloud_firewall.web.id]
+  backups      = var.enable_backups
+
+  labels = {
+    env = "dev"
+  }
+
+  user_data = <<-EOF
+    #cloud-config
+    package_update: true
+    packages:
+      - fail2ban
+    runcmd:
+      - curl -fsSL https://get.docker.com | sh
+      - usermod -aG docker root
+      - mkdir -p /opt/traefik /opt/apps
+      - docker network create dev || true
+      - systemctl enable --now docker
+  EOF
+}
+
+resource "cloudflare_record" "dev_wildcard" {
+  count = var.cloudflare_zone_id != "" ? 1 : 0
+
+  zone_id = var.cloudflare_zone_id
+  name    = "*-dev"
+  type    = "A"
+  content = hcloud_server.dev.ipv4_address
+  ttl     = 1
+  proxied = var.cloudflare_proxied
+}
+
+# ── Staging Server ─────────────────────────────────────────────
+
+resource "hcloud_server" "staging" {
+  name         = "staging"
+  server_type  = var.server_type
+  image        = "ubuntu-24.04"
+  location     = var.location
+  ssh_keys     = [hcloud_ssh_key.deploy.id]
+  firewall_ids = [hcloud_firewall.web.id]
+  backups      = var.enable_backups
+
+  labels = {
+    env = "staging"
+  }
+
+  user_data = <<-EOF
+    #cloud-config
+    package_update: true
+    packages:
+      - fail2ban
+    runcmd:
+      - curl -fsSL https://get.docker.com | sh
+      - usermod -aG docker root
+      - mkdir -p /opt/traefik /opt/apps
+      - docker network create staging || true
+      - systemctl enable --now docker
+  EOF
+}
+
+resource "cloudflare_record" "staging_wildcard" {
+  count = var.cloudflare_zone_id != "" ? 1 : 0
+
+  zone_id = var.cloudflare_zone_id
+  name    = "*-staging"
+  type    = "A"
+  content = hcloud_server.staging.ipv4_address
+  ttl     = 1
+  proxied = var.cloudflare_proxied
+}

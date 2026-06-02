@@ -53,6 +53,40 @@ export default function HomePage() {
         },
       });
 
+      // Vertical texts fly in first
+      gsap.fromTo('.hero-text-left',
+        { x: -120, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out', delay: 0 }
+      );
+      gsap.fromTo('.hero-text-right',
+        { x: 120, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1.2, ease: 'power3.out', delay: 0 }
+      );
+
+      // Scooping hands animation - move together to protect children
+      gsap.fromTo('.hero-hand-left',
+        { x: '-55vw', opacity: 0 },
+        { x: 0, opacity: 1, duration: 1.8, ease: 'power3.out', delay: 0.5 }
+      );
+      gsap.fromTo('.hero-hand-right',
+        { x: '55vw', opacity: 0 },
+        { x: 0, opacity: 1, duration: 1.8, ease: 'power3.out', delay: 0.5 }
+      );
+
+
+      // Vertical texts fade out on scroll (hands stay visible)
+      gsap.to('.hero-text-left, .hero-text-right', {
+        opacity: 0,
+        y: -40,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroRef.current!,
+          start: 'top top',
+          end: '50% top',
+          scrub: true,
+        },
+      });
+
       // Reveal animations for sections
       const revealSections = [storyRef, impactRef, workRef, quoteRef, ctaRef];
       revealSections.forEach((ref) => {
@@ -164,14 +198,14 @@ export default function HomePage() {
         <div className="parallax-layer absolute inset-0 z-0">
           <Image src="/images/parallax-layer1.jpg" alt="" fill className="object-cover" priority />
         </div>
-        <div className="parallax-layer absolute inset-0 z-[1] opacity-50">
+        <div className="parallax-layer absolute inset-0 z-[1] opacity-40">
           <Image src="/images/parallax-layer4.jpg" alt="" fill className="object-cover" priority />
         </div>
 
         {/* Cinematic overlay */}
         <div className="absolute inset-0 z-[3]"
           style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.25) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.2) 100%)'
           }} />
 
         {/* Soft fade to story section background */}
@@ -180,17 +214,81 @@ export default function HomePage() {
             background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, var(--color-bg-base) 100%)'
           }} />
 
+        {/* Left hand - scoops in from far left */}
+        <div className="hero-hand-left hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 z-[5] w-[600px] xl:w-[720px] 2xl:w-[840px]"
+          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))' }}>
+          <Image src="/images/hand-left.png" alt="" width={500} height={500} className="w-full h-auto" priority />
+        </div>
+
+        {/* Right hand - scoops in from far right */}
+        <div className="hero-hand-right hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-[5] w-[600px] xl:w-[720px] 2xl:w-[840px]"
+          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))' }}>
+          <Image src="/images/hand-right.png" alt="" width={500} height={500} className="w-full h-auto" priority />
+        </div>
+
+        {/* Left vertical text - flies in from left */}
+        <div className="hero-text-left hidden xl:flex absolute left-6 2xl:left-10 top-1/2 -translate-y-1/2 z-20 items-center justify-center">
+          <span className="text-2xl 2xl:text-3xl font-bold tracking-[0.25em]"
+            style={{
+              writingMode: 'vertical-rl',
+              color: '#EE82EE',
+              textShadow: '0 0 24px rgba(0,0,0,0.7), 0 0 48px rgba(0,0,0,0.5)'
+            }}>
+            善施恩惠烏蒙
+          </span>
+        </div>
+
+        {/* Right vertical text - flies in from right */}
+        <div className="hero-text-right hidden xl:flex absolute right-6 2xl:right-10 top-1/2 -translate-y-1/2 z-20 items-center justify-center">
+          <span className="text-2xl 2xl:text-3xl font-bold tracking-[0.25em]"
+            style={{
+              writingMode: 'vertical-rl',
+              color: '#EE82EE',
+              textShadow: '0 0 24px rgba(0,0,0,0.7), 0 0 48px rgba(0,0,0,0.5)'
+            }}>
+            啟願溫暖人間
+          </span>
+        </div>
+
         {/* Content */}
-        <div className="hero-content relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <p className="text-label mb-6 tracking-widest" style={{ color: 'rgba(255,255,255,0.75)' }}>
-            {t('tagline')}
-          </p>
-          <h1 className="text-display font-bold mb-8 text-white" style={{ textShadow: '0 4px 40px rgba(0,0,0,0.4)' }}>
-            {t('heroTitle')}
+        <div className="hero-content relative z-10 text-center px-6 max-w-3xl mx-auto">
+          {/* Mission statements */}
+          <div className="mb-6 space-y-1">
+            <p className="text-sm md:text-base tracking-wider" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              發揚互助精神 · 倡導德行教育
+            </p>
+            <p className="text-sm md:text-base tracking-wider" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              為社會的文明建設作出無私奉獻
+            </p>
+          </div>
+
+          {/* Main title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 text-white" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.4)' }}>
+            讓人間
           </h1>
-          <p className="text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.88)' }}>
-            {t('heroSubtitle')}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3" style={{ color: '#FF6B9D', textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}>
+            多一分溫暖
+          </h1>
+          <p className="text-lg md:text-xl mb-8" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            少一分痛苦。
           </p>
+
+          {/* Foundation name */}
+          <div className="mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#90EE90', textShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
+              善啟慈善基金會
+            </h2>
+            <p className="text-sm tracking-widest uppercase font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>
+              SIN KAI FUNDS LIMITED
+            </p>
+          </div>
+
+          {/* Registration */}
+          <p className="text-xs md:text-sm mb-10 tracking-wide" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            政府註冊 零行政費 非牟利機構，牌照號碼：658073
+          </p>
+
+          {/* CTA buttons */}
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href={`/${locale}/about`} className="btn-primary inline-block">
               {t('btnAbout')}
