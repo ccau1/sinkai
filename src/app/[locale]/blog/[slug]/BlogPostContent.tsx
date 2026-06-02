@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { type Locale } from '@/i18n/config';
 
@@ -14,9 +14,14 @@ interface Props {
   locale: string;
 }
 
+function thumbToOriginal(path: string): string {
+  return path.replace('-thumb.jpg', '.jpg');
+}
+
 export default function BlogPostContent({ post, translation, relatedPosts, locale }: Props) {
   const t = useTranslations('blog');
   const contentRef = useRef<HTMLDivElement>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -35,6 +40,19 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
     });
     return () => ctx.revert();
   }, []);
+
+  useEffect(() => {
+    if (lightbox) {
+      document.body.style.overflow = 'hidden';
+      const handler = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setLightbox(null);
+        if (e.key === 'ArrowLeft') setLightbox(prev => prev ? { ...prev, index: Math.max(0, prev.index - 1) } : null);
+        if (e.key === 'ArrowRight') setLightbox(prev => prev ? { ...prev, index: Math.min(prev.images.length - 1, prev.index + 1) } : null);
+      };
+      document.addEventListener('keydown', handler);
+      return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = ''; };
+    }
+  }, [lightbox]);
 
   const renderContent = (content: string) => {
     const lines = content.split('\n');
@@ -96,6 +114,19 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
         flushList();
         inTable = true;
         tableRows.push(trimmed);
+      } else if (trimmed.startsWith('![') && trimmed.includes('](')) {
+        flushList();
+        flushTable();
+        const match = trimmed.match(/!\[(.*?)\]\((.*?)\)/);
+        if (match) {
+          const [, alt, src] = match;
+          elements.push(
+            <div key={`img-${i}`} className="reveal my-6 rounded-xl overflow-hidden">
+              <Image src={src} alt={alt} width={800} height={600} className="w-full h-auto object-cover" />
+              {alt && <p className="text-sm text-center mt-2" style={{ color: 'var(--color-text-tertiary)' }}>{alt}</p>}
+            </div>
+          );
+        }
       } else if (trimmed === '') {
         // skip
       } else {
@@ -113,6 +144,8 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
     flushTable();
     return elements;
   };
+
+  const allImages = post.imageGroups?.flatMap((g: any) => g.images) ?? [];
 
   return (
     <div>
@@ -141,6 +174,35 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
                 {translation.excerpt}
               </p>
               {renderContent(translation.content)}
+
+              {/* Image Groups */}
+              {post.imageGroups?.map((group: any, gi: number) => (
+                <div key={gi} className="reveal mt-10 mb-8">
+                  <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--color-text-primary)' }}>
+                    {group.caption[locale as Locale] || group.caption['en'] || group.caption['zh-TW']}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {group.images.map((img: string, ii: number) => {
+                      const globalIndex = allImages.indexOf(img);
+                      return (
+                        <div
+                          key={ii}
+                          className="aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group relative"
+                          onClick={() => setLightbox({ images: allImages, index: globalIndex })}
+                        >
+                          <Image
+                            src={img}
+                            alt=""
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </article>
 
             {/* Sidebar */}
@@ -180,6 +242,38 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
           </div>
         </div>
       </section>
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.92)' }}
+          onClick={() => setLightbox(null)}>
+          <button className="absolute top-4 right-4 text-white p-2 z-10" onClick={() => setLightbox(null)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          {lightbox.index > 0 && (
+            <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2 z-10"
+              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: lightbox.index - 1 }); }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+          )}
+          {lightbox.index < lightbox.images.length - 1 && (
+            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2 z-10"
+              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: lightbox.index + 1 }); }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          )}
+          <img
+            src={thumbToOriginal(lightbox.images[lightbox.index])}
+            alt=""
+            className="max-w-[90vw] max-h-[85vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-xs font-medium tracking-wider">
+            {lightbox.index + 1} / {lightbox.images.length}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

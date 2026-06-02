@@ -3,8 +3,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="$(dirname "$SCRIPT_DIR")"
-TF_DIR="$DEPLOY_DIR/terraform"
-SSL_DIR="$DEPLOY_DIR/ssl"
+TF_DIR="$DEPLOY_DIR/terraform/environments/prod"
+SSL_DIR="$TF_DIR/ssl"
 
 # Read the public key path from terraform.tfvars, derive private key path
 TFVARS="$TF_DIR/terraform.tfvars"
@@ -21,7 +21,7 @@ if [ ! -f "$SSH_KEY" ]; then
     echo "❌ SSH private key not found: $SSH_KEY"
     echo "   Options:"
     echo "   1. Set SSH_KEY env var: SSH_KEY=~/.ssh/my-key ./deploy/scripts/push-certs.sh"
-    echo "   2. Update ssh_public_key_path in deploy/terraform/terraform.tfvars"
+    echo "   2. Update ssh_public_key_path in deploy/terraform/environments/prod/terraform.tfvars"
     exit 1
 fi
 

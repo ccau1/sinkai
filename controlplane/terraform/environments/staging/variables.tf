@@ -1,5 +1,5 @@
 variable "hcloud_token" {
-  description = "Hetzner Cloud API token for the dev project (Read & Write)"
+  description = "Hetzner Cloud API token for the staging project (Read & Write)"
   type        = string
   sensitive   = true
 }
@@ -11,7 +11,7 @@ variable "ssh_public_key_path" {
 }
 
 variable "server_type" {
-  description = "Hetzner server type for dev/staging environments. cx23 = 2 Intel vCPU/4GB (~€4)"
+  description = "Hetzner server type for staging environment. cx23 = 2 Intel vCPU/4GB (~€4)"
   type        = string
   default     = "cx23"
 }
@@ -44,7 +44,7 @@ variable "cloudflare_zone_id" {
 }
 
 variable "cloudflare_proxied" {
-  description = "Enable Cloudflare proxy (CDN + free SSL). true = orange cloud"
+  description = "Enable Cloudflare proxy (CDN + free SSL). true = orange cloud. NOTE: Let's Encrypt does not work with proxying enabled. For staging, keep this false."
   type        = bool
-  default     = true
+  default     = false
 }

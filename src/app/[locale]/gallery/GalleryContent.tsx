@@ -7,6 +7,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function thumbToOriginal(path: string): string {
+  return path.replace('-thumb.jpg', '.jpg');
+}
+
 interface GallerySection {
   id: string;
   images: string[];
@@ -196,7 +200,7 @@ export default function GalleryPage() {
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           )}
-          <img src={`${lightbox.dir}${lightbox.images[lightbox.index]}`} alt=""
+          <img src={`${lightbox.dir}${thumbToOriginal(lightbox.images[lightbox.index])}`} alt=""
             className="max-w-[90vw] max-h-[85vh] object-contain"
             onClick={(e) => e.stopPropagation()} />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-xs font-medium tracking-wider">

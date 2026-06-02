@@ -82,7 +82,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="reveal relative aspect-square rounded-2xl overflow-hidden">
-              <img src="/images/parallax-layer1.jpg" alt="" className="w-full h-full object-cover" />
+              <img src="/gallery/mountain/01_45.jpg" alt="" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>

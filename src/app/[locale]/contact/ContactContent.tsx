@@ -12,6 +12,7 @@ export default function ContactPage() {
   const t = useTranslations('contact');
   const pageRef = useRef<HTMLDivElement>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -44,7 +45,7 @@ export default function ContactPage() {
     <div ref={pageRef}>
       {/* Hero Banner */}
       <section className="relative h-[50vh] min-h-[300px]">
-        <Image src="/images/parallax-layer4.jpg" alt={t('pageTitle')} fill className="object-cover" priority />
+        <Image src="/gallery/snow/16_37.jpg" alt={t('pageTitle')} fill className="object-cover" priority />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)' }} />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="container-main text-center">
@@ -79,6 +80,22 @@ export default function ContactPage() {
                         {line}
                       </p>
                     ))}
+                    {block.icon === 'map' && (
+                      <div
+                        className="ml-8 mt-3 rounded-lg overflow-hidden cursor-pointer"
+                        style={{ height: '120px', border: '1px solid var(--color-border)' }}
+                        onClick={() => setMapOpen(true)}
+                      >
+                        <iframe
+                          src="https://maps.google.com/maps?q=Charm+Centre,+700+Castle+Peak+Road,+Lai+Chi+Kok,+Hong+Kong&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0, pointerEvents: 'none' }}
+                          loading="lazy"
+                          title="Map preview"
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -160,6 +177,45 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* Map Modal */}
+      {mapOpen && (
+        <div
+          className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+          onClick={() => setMapOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl"
+            style={{ backgroundColor: 'var(--color-bg-surface)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
+              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>{t('addressLabel')}</h3>
+              <button
+                onClick={() => setMapOpen(false)}
+                className="p-1 rounded-lg hover:bg-black/5 transition-colors"
+                aria-label="Close"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div style={{ height: '60vh', minHeight: '400px' }}>
+              <iframe
+                src="https://maps.google.com/maps?q=Charm+Centre,+700+Castle+Peak+Road,+Lai+Chi+Kok,+Hong+Kong&t=&z=17&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                title="Google Map"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

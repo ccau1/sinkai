@@ -21,6 +21,13 @@ export default function HomePage() {
   const ctaRef = useRef<HTMLDivElement>(null);
 
   const [counts, setCounts] = useState({ schools: 0, donation: 0, years: 0 });
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const heroSlides = [
+    '/gallery/activities/13_16.jpg',
+    '/gallery/activities/13_15.jpg',
+    '/gallery/schools-new/06_osch_56.jpg',
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -162,6 +169,13 @@ export default function HomePage() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [heroSlides.length]);
+
   const stats = [
     { number: `${counts.schools}+`, label: t('statSchools'), desc: t('statSchoolsDesc') },
     { number: `${counts.donation}%`, label: t('statDonation'), desc: t('statDonationDesc') },
@@ -169,12 +183,12 @@ export default function HomePage() {
   ];
 
   const activities = [
-    { key: 'school', img: '/images/school-opening.jpg' },
-    { key: 'field', img: '/images/parallax-layer4.jpg' },
-    { key: 'elderly', img: '/images/mid-autumn-event.jpg' },
-    { key: 'mooncake', img: '/images/mooncake.jpg' },
-    { key: 'students', img: '/gallery/activities/13_01-thumb.jpg' },
-    { key: 'survey', img: '/gallery/hk-charity/07_02-thumb.jpg' },
+    { key: 'school', img: '/gallery/schools-new/06_osch_56.jpg' },
+    { key: 'field', img: '/gallery/field-trip/04_43.jpg' },
+    { key: 'elderly', img: '/gallery/hk-charity/07_2019ma2.jpg' },
+    { key: 'mooncake', img: '/gallery/news/15_mooncake2021.jpg' },
+    { key: 'students', img: '/gallery/activities/13_01.jpg' },
+    { key: 'survey', img: '/gallery/hk-charity/07_02.jpg' },
   ];
 
   return (
@@ -183,12 +197,20 @@ export default function HomePage() {
           HERO SECTION
           ============================================ */}
       <section ref={heroRef} className="relative pt-16 min-h-[100dvh] flex items-center justify-center overflow-hidden">
-        {/* Parallax background layers */}
+        {/* Parallax background slideshow */}
         <div className="parallax-layer absolute inset-0 z-0">
-          <Image src="/images/parallax-layer1.jpg" alt="" fill className="object-cover" priority />
-        </div>
-        <div className="parallax-layer absolute inset-0 z-[1] opacity-20">
-          <Image src="/images/parallax-layer4.jpg" alt="" fill className="object-cover" priority />
+          {heroSlides.map((src, i) => (
+            <Image
+              key={src}
+              src={src}
+              alt=""
+              fill
+              className="object-cover transition-opacity duration-[2000ms] ease-in-out"
+              style={{ opacity: i === currentSlide ? 1 : 0 }}
+              priority={i === 0}
+            />
+          ))}
+          <div className="absolute inset-0 bg-black/50" />
         </div>
 
         {/* Warm light overlay — bright and airy */}
@@ -329,7 +351,7 @@ export default function HomePage() {
             {/* Left image */}
             <div className="lg:col-span-4 reveal">
               <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
-                <Image src="/images/school-opening.jpg" alt="" fill className="object-cover" />
+                <Image src="/gallery/schools-new/06_osch_56.jpg" alt="" fill className="object-cover" />
               </div>
             </div>
 
@@ -356,14 +378,14 @@ export default function HomePage() {
             {/* Right image */}
             <div className="lg:col-span-4 reveal lg:mt-16">
               <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
-                <Image src="/images/mid-autumn-event.jpg" alt="" fill className="object-cover" />
+                <Image src="/gallery/hk-charity/07_2019ma2.jpg" alt="" fill className="object-cover" />
               </div>
             </div>
           </div>
 
           {/* Bottom wide image */}
           <div className="reveal relative aspect-[21/9] md:aspect-[3/1] rounded-[2rem] overflow-hidden shadow-xl">
-            <Image src="/images/parallax-layer4.jpg" alt="" fill className="object-cover" />
+            <Image src="/gallery/field-trip/04_41.jpg" alt="" fill className="object-cover" />
             <div className="absolute inset-0" style={{
               background: 'linear-gradient(to right, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.3) 100%)'
             }} />
@@ -382,7 +404,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Image side */}
             <div className="reveal relative aspect-[4/5] md:aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl">
-              <Image src="/images/parallax-layer4.jpg" alt="" fill className="impact-img object-cover scale-110" />
+              <Image src="/gallery/schools-new/06_osch_61.jpg" alt="" fill className="impact-img object-cover scale-110" />
               <div className="absolute inset-0" style={{
                 background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)'
               }} />
@@ -518,7 +540,7 @@ export default function HomePage() {
           ============================================ */}
       <section ref={ctaRef} className="relative min-h-[60vh] md:min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/parallax-layer4.jpg" alt="" fill className="object-cover" />
+          <Image src="/gallery/mountain/01_48.jpg" alt="" fill className="object-cover" />
           <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
         </div>
 

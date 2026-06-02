@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
-type Theme = 'light' | 'dark' | 'oceanic';
+type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -40,9 +40,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleTheme = () => {
-    const cycle: Theme[] = ['light', 'dark', 'oceanic'];
-    const idx = cycle.indexOf(theme);
-    setTheme(cycle[(idx + 1) % cycle.length]);
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   if (!mounted) {

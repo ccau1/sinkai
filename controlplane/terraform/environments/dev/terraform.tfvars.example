@@ -10,4 +10,4 @@ hcloud_token = "YOUR_HETZNER_DEV_API_TOKEN"
 # ── Cloudflare DNS (optional) ─────────────────────────────────
 # cloudflare_api_token = "YOUR_CLOUDFLARE_API_TOKEN"
 # cloudflare_zone_id   = "YOUR_CLOUDFLARE_ZONE_ID"
-# cloudflare_proxied   = true
+# cloudflare_proxied   = false

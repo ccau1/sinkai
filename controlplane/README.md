@@ -8,9 +8,12 @@ In a real multi-repo setup, this would be its own Git repository (e.g., `tribalo
 
 | File | Purpose |
 |------|---------|
-| `docker-compose.yml` | Traefik reverse proxy container |
-| `traefik.yml` | Traefik static configuration (entrypoints, Let's Encrypt, Docker provider) |
-| `terraform/` | Provisions the dev and staging Hetzner servers + Cloudflare DNS |
+| `docker-compose.dev.yml` | Traefik reverse proxy container for dev server |
+| `docker-compose.staging.yml` | Traefik reverse proxy container for staging server |
+| `traefik.dev.yml` | Traefik static configuration for dev server |
+| `traefik.staging.yml` | Traefik static configuration for staging server |
+| `terraform/environments/dev/` | Provisions the dev Hetzner server + Cloudflare DNS |
+| `terraform/environments/staging/` | Provisions the staging Hetzner server + Cloudflare DNS |
 
 ## Architecture
 
@@ -33,7 +36,16 @@ Traefik auto-discovers app containers via Docker labels. No manual proxy config 
 ## Provisioning the Servers
 
 ```bash
-cd controlplane/terraform
+# For dev
+cd controlplane/terraform/environments/dev
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your tokens
+
+terraform init
+terraform apply
+
+# For staging
+cd controlplane/terraform/environments/staging
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your tokens
 
@@ -46,11 +58,13 @@ terraform apply
 After Terraform provisions a server:
 
 ```bash
-# Copy Traefik files to the server
-scp -r controlplane/docker-compose.yml controlplane/traefik.yml root@SERVER_IP:/opt/traefik/
+# Copy Traefik files to the dev server
+scp -r controlplane/docker-compose.dev.yml controlplane/traefik.dev.yml root@DEV_SERVER_IP:/opt/traefik/
+ssh root@DEV_SERVER_IP 'cd /opt/traefik && docker network create dev || true && docker compose -f docker-compose.dev.yml up -d'
 
-# Start Traefik
-ssh root@SERVER_IP 'cd /opt/traefik && docker compose up -d'
+# Copy Traefik files to the staging server
+scp -r controlplane/docker-compose.staging.yml controlplane/traefik.staging.yml root@STAGING_SERVER_IP:/opt/traefik/
+ssh root@STAGING_SERVER_IP 'cd /opt/traefik && docker network create staging || true && docker compose -f docker-compose.staging.yml up -d'
 ```
 
 ## Adding a New App to Dev or Staging

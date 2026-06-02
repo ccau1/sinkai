@@ -214,6 +214,7 @@
     "formSubjectPlaceholder": "查询主旨",
     "formMessage": "讯息",
     "formMessagePlaceholder": "请输入您的讯息...",
+    "viewMap": "查看地图",
     "formSubmit": "发送讯息",
     "formSuccess": "感谢您的讯息，我们会尽快回覆您。"
   }

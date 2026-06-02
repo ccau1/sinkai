@@ -1,5 +1,10 @@
 import { type Locale } from '@/i18n/config';
 
+export interface BlogPostImageGroup {
+  caption: Record<Locale, string>;
+  images: string[]; // paths to thumb images, e.g. /gallery/snow/16_01-thumb.jpg
+}
+
 export interface BlogPost {
   slug: string;
   date: string;
@@ -9,13 +14,26 @@ export interface BlogPost {
     excerpt: string;
     content: string;
   }>;
+  imageGroups?: BlogPostImageGroup[];
 }
 
 export const blogPosts: BlogPost[] = [
   {
     slug: 'mountain-area-reality',
     date: '2024-03-15',
-    coverImage: '/images/parallax-layer1.jpg',
+    coverImage: '/gallery/mountain/01_00-thumb.jpg',
+    imageGroups: [
+      {
+        caption: {
+          en: 'Mountain scenery and terrain of Guizhou',
+          'zh-CN': '贵州山区风貌',
+          'zh-TW': '貴州山區風貌',
+        },
+        images: [
+          '/gallery/mountain/01_07-thumb.jpg','/gallery/mountain/01_08-thumb.jpg','/gallery/mountain/01_09-thumb.jpg','/gallery/mountain/01_10-thumb.jpg','/gallery/mountain/01_11-thumb.jpg','/gallery/mountain/01_13-thumb.jpg','/gallery/mountain/01_15-thumb.jpg','/gallery/mountain/01_16-thumb.jpg','/gallery/mountain/01_17-thumb.jpg','/gallery/mountain/01_22-thumb.jpg','/gallery/mountain/01_23-thumb.jpg','/gallery/mountain/01_27-thumb.jpg','/gallery/mountain/01_28-thumb.jpg','/gallery/mountain/01_31-thumb.jpg','/gallery/mountain/01_32-thumb.jpg','/gallery/mountain/01_34-thumb.jpg','/gallery/mountain/01_37-thumb.jpg','/gallery/mountain/01_39-thumb.jpg','/gallery/mountain/01_40-thumb.jpg','/gallery/mountain/01_43-thumb.jpg','/gallery/mountain/01_44-thumb.jpg','/gallery/mountain/01_45-thumb.jpg','/gallery/mountain/01_46-thumb.jpg','/gallery/mountain/01_47-thumb.jpg','/gallery/mountain/01_48-thumb.jpg','/gallery/mountain/01_49-thumb.jpg','/gallery/mountain/01_50-thumb.jpg',
+        ],
+      },
+    ],
     translations: {
       'en': {
         title: 'Mountain Area Reality: Life in Guizhou\'s Impoverished Regions',
@@ -24,6 +42,8 @@ export const blogPosts: BlogPost[] = [
 ## Geography and Landscape
 
 Guizhou Province covers **67,992 square kilometres**, approximately 1.8% of China's total land area. Located inland in southwestern China, the province is characterized by its dramatic karst topography — 92.5% of the land is highland mountains, with rugged limestone peaks, steep valleys, underground rivers, and numerous cave systems at altitudes ranging from **1,000 to 2,900 metres** above sea level.
+
+![Map of Guizhou Province](/gallery/mountain/01_00.jpg)
 
 The mountainous terrain is relentless. Everywhere you look are unending, uneven stone mountains — a landscape that is stunningly beautiful but brutally unforgiving for those who must make their living from it.
 
@@ -63,6 +83,8 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
 
 贵州省面积**67,992平方公里**，约占全中国总面积的1.8%。地处中国内陆西南部，全省以壮观的喀斯特地形为特征——92.5%的土地为高原山脉，拥有崎岖的石灰岩山峰、陡峭的山谷、地下河流和众多洞穴系统，海拔高度从**1,000至2,900公尺**不等。
 
+![贵州省地图](/gallery/mountain/01_00.jpg)
+
 山地地形连绵不绝。放眼所及尽是不平整的石山——景色壮丽，但对必须靠土地谋生的人来说却是极为严酷的环境。
 
 ## 气候与生计
@@ -101,6 +123,8 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
 
 貴州省面積**67,992平方公里**，約佔全中國總面積的1.8%。地處中國內陸西南部，全省以壯觀的喀斯特地形為特徵——92.5%的土地為高原山脈，擁有崎嶇的石灰岩山峰、陡峭的山谷、地下河流和眾多洞穴系統，海拔高度從**1,000至2,900公尺**不等。
 
+![貴州省地圖](/gallery/mountain/01_00.jpg)
+
 山地地形連綿不絕。放眼所及盡是不平整的石山——景色壯麗，但對必須靠土地謀生的人來說卻是極為嚴酷的環境。
 
 ## 氣候與生計
@@ -136,7 +160,136 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
   {
     slug: 'snow-disaster-2008',
     date: '2024-02-10',
-    coverImage: '/gallery/snow/16_01-thumb.jpg',
+    coverImage: '/gallery/snow/16_29.jpg',
+    imageGroups: [
+      {
+        caption: {
+          en: 'Dilapidated dwellings and dangerous housing on the verge of collapse',
+          'zh-CN': '多处贫农凄宿的住所及频临或已倒塌的危房',
+          'zh-TW': '多處貧農凄宿的住所及頻臨或已倒塌的危房',
+        },
+        images: [
+          '/gallery/snow/16_01-thumb.jpg',
+          '/gallery/snow/16_02-thumb.jpg',
+          '/gallery/snow/16_03-thumb.jpg',
+          '/gallery/snow/16_04-thumb.jpg',
+          '/gallery/snow/16_05-thumb.jpg',
+          '/gallery/snow/16_06-thumb.jpg',
+          '/gallery/snow/16_07-thumb.jpg',
+          '/gallery/snow/16_08-thumb.jpg',
+          '/gallery/snow/16_09-thumb.jpg',
+          '/gallery/snow/16_10-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'The only remaining dilapidated school building — the only place where hope for knowledge survives',
+          'zh-CN': '仅存的危房校舍，唯一获知识希望的地方',
+          'zh-TW': '僅存的危房校舍，唯一獲知識希望的地方',
+        },
+        images: [
+          '/gallery/snow/16_11-thumb.jpg',
+          '/gallery/snow/16_12-thumb.jpg',
+          '/gallery/snow/16_13-thumb.jpg',
+          '/gallery/snow/16_14-thumb.jpg',
+          '/gallery/snow/16_15-thumb.jpg',
+          '/gallery/snow/16_16-thumb.jpg',
+          '/gallery/snow/16_17-thumb.jpg',
+          '/gallery/snow/16_18-thumb.jpg',
+          '/gallery/snow/16_19-thumb.jpg',
+          '/gallery/snow/16_20-thumb.jpg',
+          '/gallery/snow/16_21-thumb.jpg',
+          '/gallery/snow/16_22-thumb.jpg',
+          '/gallery/snow/16_23-thumb.jpg',
+          '/gallery/snow/16_24-thumb.jpg',
+          '/gallery/snow/16_47-thumb.jpg',
+          '/gallery/snow/16_48-thumb.jpg',
+          '/gallery/snow/16_49-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'These are the staple foods that sustain the poor farmers\' daily lives',
+          'zh-CN': '这些是贫农度日的主要食粮',
+          'zh-TW': '這些是貧農度日的主要食糧',
+        },
+        images: [
+          '/gallery/snow/16_25-thumb.jpg',
+          '/gallery/snow/16_26-thumb.jpg',
+          '/gallery/snow/16_27-thumb.jpg',
+          '/gallery/snow/16_28-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'Even the basic necessities of life are severely lacking. Sin Kai distributes relief supplies, hoping to bring a little warmth to those in need',
+          'zh-CN': '连生活的基本亦严重缺乏，如何建立人生。善启派发救灾物资，希望尽多一些点滴温暖给有需要的人',
+          'zh-TW': '連生活的基本亦嚴重缺乏，如何建立人生。善啟派發救災物資，希望盡多一些點滴溫暖給有需要的人',
+        },
+        images: [
+          '/gallery/snow/16_29-thumb.jpg',
+          '/gallery/snow/16_30-thumb.jpg',
+          '/gallery/snow/16_31-thumb.jpg',
+          '/gallery/snow/16_32-thumb.jpg',
+          '/gallery/snow/16_33-thumb.jpg',
+          '/gallery/snow/16_34-thumb.jpg',
+          '/gallery/snow/16_35-thumb.jpg',
+          '/gallery/snow/16_36-thumb.jpg',
+          '/gallery/snow/16_37-thumb.jpg',
+          '/gallery/snow/16_38-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'Without education, one can never escape poverty — they can only pin their hopes on the next generation to work hard',
+          'zh-CN': '没有知识，一辈子无法脱贫，只能寄望下一代发奋',
+          'zh-TW': '沒有知識，一輩子無法脫貧，只能寄望下一代發奮',
+        },
+        images: [
+          '/gallery/snow/16_39-thumb.jpg',
+          '/gallery/snow/16_40-thumb.jpg',
+          '/gallery/snow/16_41-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'No matter how poor, education cannot be neglected. Rich knowledge is what inspires a wise life',
+          'zh-CN': '再穷不能穷教育，丰富学识，方能启发智慧人生',
+          'zh-TW': '再窮不能窮教育，豐富學識，方能啟發智慧人生',
+        },
+        images: [
+          '/gallery/snow/16_42-thumb.jpg',
+          '/gallery/snow/16_43-thumb.jpg',
+          '/gallery/snow/16_44-thumb.jpg',
+          '/gallery/snow/16_45-thumb.jpg',
+          '/gallery/snow/16_46-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'Special thanks to Mr. Lin Jinquan, Ms. Yang Jishan, and Ms. You Birong for their generous donations',
+          'zh-CN': '特别鸣谢英国华侨夫妇林锦全先生、杨继善女士及旅欧吉澳游碧蓉女士等人大力募捐资助',
+          'zh-TW': '特別鳴謝英國華僑夫婦林錦全先生、楊繼善女士及旅歐吉澳游碧蓉女士等人大力募捐資助',
+        },
+        images: [
+          '/gallery/snow/16_50-thumb.jpg',
+          '/gallery/snow/16_51-thumb.jpg',
+          '/gallery/snow/16_52-thumb.jpg',
+          '/gallery/snow/16_53-thumb.jpg',
+          '/gallery/snow/16_54-thumb.jpg',
+          '/gallery/snow/16_55-thumb.jpg',
+          '/gallery/snow/16_56-thumb.jpg',
+          '/gallery/snow/16_57-thumb.jpg',
+          '/gallery/snow/16_58-thumb.jpg',
+          '/gallery/snow/16_59-thumb.jpg',
+          '/gallery/snow/16_60-thumb.jpg',
+          '/gallery/snow/16_61-thumb.jpg',
+          '/gallery/snow/16_62-thumb.jpg',
+          '/gallery/snow/16_63-thumb.jpg',
+          '/gallery/snow/16_64-thumb.jpg',
+        ],
+      },
+    ],
     translations: {
       'en': {
         title: '2008 Snow Disaster: Emergency Relief in Guizhou',
@@ -223,7 +376,29 @@ The photos in our gallery show both the devastation of the snowstorm and the gra
   {
     slug: 'school-building-programme',
     date: '2024-01-20',
-    coverImage: '/gallery/schools-new/06_osch_32-thumb.jpg',
+    coverImage: '/gallery/schools-old/06_osch_09.jpg',
+    imageGroups: [
+      {
+        caption: {
+          en: 'Old school buildings before renovation',
+          'zh-CN': '修建前的旧校舍',
+          'zh-TW': '修建前的舊校舍',
+        },
+        images: [
+          '/gallery/schools-old/06_osch_01-thumb.jpg','/gallery/schools-old/06_osch_02-thumb.jpg','/gallery/schools-old/06_osch_04-thumb.jpg','/gallery/schools-old/06_osch_05-thumb.jpg','/gallery/schools-old/06_osch_06-thumb.jpg','/gallery/schools-old/06_osch_07-thumb.jpg','/gallery/schools-old/06_osch_08-thumb.jpg','/gallery/schools-old/06_osch_09-thumb.jpg','/gallery/schools-old/06_osch_10-thumb.jpg','/gallery/schools-old/06_osch_12-thumb.jpg','/gallery/schools-old/06_osch_13-thumb.jpg','/gallery/schools-old/06_osch_14-thumb.jpg','/gallery/schools-old/06_osch_15-thumb.jpg','/gallery/schools-old/06_osch_16-thumb.jpg','/gallery/schools-old/06_osch_17-thumb.jpg','/gallery/schools-old/06_osch_18-thumb.jpg','/gallery/schools-old/06_osch_19-thumb.jpg','/gallery/schools-old/06_osch_20-thumb.jpg','/gallery/schools-old/06_osch_21-thumb.jpg','/gallery/schools-old/06_osch_22-thumb.jpg','/gallery/schools-old/06_osch_23-thumb.jpg','/gallery/schools-old/06_osch_24-thumb.jpg','/gallery/schools-old/06_osch_25-thumb.jpg','/gallery/schools-old/06_osch_26-thumb.jpg','/gallery/schools-old/06_osch_27-thumb.jpg','/gallery/schools-old/06_osch_28-thumb.jpg','/gallery/schools-old/06_osch_29-thumb.jpg',
+        ],
+      },
+      {
+        caption: {
+          en: 'New school buildings after construction',
+          'zh-CN': '修建后的新校舍',
+          'zh-TW': '修建後的新校舍',
+        },
+        images: [
+          '/gallery/schools-new/06_osch_32-thumb.jpg','/gallery/schools-new/06_osch_40-thumb.jpg','/gallery/schools-new/06_osch_47-thumb.jpg','/gallery/schools-new/06_osch_48-thumb.jpg','/gallery/schools-new/06_osch_52-thumb.jpg','/gallery/schools-new/06_osch_53-thumb.jpg','/gallery/schools-new/06_osch_54-thumb.jpg','/gallery/schools-new/06_osch_55-thumb.jpg','/gallery/schools-new/06_osch_56-thumb.jpg','/gallery/schools-new/06_osch_59-thumb.jpg','/gallery/schools-new/06_osch_60-thumb.jpg','/gallery/schools-new/06_osch_61-thumb.jpg','/gallery/schools-new/06_osch_63-thumb.jpg','/gallery/schools-new/06_osch_64-thumb.jpg','/gallery/schools-new/06_osch_66-thumb.jpg','/gallery/schools-new/06_osch_67-thumb.jpg','/gallery/schools-new/06_osch_68-thumb.jpg','/gallery/schools-new/06_osch_69-thumb.jpg','/gallery/schools-new/06_osch_70-thumb.jpg','/gallery/schools-new/06_osch_71-thumb.jpg','/gallery/schools-new/06_osch_72-thumb.jpg','/gallery/schools-new/06_osch_73-thumb.jpg',
+        ],
+      },
+    ],
     translations: {
       'en': {
         title: 'Hope School Building Programme: From Danger to Safety',
@@ -350,7 +525,7 @@ To date, **18 Hope Schools** have been completed, serving thousands of children 
   {
     slug: 'student-aid-programme',
     date: '2023-12-05',
-    coverImage: '/images/parallax-layer4.jpg',
+    coverImage: '/gallery/activities/13_05-thumb.jpg',
     translations: {
       'en': {
         title: 'Student Dream Aid Programme: Education Changes Destiny',
@@ -489,7 +664,19 @@ Thousands of students have completed their education through this programme, man
   {
     slug: 'mid-autumn-elderly-care',
     date: '2023-09-20',
-    coverImage: '/images/mid-autumn-event.jpg',
+    coverImage: '/gallery/hk-charity/07_03.jpg',
+    imageGroups: [
+      {
+        caption: {
+          en: 'Mid-Autumn charity events in Hong Kong',
+          'zh-CN': '香港中秋慈善活动',
+          'zh-TW': '香港中秋慈善活動',
+        },
+        images: [
+          '/gallery/hk-charity/07_02-thumb.jpg','/gallery/hk-charity/07_03-thumb.jpg','/gallery/hk-charity/07_04-thumb.jpg','/gallery/hk-charity/07_05-thumb.jpg','/gallery/hk-charity/07_08-thumb.jpg','/gallery/hk-charity/07_09-thumb.jpg','/gallery/hk-charity/07_10-thumb.jpg','/gallery/hk-charity/07_11-thumb.jpg','/gallery/hk-charity/07_12-thumb.jpg','/gallery/hk-charity/07_13-thumb.jpg','/gallery/hk-charity/07_15-thumb.jpg','/gallery/hk-charity/07_2019ma1-thumb.jpg','/gallery/hk-charity/07_2019ma2-thumb.jpg','/gallery/hk-charity/07_2019ma3-thumb.jpg','/gallery/hk-charity/07_2021ma1-thumb.jpg','/gallery/hk-charity/07_2021ma2-thumb.jpg','/gallery/hk-charity/07_20-thumb.jpg','/gallery/hk-charity/07_21-thumb.jpg','/gallery/hk-charity/07_24-thumb.jpg','/gallery/hk-charity/07_27-thumb.jpg','/gallery/hk-charity/07_28-thumb.jpg','/gallery/hk-charity/07_29-thumb.jpg','/gallery/hk-charity/07_30-thumb.jpg',
+        ],
+      },
+    ],
     translations: {
       'en': {
         title: 'Mid-Autumn Love for the Elderly: Charity in Hong Kong',
@@ -595,7 +782,7 @@ The event is funded entirely through proceeds from our annual **Charity Mooncake
   {
     slug: 'charity-mooncake-sale',
     date: '2023-08-15',
-    coverImage: '/images/mooncake.jpg',
+    coverImage: '/gallery/news/15_mooncake2021-thumb.jpg',
     translations: {
       'en': {
         title: 'Charity Mooncake Sale: Sweet Treats for a Good Cause',
@@ -681,6 +868,18 @@ Contact us via phone (2735 1122) or email (info@sinkai.org) to place your order.
     slug: 'emergency-aid-programme',
     date: '2023-07-10',
     coverImage: '/gallery/activities/13_06-thumb.jpg',
+    imageGroups: [
+      {
+        caption: {
+          en: 'Relief and volunteer activities',
+          'zh-CN': '救灾及义工活动',
+          'zh-TW': '救災及義工活動',
+        },
+        images: [
+          '/gallery/activities/13_01-thumb.jpg','/gallery/activities/13_02-thumb.jpg','/gallery/activities/13_03-thumb.jpg','/gallery/activities/13_04-thumb.jpg','/gallery/activities/13_05-thumb.jpg','/gallery/activities/13_06-thumb.jpg','/gallery/activities/13_07-thumb.jpg','/gallery/activities/13_11-thumb.jpg','/gallery/activities/13_12-thumb.jpg','/gallery/activities/13_13-thumb.jpg','/gallery/activities/13_14-thumb.jpg','/gallery/activities/13_15-thumb.jpg','/gallery/activities/13_16-thumb.jpg',
+        ],
+      },
+    ],
     translations: {
       'en': {
         title: 'Emergency Aid Programme: Responding to Crisis',

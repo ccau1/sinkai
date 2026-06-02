@@ -2,7 +2,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TF_DIR="$(dirname "$SCRIPT_DIR")/terraform"
+TF_DIR="$(dirname "$SCRIPT_DIR")/terraform/environments/prod"
 TFVARS="$TF_DIR/terraform.tfvars"
 
 ensure_tfvars_exists() {

@@ -54,7 +54,7 @@ export default function DonatePage() {
     <div ref={pageRef}>
       {/* Hero Banner */}
       <section className="relative h-[50vh] min-h-[300px]">
-        <Image src="/images/school-opening.jpg" alt={t('pageTitle')} fill className="object-cover" priority />
+        <Image src="/gallery/schools-new/06_osch_56.jpg" alt={t('pageTitle')} fill className="object-cover" priority />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)' }} />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="container-main text-center">
@@ -134,7 +134,7 @@ export default function DonatePage() {
               </ul>
             </div>
             <div className="reveal relative aspect-square rounded-2xl overflow-hidden">
-              <Image src="/images/mooncake.jpg" alt="Mooncake" fill className="object-cover" />
+              <Image src="/gallery/news/15_mooncake2021.jpg" alt="Mooncake" fill className="object-cover" />
             </div>
           </div>
         </div>
