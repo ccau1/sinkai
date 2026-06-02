@@ -2,10 +2,6 @@
 
 Infrastructure-as-code for the **production** environment (Hetzner Cloud server + Cloudflare DNS + Origin CA certificates).
 
-> For **dev / staging** infrastructure, see [`controlplane/terraform/`](../controlplane/terraform/).
-
----
-
 ## Philosophy: One Folder Per Environment
 
 Each environment lives in its own folder with its own **isolated Terraform state file**.
@@ -20,7 +16,7 @@ deploy/terraform/
         └── ssl/
 ```
 
-This guarantees that `terraform destroy` in `environments/prod/` only destroys production resources. It can never accidentally touch dev or staging because they live in completely separate state files under `controlplane/terraform/environments/`.
+This guarantees that `terraform destroy` in `environments/prod/` only destroys production resources.
 
 ---
 
@@ -68,7 +64,7 @@ cd deploy/terraform/environments/prod
 terraform destroy
 ```
 
-You would never accidentally destroy dev/staging from here — they live under `controlplane/terraform/environments/` with their own separate states.
+You would never accidentally destroy dev/staging from here — they live in their own separate repositories with isolated state files.
 
 ---
 
