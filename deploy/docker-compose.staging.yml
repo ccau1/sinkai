@@ -5,7 +5,7 @@ services:
     image: ${APP_IMAGE}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sinkai-staging.rule=Host(`sinkai-staging.tribalorigin.com`)"
+      - "traefik.http.routers.sinkai-staging.rule=Host(`sinkai.staging.tribalorigin.com`)"
       - "traefik.http.routers.sinkai-staging.entrypoints=websecure"
       - "traefik.http.routers.sinkai-staging.tls.certresolver=letsencrypt"
       - "traefik.http.routers.sinkai-staging.middlewares=compress@file"

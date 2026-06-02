@@ -66,26 +66,15 @@ export default function HomePage() {
       // Scooping hands animation - move together to protect children
       gsap.fromTo('.hero-hand-left',
         { x: '-55vw', opacity: 0 },
-        { x: 0, opacity: 1, duration: 1.8, ease: 'power3.out', delay: 0.5 }
+        { x: 0, opacity: 0.7, duration: 1.8, ease: 'power3.out', delay: 0.5 }
       );
       gsap.fromTo('.hero-hand-right',
         { x: '55vw', opacity: 0 },
-        { x: 0, opacity: 1, duration: 1.8, ease: 'power3.out', delay: 0.5 }
+        { x: 0, opacity: 0.7, duration: 1.8, ease: 'power3.out', delay: 0.5 }
       );
 
 
-      // Vertical texts fade out on scroll (hands stay visible)
-      gsap.to('.hero-text-left, .hero-text-right', {
-        opacity: 0,
-        y: -40,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: heroRef.current!,
-          start: 'top top',
-          end: '50% top',
-          scrub: true,
-        },
-      });
+      // Vertical texts stay visible on scroll (same as hands)
 
       // Reveal animations for sections
       const revealSections = [storyRef, impactRef, workRef, quoteRef, ctaRef];
@@ -215,20 +204,20 @@ export default function HomePage() {
           }} />
 
         {/* Left hand - scoops in from far left */}
-        <div className="hero-hand-left hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 z-[5] w-[600px] xl:w-[720px] 2xl:w-[840px]"
-          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))' }}>
+        <div className="hero-hand-left hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 z-[5] w-[480px] xl:w-[576px] 2xl:w-[672px]"
+          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))', opacity: 0.7 }}>
           <Image src="/images/hand-left.png" alt="" width={500} height={500} className="w-full h-auto" priority />
         </div>
 
         {/* Right hand - scoops in from far right */}
-        <div className="hero-hand-right hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-[5] w-[600px] xl:w-[720px] 2xl:w-[840px]"
-          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))' }}>
+        <div className="hero-hand-right hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-[5] w-[480px] xl:w-[576px] 2xl:w-[672px]"
+          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))', opacity: 0.7 }}>
           <Image src="/images/hand-right.png" alt="" width={500} height={500} className="w-full h-auto" priority />
         </div>
 
         {/* Left vertical text - flies in from left */}
         <div className="hero-text-left hidden xl:flex absolute left-6 2xl:left-10 top-1/2 -translate-y-1/2 z-20 items-center justify-center">
-          <span className="text-2xl 2xl:text-3xl font-bold tracking-[0.25em]"
+          <span className="text-[3.33rem] font-bold tracking-[0.25em]"
             style={{
               writingMode: 'vertical-rl',
               color: '#EE82EE',
@@ -240,7 +229,7 @@ export default function HomePage() {
 
         {/* Right vertical text - flies in from right */}
         <div className="hero-text-right hidden xl:flex absolute right-6 2xl:right-10 top-1/2 -translate-y-1/2 z-20 items-center justify-center">
-          <span className="text-2xl 2xl:text-3xl font-bold tracking-[0.25em]"
+          <span className="text-[3.33rem] font-bold tracking-[0.25em]"
             style={{
               writingMode: 'vertical-rl',
               color: '#EE82EE',

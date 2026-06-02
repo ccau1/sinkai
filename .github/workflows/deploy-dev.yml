@@ -91,7 +91,7 @@ jobs:
 
       - name: Health check (dev)
         run: |
-          HEALTH_URL="https://sinkai-dev.tribalorigin.com"
+          HEALTH_URL="https://sinkai.dev.tribalorigin.com"
           echo "Testing dev site: $HEALTH_URL"
           echo "Waiting for containers to start..."
           for i in {1..12}; do
