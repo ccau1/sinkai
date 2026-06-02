@@ -136,7 +136,7 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
   {
     slug: 'snow-disaster-2008',
     date: '2024-02-10',
-    coverImage: '/gallery/snow/16_01s.jpg',
+    coverImage: '/gallery/snow/16_01-thumb.jpg',
     translations: {
       'en': {
         title: '2008 Snow Disaster: Emergency Relief in Guizhou',
@@ -223,7 +223,7 @@ The photos in our gallery show both the devastation of the snowstorm and the gra
   {
     slug: 'school-building-programme',
     date: '2024-01-20',
-    coverImage: '/gallery/schools-new/06_osch_32s.jpg',
+    coverImage: '/gallery/schools-new/06_osch_32-thumb.jpg',
     translations: {
       'en': {
         title: 'Hope School Building Programme: From Danger to Safety',
@@ -680,7 +680,7 @@ Contact us via phone (2735 1122) or email (info@sinkai.org) to place your order.
   {
     slug: 'emergency-aid-programme',
     date: '2023-07-10',
-    coverImage: '/gallery/activities/13_06s.jpg',
+    coverImage: '/gallery/activities/13_06-thumb.jpg',
     translations: {
       'en': {
         title: 'Emergency Aid Programme: Responding to Crisis',

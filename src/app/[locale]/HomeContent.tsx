@@ -173,8 +173,8 @@ export default function HomePage() {
     { key: 'field', img: '/images/parallax-layer4.jpg' },
     { key: 'elderly', img: '/images/mid-autumn-event.jpg' },
     { key: 'mooncake', img: '/images/mooncake.jpg' },
-    { key: 'students', img: '/gallery/activities/13_01s.jpg' },
-    { key: 'survey', img: '/gallery/hk-charity/07_02s.jpg' },
+    { key: 'students', img: '/gallery/activities/13_01-thumb.jpg' },
+    { key: 'survey', img: '/gallery/hk-charity/07_02-thumb.jpg' },
   ];
 
   return (
@@ -187,14 +187,14 @@ export default function HomePage() {
         <div className="parallax-layer absolute inset-0 z-0">
           <Image src="/images/parallax-layer1.jpg" alt="" fill className="object-cover" priority />
         </div>
-        <div className="parallax-layer absolute inset-0 z-[1] opacity-40">
+        <div className="parallax-layer absolute inset-0 z-[1] opacity-20">
           <Image src="/images/parallax-layer4.jpg" alt="" fill className="object-cover" priority />
         </div>
 
-        {/* Cinematic overlay */}
+        {/* Warm light overlay — bright and airy */}
         <div className="absolute inset-0 z-[3]"
           style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.2) 100%)'
+            background: 'linear-gradient(135deg, rgba(180,140,60,0.15) 0%, rgba(100,140,80,0.1) 40%, rgba(160,120,50,0.12) 70%, rgba(140,110,40,0.08) 100%)'
           }} />
 
         {/* Soft fade to story section background */}
@@ -203,20 +203,23 @@ export default function HomePage() {
             background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, var(--color-bg-base) 100%)'
           }} />
 
-        {/* Left hand - scoops in from far left */}
-        <div className="hero-hand-left hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 z-[5] w-[480px] xl:w-[576px] 2xl:w-[672px]"
-          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))', opacity: 0.7 }}>
-          <Image src="/images/hand-left.png" alt="" width={500} height={500} className="w-full h-auto" priority />
-        </div>
+        {/* Hands wrapper — centers hands in the content area below the fixed header */}
+        <div className="absolute inset-x-0 top-16 bottom-0 pointer-events-none flex items-center justify-between">
+          {/* Left hand - scoops in from far left */}
+          <div className="hero-hand-left z-[5] w-[200px] sm:w-[280px] lg:w-[480px] xl:w-[576px] 2xl:w-[672px]"
+            style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))', opacity: 0.7 }}>
+            <Image src="/images/hand-left.png" alt="" width={500} height={500} className="w-full h-auto" priority />
+          </div>
 
-        {/* Right hand - scoops in from far right */}
-        <div className="hero-hand-right hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 z-[5] w-[480px] xl:w-[576px] 2xl:w-[672px]"
-          style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))', opacity: 0.7 }}>
-          <Image src="/images/hand-right.png" alt="" width={500} height={500} className="w-full h-auto" priority />
+          {/* Right hand - scoops in from far right */}
+          <div className="hero-hand-right z-[5] w-[200px] sm:w-[280px] lg:w-[480px] xl:w-[576px] 2xl:w-[672px]"
+            style={{ filter: 'drop-shadow(0 0 30px rgba(255,180,80,0.35))', opacity: 0.7 }}>
+            <Image src="/images/hand-right.png" alt="" width={500} height={500} className="w-full h-auto" priority />
+          </div>
         </div>
 
         {/* Left vertical text - flies in from left */}
-        <div className="hero-text-left hidden xl:flex absolute left-6 2xl:left-10 top-1/2 -translate-y-1/2 z-20 items-center justify-center">
+        <div className="hero-text-left hidden xl:flex absolute left-[12%] top-1/2 -translate-y-1/2 z-20 items-center justify-center">
           <span className="text-[3.33rem] font-bold tracking-[0.25em]"
             style={{
               writingMode: 'vertical-rl',
@@ -228,7 +231,7 @@ export default function HomePage() {
         </div>
 
         {/* Right vertical text - flies in from right */}
-        <div className="hero-text-right hidden xl:flex absolute right-6 2xl:right-10 top-1/2 -translate-y-1/2 z-20 items-center justify-center">
+        <div className="hero-text-right hidden xl:flex absolute right-[12%] top-1/2 -translate-y-1/2 z-20 items-center justify-center">
           <span className="text-[3.33rem] font-bold tracking-[0.25em]"
             style={{
               writingMode: 'vertical-rl',
