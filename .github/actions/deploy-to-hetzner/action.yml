@@ -103,6 +103,29 @@ runs:
         LIST=$(echo "${{ inputs.files-to-copy }}" | paste -sd ',' -)
         echo "list=$LIST" >> "$GITHUB_OUTPUT"
 
+    - name: Remove conflicting directories before copy
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        key: ${{ inputs.ssh-key }}
+        script: |
+          set -e
+          cd ${{ inputs.remote-path }}
+          # A previous failed bind mount may have created a directory where a
+          # file should be copied (e.g., nginx.ssl.conf). Remove such conflicts
+          # so the subsequent SCP can place the file at the correct path.
+          while IFS= read -r src; do
+            [ -z "$src" ] && continue
+            dest="$(basename "$src")"
+            if [ -d "$dest" ]; then
+              echo "Removing conflicting directory before copy: $dest"
+              rm -rf "$dest"
+            fi
+          done <<'EOF'
+          ${{ inputs.files-to-copy }}
+          EOF
+
     - name: Copy files to server
       uses: appleboy/scp-action@v0.1.7
       with:

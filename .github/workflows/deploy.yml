@@ -47,7 +47,7 @@ env:
   HEALTH_URL_PROD: https://sinkai.tribalorigin.com
   COMPOSE_FILE_PROD_SHARED: docker-compose.prod.yml
   COMPOSE_FILE_PROD_STANDALONE: docker-compose.prod-standalone.yml
-  NGINX_FILE_PROD_SHARED: nginx.dev.conf
+  NGINX_FILE_PROD_SHARED: nginx.ssl.conf
   NGINX_FILE_PROD_STANDALONE: nginx.prod-standalone.conf
 
 jobs:
