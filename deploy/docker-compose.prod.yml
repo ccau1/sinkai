@@ -4,8 +4,8 @@ services:
   app:
     image: ${APP_IMAGE}
     ports:
-      - "80:80"
-      - "443:443"
+      - "5280:80"
+      - "52443:443"
     volumes:
       - ./nginx.ssl.conf:/etc/nginx/conf.d/default.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
