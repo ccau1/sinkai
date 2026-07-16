@@ -52,6 +52,9 @@ runs:
         echo "Testing health endpoint: $URL"
         echo "Waiting for containers to start..."
 
+        # Unique heredoc delimiter unlikely to appear in an arbitrary response body.
+        DELIM="HEALTH_CHECK_ACTION_RESPONSE_BODY_EOF"
+
         HTTP_CODE=""
         for i in $(seq 1 "$MAX"); do
           sleep "$INTERVAL"
@@ -61,9 +64,12 @@ runs:
             echo "Health check passed: $URL (HTTP $HTTP_CODE)"
             {
               echo "status=$HTTP_CODE"
-              echo "body<<EOF"
+              echo "body<<$DELIM"
               cat /tmp/health_response.html 2>/dev/null || true
-              echo "EOF"
+              # Ensure the closing delimiter starts on its own line, even if the
+              # response body does not end with a newline.
+              echo
+              echo "$DELIM"
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -76,8 +82,11 @@ runs:
         echo "--- End response body ---"
         {
           echo "status=${HTTP_CODE:-none}"
-          echo "body<<EOF"
+          echo "body<<$DELIM"
           cat /tmp/health_response.html 2>/dev/null || true
-          echo "EOF"
+          # Ensure the closing delimiter starts on its own line, even if the
+          # response body does not end with a newline.
+          echo
+          echo "$DELIM"
         } >> "$GITHUB_OUTPUT"
         exit 1
