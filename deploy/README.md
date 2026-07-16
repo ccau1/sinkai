@@ -123,7 +123,8 @@ Polls `HEALTH_URL` up to 12 times (60 seconds total).
 |-------------|---------------|-----|---------|
 | `dev` | Traefik | Let's Encrypt | `dev` (external) |
 | `staging` | Traefik | Let's Encrypt | `staging` (external) |
-| `prod` | nginx (direct) | Cloudflare Origin CA | bridge |
+| `prod` (shared, CI) | Existing shared Traefik | Let's Encrypt | `prod` (external) |
+| `prod` (standalone) | nginx (direct) | Cloudflare Origin CA | bridge |
 
 - **Dev/Staging** share a server with Traefik. Each app container joins the external Docker network and gets auto-discovered via Traefik labels.
 - **Prod** runs nginx directly on ports 80/443 with a Cloudflare Origin CA certificate. No Traefik needed.
@@ -186,9 +187,11 @@ terraform init
 make infra
 ```
 
-### 3. SSL Certificate Setup (Cloudflare Origin CA)
+### 3. SSL Certificate Setup
 
-Terraform creates the certificate automatically. Extract and push it:
+**Shared prod (CI)**: The server already runs a shared Traefik instance that manages Let's Encrypt certificates automatically. No manual cert setup is needed as long as the domain points to the server and Traefik is on the `prod` Docker network.
+
+**Standalone prod**: Terraform creates a Cloudflare Origin CA certificate automatically. Extract and push it:
 
 ```bash
 ./deploy/scripts/push-certs.sh
@@ -200,13 +203,11 @@ Then set Cloudflare SSL/TLS mode to **"Full (strict)"**.
 
 | Secret | Required | Value |
 |--------|----------|-------|
-| `HETZNER_HOST` | ✅ | Server IP |
-| `HETZNER_USER` | ✅ | `root` |
-| `HETZNER_SSH_KEY` | ✅ | Private SSH key |
-| `ENV_FILE` | ✅ | Empty for static sites |
+| `PROD_HETZNER_HOST` | ✅ | Server IP |
+| `PROD_HETZNER_USER` | ✅ | `root` |
+| `PROD_HETZNER_SSH_KEY` | ✅ | Private SSH key |
+| `PROD_ENV_FILE` | ✅ | Empty for static sites |
 | `GH_TOKEN` | ✅ | GitHub Classic PAT (`read:packages`) |
-| `CF_ORIGIN_CERT` | ⬜ | Cloudflare Origin CA cert |
-| `CF_ORIGIN_KEY` | ⬜ | Cloudflare Origin CA key |
 
 ### 5. First Deploy
 
