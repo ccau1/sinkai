@@ -28,9 +28,24 @@ async function seed() {
         data: {
           email: 'admin@sinkai.org',
           password: 'admin123',
+          roles: ['admin'],
         },
       })
       console.log('Created default admin user: admin@sinkai.org / admin123')
+    } else {
+      // Ensure the first user has admin privileges for local development.
+      const firstUser = existingUsers.docs[0]
+      const roles = (firstUser.roles as string[]) || []
+      if (roles.length === 0) {
+        await payload.update({
+          collection: 'users',
+          id: firstUser.id,
+          data: {
+            roles: ['admin'],
+          },
+        })
+        console.log('Updated default user with admin role.')
+      }
     }
   }
 

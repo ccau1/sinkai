@@ -51,6 +51,7 @@ packages/web/*.tsbuildinfo
 packages/web/next-env.d.ts
 packages/cms/.next/
 packages/cms/.open-next/
+packages/cms/.wrangler/
 packages/cms/dist/
 packages/cms/node_modules/
 packages/cms/*.tsbuildinfo

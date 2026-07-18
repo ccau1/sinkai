@@ -58,6 +58,9 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Installations, Blogs],
+  graphQL: {
+    disable: true,
+  },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

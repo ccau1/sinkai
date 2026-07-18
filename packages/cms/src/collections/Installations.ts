@@ -1,4 +1,35 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
+import {
+  isAdmin,
+  isAuthenticatedUser,
+  isInstallationEditor,
+  publishedOrAuthenticated,
+} from '../util/access'
+import { createLocaleTabs, type LocaleSuffix } from '../util/localeTabs'
+
+function buildInstallationLocaleFields(suffix: LocaleSuffix, label: string): Field[] {
+  const isEnglish = suffix === 'En'
+
+  return [
+    {
+      name: `title${suffix}`,
+      type: 'text',
+      label: isEnglish ? 'Title' : label === '简体中文' ? '标题' : '標題',
+      required: true,
+    },
+    {
+      name: `location${suffix}`,
+      type: 'text',
+      label: isEnglish ? 'Location' : label === '简体中文' ? '地点' : '地點',
+      required: true,
+    },
+    {
+      name: `description${suffix}`,
+      type: 'richText',
+      label: isEnglish ? 'Description' : '描述',
+    },
+  ]
+}
 
 export const Installations: CollectionConfig = {
   slug: 'installations',
@@ -7,80 +38,14 @@ export const Installations: CollectionConfig = {
     defaultColumns: ['titleEn', 'type', 'locationEn', 'completionDate', 'updatedAt'],
   },
   access: {
-    read: () => true,
+    read: publishedOrAuthenticated,
+    create: isInstallationEditor,
+    update: isInstallationEditor,
+    delete: isAdmin,
+    admin: isAuthenticatedUser,
   },
   fields: [
-    {
-      type: 'tabs',
-      tabs: [
-        {
-          label: 'English',
-          fields: [
-            {
-              name: 'titleEn',
-              type: 'text',
-              label: 'Title',
-              required: true,
-            },
-            {
-              name: 'locationEn',
-              type: 'text',
-              label: 'Location',
-              required: true,
-            },
-            {
-              name: 'descriptionEn',
-              type: 'richText',
-              label: 'Description',
-            },
-          ],
-        },
-        {
-          label: '简体中文',
-          fields: [
-            {
-              name: 'titleZhCN',
-              type: 'text',
-              label: '标题',
-              required: true,
-            },
-            {
-              name: 'locationZhCN',
-              type: 'text',
-              label: '地点',
-              required: true,
-            },
-            {
-              name: 'descriptionZhCN',
-              type: 'richText',
-              label: '描述',
-            },
-          ],
-        },
-        {
-          label: '繁體中文',
-          fields: [
-            {
-              name: 'titleZhTW',
-              type: 'text',
-              label: '標題',
-              required: true,
-            },
-            {
-              name: 'locationZhTW',
-              type: 'text',
-              label: '地點',
-              required: true,
-            },
-            {
-              name: 'descriptionZhTW',
-              type: 'richText',
-              label: '描述',
-            },
-          ],
-        },
-      ],
-    },
+    createLocaleTabs(buildInstallationLocaleFields),
     {
       name: 'slug',
       type: 'text',

@@ -1,5 +1,57 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
+import {
+  isAdmin,
+  isAuthenticatedUser,
+  isBlogEditor,
+  publishedOrAuthenticated,
+} from '../util/access'
+import { createLocaleTabs, type LocaleSuffix } from '../util/localeTabs'
 import { generateShortId } from '../util/shortId'
+
+function buildBlogLocaleFields(suffix: LocaleSuffix, label: string): Field[] {
+  const isEnglish = suffix === 'En'
+
+  return [
+    {
+      name: `slugName${suffix}`,
+      type: 'text',
+      label: 'Slug',
+      required: true,
+      admin: {
+        description: isEnglish
+          ? 'URL-safe English slug, e.g. "mountain-area-reality"'
+          : label === '简体中文'
+            ? '简体中文 URL 标识，例如「山区现实」'
+            : '繁體中文 URL 標識，例如「山區現實」',
+      },
+    },
+    {
+      name: `title${suffix}`,
+      type: 'text',
+      label: isEnglish ? 'Title' : label === '简体中文' ? '标题' : '標題',
+      required: true,
+    },
+    {
+      name: `excerpt${suffix}`,
+      type: 'textarea',
+      label: isEnglish ? 'Excerpt' : '摘要',
+      required: true,
+    },
+    {
+      name: `content${suffix}`,
+      type: 'richText',
+      label: isEnglish ? 'Content' : label === '简体中文' ? '内容' : '內容',
+    },
+    {
+      name: `legacyContent${suffix}`,
+      type: 'textarea',
+      label: isEnglish ? 'Legacy Content' : label === '简体中文' ? '旧版内容' : '舊版內容',
+      admin: {
+        hidden: true,
+      },
+    },
+  ]
+}
 
 export const Blogs: CollectionConfig = {
   slug: 'blogs',
@@ -8,122 +60,14 @@ export const Blogs: CollectionConfig = {
     defaultColumns: ['titleEn', 'slugNameEn', 'shortId', 'date', 'updatedAt'],
   },
   access: {
-    read: () => true,
+    read: publishedOrAuthenticated,
+    create: isBlogEditor,
+    update: isBlogEditor,
+    delete: isAdmin,
+    admin: isAuthenticatedUser,
   },
   fields: [
-    {
-      type: 'tabs',
-      tabs: [
-        {
-          label: 'English',
-          fields: [
-            {
-              name: 'slugNameEn',
-              type: 'text',
-              label: 'Slug',
-              required: true,
-              admin: {
-                description: 'URL-safe English slug, e.g. "mountain-area-reality"',
-              },
-            },
-            {
-              name: 'titleEn',
-              type: 'text',
-              label: 'Title',
-              required: true,
-            },
-            {
-              name: 'excerptEn',
-              type: 'textarea',
-              label: 'Excerpt',
-              required: true,
-            },
-            {
-              name: 'contentEn',
-              type: 'richText',
-              label: 'Content',
-            },
-            {
-              name: 'legacyContentEn',
-              type: 'textarea',
-              label: 'Legacy Content',
-            },
-          ],
-        },
-        {
-          label: '简体中文',
-          fields: [
-            {
-              name: 'slugNameZhCN',
-              type: 'text',
-              label: 'Slug',
-              required: true,
-              admin: {
-                description: '简体中文 URL 标识，例如「山区现实」',
-              },
-            },
-            {
-              name: 'titleZhCN',
-              type: 'text',
-              label: '标题',
-              required: true,
-            },
-            {
-              name: 'excerptZhCN',
-              type: 'textarea',
-              label: '摘要',
-              required: true,
-            },
-            {
-              name: 'contentZhCN',
-              type: 'richText',
-              label: '内容',
-            },
-            {
-              name: 'legacyContentZhCN',
-              type: 'textarea',
-              label: '旧版内容',
-            },
-          ],
-        },
-        {
-          label: '繁體中文',
-          fields: [
-            {
-              name: 'slugNameZhTW',
-              type: 'text',
-              label: 'Slug',
-              required: true,
-              admin: {
-                description: '繁體中文 URL 標識，例如「山區現實」',
-              },
-            },
-            {
-              name: 'titleZhTW',
-              type: 'text',
-              label: '標題',
-              required: true,
-            },
-            {
-              name: 'excerptZhTW',
-              type: 'textarea',
-              label: '摘要',
-              required: true,
-            },
-            {
-              name: 'contentZhTW',
-              type: 'richText',
-              label: '內容',
-            },
-            {
-              name: 'legacyContentZhTW',
-              type: 'textarea',
-              label: '舊版內容',
-            },
-          ],
-        },
-      ],
-    },
+    createLocaleTabs(buildBlogLocaleFields),
     {
       name: 'shortId',
       type: 'text',
@@ -177,26 +121,24 @@ export const Blogs: CollectionConfig = {
           shortId = generateShortId(data.slugNameEn as string)
         }
 
-        if (!data.slugNameEn) throw new Error('English slug is required')
-        if (!data.slugNameZhCN) throw new Error('简体中文 slug is required')
-        if (!data.slugNameZhTW) throw new Error('繁體中文 slug is required')
-        if (!shortId) throw new Error('shortId is required')
-
-        // Enforce uniqueness: no two blogs can share the same shortId
-        const existing = await req.payload.find({
-          collection: 'blogs',
-          where: {
-            shortId: { equals: shortId },
-          },
-          limit: 1,
-          depth: 0,
-        })
-        if (existing.totalDocs > 0) {
-          const first = existing.docs[0]
-          if (operation === 'create' || String((first as { id?: string | number }).id) !== String(data.id)) {
-            // Collision: append a random suffix and recheck would be ideal, but for now
-            // generate a new random shortId so the save can succeed.
-            shortId = `${shortId}-${Math.random().toString(36).slice(2, 5)}`
+        // Only enforce uniqueness when we actually have a shortId.
+        // Missing required fields are left to Payload's built-in validation so the
+        // admin UI can show per-field error messages instead of a generic 500.
+        if (shortId) {
+          const existing = await req.payload.find({
+            collection: 'blogs',
+            where: {
+              shortId: { equals: shortId },
+            },
+            limit: 1,
+            depth: 0,
+          })
+          if (existing.totalDocs > 0) {
+            const first = existing.docs[0]
+            if (operation === 'create' || String((first as { id?: string | number }).id) !== String(data.id)) {
+              // Collision: append a random suffix so the save can succeed.
+              shortId = `${shortId}-${Math.random().toString(36).slice(2, 5)}`
+            }
           }
         }
 

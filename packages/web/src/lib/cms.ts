@@ -69,6 +69,35 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
   return url
 }
 
+function normalizeMedia(media: CMSMedia | undefined): CMSMedia | undefined {
+  if (!media) return media
+  return {
+    ...media,
+    url: resolveMediaUrl(media.url) || media.filename,
+  }
+}
+
+function normalizeLexicalContent(content: unknown): unknown {
+  if (!content || typeof content !== 'object') return content
+  if (Array.isArray(content)) {
+    return content.map(normalizeLexicalContent)
+  }
+  const node = content as Record<string, unknown>
+  if (node.type === 'upload' && node.value && typeof node.value === 'object') {
+    return {
+      ...node,
+      value: normalizeMedia(node.value as CMSMedia),
+    }
+  }
+  if (node.children && Array.isArray(node.children)) {
+    return {
+      ...node,
+      children: node.children.map(normalizeLexicalContent),
+    }
+  }
+  return content
+}
+
 function localeField<T>(doc: object, fieldBase: string, locale: Locale): T | undefined {
   const suffix = locale === 'zh-CN' ? 'ZhCN' : locale === 'zh-TW' ? 'ZhTW' : 'En'
   return ((doc as Record<string, unknown>)[`${fieldBase}${suffix}`] as T) || undefined
@@ -273,15 +302,10 @@ export async function fetchInstallationBySlug(slug: string, locale: Locale): Pro
 function normalizeBlog(doc: CMSBlog): CMSBlog {
   return {
     ...doc,
-    coverImage: doc.coverImage
-      ? {
-          id: doc.coverImage.id,
-          url: resolveMediaUrl(doc.coverImage.url) || doc.coverImage.filename,
-          altEn: doc.coverImage.altEn,
-          altZhCN: doc.coverImage.altZhCN,
-          altZhTW: doc.coverImage.altZhTW,
-        }
-      : undefined,
+    contentEn: normalizeLexicalContent(doc.contentEn),
+    contentZhCN: normalizeLexicalContent(doc.contentZhCN),
+    contentZhTW: normalizeLexicalContent(doc.contentZhTW),
+    coverImage: normalizeMedia(doc.coverImage),
     installations: (doc.installations || []).map(normalizeInstallation),
   }
 }
@@ -289,10 +313,7 @@ function normalizeBlog(doc: CMSBlog): CMSBlog {
 function normalizeInstallation(doc: CMSInstallation): CMSInstallation {
   return {
     ...doc,
-    photos: (doc.photos || []).map((photo) => ({
-      ...photo,
-      url: resolveMediaUrl(photo.url) || photo.filename,
-    })),
+    photos: (doc.photos || []).map(normalizeMedia).filter(Boolean) as CMSMedia[],
   }
 }
 

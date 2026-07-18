@@ -127,6 +127,18 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  roles: ('admin' | 'blog_editor' | 'installation_editor' | 'read_only')[];
+  /**
+   * Grant additional permissions beyond the user's roles. Permissions override or extend role access.
+   */
+  permissions?: {
+    manageUsers?: boolean | null;
+    editBlogs?: boolean | null;
+    editInstallations?: boolean | null;
+    uploadMedia?: boolean | null;
+    deleteMedia?: boolean | null;
+    viewUnpublished?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -172,17 +184,7 @@ export interface Media {
 export interface Installation {
   id: number;
   titleEn: string;
-  titleZhCN: string;
-  titleZhTW: string;
-  /**
-   * URL-safe identifier, e.g. "hope-primary-school-guizhou"
-   */
-  slug: string;
-  type: 'school' | 'bridge' | 'water-tank';
   locationEn: string;
-  locationZhCN: string;
-  locationZhTW: string;
-  completionDate?: string | null;
   descriptionEn?: {
     root: {
       type: string;
@@ -198,6 +200,8 @@ export interface Installation {
     };
     [k: string]: unknown;
   } | null;
+  titleZhCN: string;
+  locationZhCN: string;
   descriptionZhCN?: {
     root: {
       type: string;
@@ -213,6 +217,8 @@ export interface Installation {
     };
     [k: string]: unknown;
   } | null;
+  titleZhTW: string;
+  locationZhTW: string;
   descriptionZhTW?: {
     root: {
       type: string;
@@ -228,6 +234,12 @@ export interface Installation {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * URL-safe identifier, e.g. "hope-primary-school-guizhou"
+   */
+  slug: string;
+  type: 'school' | 'bridge' | 'water-tank';
+  completionDate?: string | null;
   photos?: (number | Media)[] | null;
   published?: boolean | null;
   updatedAt: string;
@@ -243,24 +255,8 @@ export interface Blog {
    * URL-safe English slug, e.g. "mountain-area-reality"
    */
   slugNameEn: string;
-  /**
-   * 简体中文 URL 标识，例如「山区现实」
-   */
-  slugNameZhCN: string;
-  /**
-   * 繁體中文 URL 標識，例如「山區現實」
-   */
-  slugNameZhTW: string;
-  /**
-   * Short URL token shared across all locales, e.g. "abc123"
-   */
-  shortId: string;
   titleEn: string;
-  titleZhCN: string;
-  titleZhTW: string;
   excerptEn: string;
-  excerptZhCN: string;
-  excerptZhTW: string;
   contentEn?: {
     root: {
       type: string;
@@ -276,6 +272,13 @@ export interface Blog {
     };
     [k: string]: unknown;
   } | null;
+  legacyContentEn?: string | null;
+  /**
+   * 简体中文 URL 标识，例如「山区现实」
+   */
+  slugNameZhCN: string;
+  titleZhCN: string;
+  excerptZhCN: string;
   contentZhCN?: {
     root: {
       type: string;
@@ -291,6 +294,13 @@ export interface Blog {
     };
     [k: string]: unknown;
   } | null;
+  legacyContentZhCN?: string | null;
+  /**
+   * 繁體中文 URL 標識，例如「山區現實」
+   */
+  slugNameZhTW: string;
+  titleZhTW: string;
+  excerptZhTW: string;
   contentZhTW?: {
     root: {
       type: string;
@@ -306,9 +316,11 @@ export interface Blog {
     };
     [k: string]: unknown;
   } | null;
-  legacyContentEn?: string | null;
-  legacyContentZhCN?: string | null;
   legacyContentZhTW?: string | null;
+  /**
+   * Short URL token shared across all locales. Auto-generated from the English slug if left blank.
+   */
+  shortId?: string | null;
   coverImage: number | Media;
   date: string;
   /**
@@ -406,6 +418,17 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
+  permissions?:
+    | T
+    | {
+        manageUsers?: T;
+        editBlogs?: T;
+        editInstallations?: T;
+        uploadMedia?: T;
+        deleteMedia?: T;
+        viewUnpublished?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -447,17 +470,17 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface InstallationsSelect<T extends boolean = true> {
   titleEn?: T;
+  locationEn?: T;
+  descriptionEn?: T;
   titleZhCN?: T;
+  locationZhCN?: T;
+  descriptionZhCN?: T;
   titleZhTW?: T;
+  locationZhTW?: T;
+  descriptionZhTW?: T;
   slug?: T;
   type?: T;
-  locationEn?: T;
-  locationZhCN?: T;
-  locationZhTW?: T;
   completionDate?: T;
-  descriptionEn?: T;
-  descriptionZhCN?: T;
-  descriptionZhTW?: T;
   photos?: T;
   published?: T;
   updatedAt?: T;
@@ -469,21 +492,21 @@ export interface InstallationsSelect<T extends boolean = true> {
  */
 export interface BlogsSelect<T extends boolean = true> {
   slugNameEn?: T;
-  slugNameZhCN?: T;
-  slugNameZhTW?: T;
-  shortId?: T;
   titleEn?: T;
-  titleZhCN?: T;
-  titleZhTW?: T;
   excerptEn?: T;
-  excerptZhCN?: T;
-  excerptZhTW?: T;
   contentEn?: T;
-  contentZhCN?: T;
-  contentZhTW?: T;
   legacyContentEn?: T;
+  slugNameZhCN?: T;
+  titleZhCN?: T;
+  excerptZhCN?: T;
+  contentZhCN?: T;
   legacyContentZhCN?: T;
+  slugNameZhTW?: T;
+  titleZhTW?: T;
+  excerptZhTW?: T;
+  contentZhTW?: T;
   legacyContentZhTW?: T;
+  shortId?: T;
   coverImage?: T;
   date?: T;
   installations?: T;
