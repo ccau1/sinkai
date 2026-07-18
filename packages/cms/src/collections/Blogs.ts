@@ -66,7 +66,9 @@ export const Blogs: CollectionConfig = {
     admin: ({ req }) => Boolean(req.user),
   },
   fields: [
-    createLocaleTabs(buildBlogLocaleFields),
+    createLocaleTabs(buildBlogLocaleFields, {
+      copyFromEnglish: ['slugName', 'title', 'excerpt', 'content', 'legacyContent'],
+    }),
     {
       name: 'shortId',
       type: 'text',

@@ -44,7 +44,9 @@ export const Installations: CollectionConfig = {
     admin: ({ req }) => Boolean(req.user),
   },
   fields: [
-    createLocaleTabs(buildInstallationLocaleFields),
+    createLocaleTabs(buildInstallationLocaleFields, {
+      copyFromEnglish: ['title', 'location', 'description'],
+    }),
     {
       name: 'slug',
       type: 'text',

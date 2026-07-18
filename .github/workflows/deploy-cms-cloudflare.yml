@@ -54,7 +54,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-        run: echo "$PAYLOAD_SECRET" | npx wrangler secret put PAYLOAD_SECRET --name sinkai-cms-staging --yes
+        run: echo "$PAYLOAD_SECRET" | npx wrangler secret put PAYLOAD_SECRET --name sinkai-cms-staging
 
       - name: Apply remote D1 migrations (staging)
         working-directory: packages/cms
@@ -115,7 +115,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-        run: echo "$PAYLOAD_SECRET" | npx wrangler secret put PAYLOAD_SECRET --name sinkai-cms-prod --yes
+        run: echo "$PAYLOAD_SECRET" | npx wrangler secret put PAYLOAD_SECRET --name sinkai-cms-prod
 
       - name: Apply remote D1 migrations (production)
         working-directory: packages/cms
