@@ -13,7 +13,7 @@ export const Users: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
-    admin: isAdmin,
+    admin: ({ req }) => Boolean(req.user),
   },
   fields: [
     {

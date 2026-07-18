@@ -1,7 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 import {
   isAdmin,
-  isAuthenticatedUser,
   isInstallationEditor,
   publishedOrAuthenticated,
 } from '../util/access'
@@ -42,7 +41,7 @@ export const Installations: CollectionConfig = {
     create: isInstallationEditor,
     update: isInstallationEditor,
     delete: isAdmin,
-    admin: isAuthenticatedUser,
+    admin: ({ req }) => Boolean(req.user),
   },
   fields: [
     createLocaleTabs(buildInstallationLocaleFields),

@@ -1,7 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 import {
   isAdmin,
-  isAuthenticatedUser,
   isBlogEditor,
   publishedOrAuthenticated,
 } from '../util/access'
@@ -64,7 +63,7 @@ export const Blogs: CollectionConfig = {
     create: isBlogEditor,
     update: isBlogEditor,
     delete: isAdmin,
-    admin: isAuthenticatedUser,
+    admin: ({ req }) => Boolean(req.user),
   },
   fields: [
     createLocaleTabs(buildBlogLocaleFields),

@@ -1,6 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
 import {
-  isAuthenticatedUser,
   isContentEditor,
   PERMISSIONS,
   userIsAdmin,
@@ -29,7 +28,7 @@ export const Media: CollectionConfig = {
     update: isContentEditor,
     delete: ({ req: { user } }) =>
       userIsAdmin(user) || hasPermission(user, PERMISSIONS.DELETE_MEDIA),
-    admin: isAuthenticatedUser,
+    admin: ({ req }) => Boolean(req.user),
   },
   fields: [createLocaleTabs(buildMediaLocaleFields)],
   upload: {
