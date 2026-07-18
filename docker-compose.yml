@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: packages/web/Dockerfile
     ports:
       - "3200:80"
     restart: unless-stopped

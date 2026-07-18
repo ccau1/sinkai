@@ -191,7 +191,7 @@ export default function AboutPage() {
             {t('quoteTitle')}
           </h2>
           <div className="reveal max-w-2xl mx-auto">
-            <span className="font-serif text-6xl block mb-4" style={{ color: 'var(--color-primary-300)', lineHeight: 1 }}>"</span>
+            <span className="font-serif text-6xl block mb-4" style={{ color: 'var(--color-primary-300)', lineHeight: 1 }}>&quot;</span>
             <p className="text-body-lg italic mb-6" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.8 }}>
               {t('quoteText')}
             </p>

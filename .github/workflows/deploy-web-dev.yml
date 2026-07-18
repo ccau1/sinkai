@@ -6,7 +6,7 @@
 # Server dir: /opt/sinkai-dev
 # =============================================================================
 
-name: Build & Deploy to Dev
+name: Build & Deploy Web to Dev
 
 on:
   push:
@@ -14,11 +14,17 @@ on:
     paths:
       - 'packages/web/src/**'
       - 'packages/web/public/**'
-      - 'packages/web/index.html'
-      - 'Dockerfile'
-      - 'nginx.conf'
+      - 'packages/web/package.json'
+      - 'packages/web/next.config.ts'
+      - 'packages/web/tsconfig.json'
+      - 'packages/web/postcss.config.mjs'
+      - 'packages/web/eslint.config.mjs'
+      - 'packages/web/Dockerfile'
+      - 'packages/web/nginx.conf'
+      - 'package.json'
+      - 'package-lock.json'
       - 'deploy/**'
-      - '.github/workflows/deploy-dev.yml'
+      - '.github/workflows/deploy-web-dev.yml'
   workflow_dispatch:
 
 env:
@@ -47,6 +53,7 @@ jobs:
         with:
           image-name: app
           context: .
+          file: packages/web/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_TAG_DEV }}

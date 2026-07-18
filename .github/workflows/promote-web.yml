@@ -1,26 +1,20 @@
 # =============================================================================
 # CONFIG — Edit these values when copying to another repo
 # =============================================================================
-# Branch:     main
-# Domain:     sinkai.staging.tribalorigin.com
-# Server dir: /opt/sinkai-staging
+# Domain:     sinkai.tribalorigin.com
+# Server dir: /opt/sinkai-prod  (shared)
+#             /opt/sinkai-prod-standalone  (standalone)
 # =============================================================================
 
-name: Build & Deploy to Staging
+name: Promote Web Staging → Prod
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/web/src/**'
-      - 'packages/web/public/**'
-      - 'packages/web/index.html'
-      - 'Dockerfile'
-      - 'nginx.conf'
-      - 'deploy/**'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
+      image_tag:
+        description: 'Image tag to promote (e.g., staging, staging-abc123)'
+        required: true
+        default: 'staging'
       deployment_target:
         description: 'Production deployment target'
         required: true
@@ -29,18 +23,14 @@ on:
         options:
           - shared
           - standalone
+      confirm:
+        description: 'Type "promote" to confirm deployment to production'
+        required: true
+        default: ''
 
 env:
   REGISTRY: ghcr.io
   IMAGE_BASE: ghcr.io/${{ github.repository }}/app
-  BRANCH: main
-  DOMAIN_STAGING: sinkai.staging.tribalorigin.com
-  SERVER_DIR_STAGING: /opt/sinkai-staging
-  HEALTH_URL_STAGING: https://sinkai.staging.tribalorigin.com
-  IMAGE_TAG_STAGING: staging
-  IMAGE_TAG_STAGING_SHA: staging-${{ github.sha }}
-  COMPOSE_FILE_STAGING: docker-compose.staging.yml
-  NGINX_FILE_STAGING: nginx.dev.conf
   DOMAIN_PROD: sinkai.tribalorigin.com
   SERVER_DIR_PROD_SHARED: /opt/sinkai-prod
   SERVER_DIR_PROD_STANDALONE: /opt/sinkai-prod-standalone
@@ -51,64 +41,10 @@ env:
   NGINX_FILE_PROD_STANDALONE: nginx.prod-standalone.conf
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build & push staging image
-        uses: ./.github/actions/build-and-push-image
-        with:
-          image-name: app
-          context: .
-          push: true
-          tags: |
-            ${{ env.IMAGE_TAG_STAGING }}
-            ${{ env.IMAGE_TAG_STAGING_SHA }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy-staging:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to staging server
-        uses: ./.github/actions/deploy-to-hetzner
-        with:
-          host: ${{ secrets.STAGING_HETZNER_HOST }}
-          username: ${{ secrets.STAGING_HETZNER_USER }}
-          ssh-key: ${{ secrets.STAGING_HETZNER_SSH_KEY }}
-          remote-path: ${{ env.SERVER_DIR_STAGING }}
-          compose-file: ${{ env.COMPOSE_FILE_STAGING }}
-          files-to-copy: |
-            deploy/${{ env.COMPOSE_FILE_STAGING }}
-            deploy/.env
-            deploy/${{ env.NGINX_FILE_STAGING }}
-          env-file-header: |
-            DOMAIN_STAGING=${{ env.DOMAIN_STAGING }}
-            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ env.IMAGE_TAG_STAGING }}
-          env-file-content: ${{ secrets.STAGING_ENV_FILE }}
-          protected-env-keys: APP_IMAGE,DOMAIN_,HEALTH_URL
-          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ env.IMAGE_TAG_STAGING }}
-          ghcr-token: ${{ secrets.GH_TOKEN }}
-          post-deploy-script: |
-            echo "Container status:"
-            docker compose -f ${{ env.COMPOSE_FILE_STAGING }} ps
-            docker compose -f ${{ env.COMPOSE_FILE_STAGING }} logs --tail 30
-          health-check-url: ${{ env.HEALTH_URL_STAGING }}
-          health-check-headers: |
-            User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
-            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
-
-  promote-to-prod:
-    name: Promote to Production
-    needs: deploy-staging
+  promote:
     runs-on: ubuntu-latest
     environment: production
+    if: ${{ github.event.inputs.confirm == 'promote' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -128,10 +64,10 @@ jobs:
           env-file-header: |
             DOMAIN_PROD=${{ env.DOMAIN_PROD }}
             TRAEFIK_NETWORK=prod
-            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ env.IMAGE_TAG_STAGING_SHA }}
+            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
           env-file-content: ${{ secrets.PROD_ENV_FILE }}
           protected-env-keys: APP_IMAGE,DOMAIN_,HEALTH_URL
-          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ env.IMAGE_TAG_STAGING_SHA }}
+          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
           ghcr-token: ${{ secrets.GH_TOKEN }}
           post-deploy-script: |
             echo "Container status:"
@@ -157,10 +93,10 @@ jobs:
             deploy/${{ env.NGINX_FILE_PROD_STANDALONE }}
           env-file-header: |
             DOMAIN_PROD=${{ env.DOMAIN_PROD }}
-            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ env.IMAGE_TAG_STAGING_SHA }}
+            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
           env-file-content: ${{ secrets.PROD_ENV_FILE }}
           protected-env-keys: APP_IMAGE,DOMAIN_,HEALTH_URL
-          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ env.IMAGE_TAG_STAGING_SHA }}
+          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
           ghcr-token: ${{ secrets.GH_TOKEN }}
           pre-deploy-script: |
             if [ -n "$CF_ORIGIN_CERT" ]; then

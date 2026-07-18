@@ -6,11 +6,14 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { type Locale } from '@/i18n/config';
+import { type BlogPost, type BlogPostImageGroup } from '@/data/blog';
+
+type Translation = BlogPost['translations'][Locale];
 
 interface Props {
-  post: any;
-  translation: any;
-  relatedPosts: any[];
+  post: BlogPost;
+  translation: Translation;
+  relatedPosts: BlogPost[];
   locale: string;
 }
 
@@ -145,7 +148,7 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
     return elements;
   };
 
-  const allImages = post.imageGroups?.flatMap((g: any) => g.images) ?? [];
+  const allImages = post.imageGroups?.flatMap((g: BlogPostImageGroup) => g.images) ?? [];
 
   return (
     <div>
@@ -176,7 +179,7 @@ export default function BlogPostContent({ post, translation, relatedPosts, local
               {renderContent(translation.content)}
 
               {/* Image Groups */}
-              {post.imageGroups?.map((group: any, gi: number) => (
+              {post.imageGroups?.map((group: BlogPostImageGroup, gi: number) => (
                 <div key={gi} className="reveal mt-10 mb-8">
                   <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--color-text-primary)' }}>
                     {group.caption[locale as Locale] || group.caption['en'] || group.caption['zh-TW']}

@@ -25,6 +25,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Prevent hydration mismatch: only switch to the persisted theme after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const saved = localStorage.getItem('theme') as Theme | null;
     if (saved) {

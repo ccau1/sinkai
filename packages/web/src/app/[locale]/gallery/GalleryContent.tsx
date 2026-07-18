@@ -131,14 +131,14 @@ export default function GalleryPage() {
           </h2>
           <div className="max-w-3xl">
             <div className="reveal mb-10">
-              <span className="text-5xl block mb-3" style={{ color: 'var(--color-primary-500)', opacity: 0.5, lineHeight: 1 }}>"</span>
+              <span className="text-5xl block mb-3" style={{ color: 'var(--color-primary-500)', opacity: 0.5, lineHeight: 1 }}>&quot;</span>
               <p className="text-body-lg italic mb-4" style={{ color: 'rgba(255,255,255,0.85)', lineHeight: 1.8 }}>
                 {t('quote1')}
               </p>
               <p className="text-label" style={{ color: 'var(--color-primary-400)' }}>{t('author1')}</p>
             </div>
             <div className="reveal pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-              <span className="text-5xl block mb-3" style={{ color: 'var(--color-primary-500)', opacity: 0.5, lineHeight: 1 }}>"</span>
+              <span className="text-5xl block mb-3" style={{ color: 'var(--color-primary-500)', opacity: 0.5, lineHeight: 1 }}>&quot;</span>
               <p className="text-body-lg italic mb-4" style={{ color: 'rgba(255,255,255,0.85)', lineHeight: 1.8 }}>
                 {t('quote2')}
               </p>
