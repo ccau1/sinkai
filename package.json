@@ -7,8 +7,10 @@
   ],
   "scripts": {
     "dev": "npm run dev -w packages/web",
+    "dev:cms": "npm run dev -w packages/cms",
     "build": "npm run build -w packages/web",
+    "build:cms": "npm run build -w packages/cms",
     "start": "npm run start -w packages/web",
-    "lint": "npm run lint -w packages/web"
+    "lint": "npm run lint -w packages/web && npm run lint -w packages/cms"
   }
 }

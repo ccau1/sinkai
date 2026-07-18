@@ -137,6 +137,7 @@ export default function ContactPage() {
                         name={field.name}
                         placeholder={field.placeholder}
                         required={field.required}
+                        suppressHydrationWarning
                         className="w-full text-sm py-3 bg-transparent outline-none transition-colors"
                         style={{
                           borderBottom: '1px solid var(--color-border)',
@@ -156,6 +157,7 @@ export default function ContactPage() {
                       placeholder={t('formMessagePlaceholder')}
                       required
                       rows={4}
+                      suppressHydrationWarning
                       className="w-full text-sm py-3 bg-transparent outline-none resize-y transition-colors"
                       style={{
                         borderBottom: '1px solid var(--color-border)',

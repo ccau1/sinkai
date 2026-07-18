@@ -3,6 +3,7 @@
     "home": "首页",
     "about": "关于我们",
     "blog": "博客",
+    "installations": "援建项目",
     "gallery": "活动剪影",
     "donate": "捐款支持",
     "contact": "联系我们",
@@ -148,7 +149,9 @@
     "readMore": "阅读更多",
     "publishedOn": "发布于",
     "backToBlog": "← 返回博客",
-    "relatedPosts": "相关文章"
+    "relatedPosts": "相关文章",
+    "noPosts": "暂无博客文章。",
+    "relatedInstallations": "相关援建项目"
   },
   "donate": {
     "pageTitle": "支持我们",
@@ -186,6 +189,14 @@
     "contactFax": "传真：2795 0323",
     "contactEmail": "电邮：info@sinkai.org",
     "donateBtn": "立即捐款"
+  },
+  "installations": {
+    "pageTitle": "援建项目",
+    "pageSubtitle": "在善启及各善心人士支持下，于贵州贫困山区建成的学校、桥梁及水窖。",
+    "schools": "学校",
+    "bridges": "桥梁",
+    "waterTanks": "水窖",
+    "empty": "尚未发布任何援建项目。"
   },
   "contact": {
     "pageTitle": "联系我们",

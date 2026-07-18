@@ -1,0 +1,9 @@
+# Sensitive Terraform variables
+terraform.tfvars
+*.auto.tfvars
+
+# Terraform state
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl

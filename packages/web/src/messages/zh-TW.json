@@ -3,6 +3,7 @@
     "home": "首頁",
     "about": "關於我們",
     "blog": "博客",
+    "installations": "援建項目",
     "gallery": "活動剪影",
     "donate": "捐款支持",
     "contact": "聯繫我們",
@@ -148,7 +149,9 @@
     "readMore": "閱讀更多",
     "publishedOn": "發佈於",
     "backToBlog": "← 返回博客",
-    "relatedPosts": "相關文章"
+    "relatedPosts": "相關文章",
+    "noPosts": "暫無博客文章。",
+    "relatedInstallations": "相關援建項目"
   },
   "donate": {
     "pageTitle": "支持我們",
@@ -186,6 +189,14 @@
     "contactFax": "傳真：2795 0323",
     "contactEmail": "電郵：info@sinkai.org",
     "donateBtn": "立即捐款"
+  },
+  "installations": {
+    "pageTitle": "援建項目",
+    "pageSubtitle": "在善啓及各善心人士支持下，於貴州貧困山區建成的學校、橋樑及水窖。",
+    "schools": "學校",
+    "bridges": "橋樑",
+    "waterTanks": "水窖",
+    "empty": "尚未發布任何援建項目。"
   },
   "contact": {
     "pageTitle": "聯繫我們",

@@ -49,3 +49,10 @@ packages/web/dist/
 packages/web/node_modules/
 packages/web/*.tsbuildinfo
 packages/web/next-env.d.ts
+packages/cms/.next/
+packages/cms/.open-next/
+packages/cms/dist/
+packages/cms/node_modules/
+packages/cms/*.tsbuildinfo
+packages/cms/next-env.d.ts
+packages/cms/payload-types.ts

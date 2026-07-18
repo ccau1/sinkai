@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  env: {
+    CMS_API_URL: process.env.CMS_API_URL || '',
+  },
 };
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');

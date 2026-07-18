@@ -31,6 +31,7 @@ export default function Header() {
   const navLinks = [
     { href: '/', label: t('home') },
     { href: '/about', label: t('about') },
+    { href: '/installations', label: t('installations') },
     { href: '/blog', label: t('blog') },
     { href: '/gallery', label: t('gallery') },
     { href: '/donate', label: t('donate') },

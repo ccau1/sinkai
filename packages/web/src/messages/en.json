@@ -3,6 +3,7 @@
     "home": "Home",
     "about": "About",
     "blog": "Blog",
+    "installations": "Installations",
     "gallery": "Gallery",
     "donate": "Donate",
     "contact": "Contact",
@@ -148,7 +149,9 @@
     "readMore": "Read More",
     "publishedOn": "Published on",
     "backToBlog": "← Back to Blog",
-    "relatedPosts": "Related Posts"
+    "relatedPosts": "Related Posts",
+    "noPosts": "No blog posts yet.",
+    "relatedInstallations": "Related Installations"
   },
   "donate": {
     "pageTitle": "Support Us",
@@ -186,6 +189,14 @@
     "contactFax": "Fax: 2795 0323",
     "contactEmail": "Email: info@sinkai.org",
     "donateBtn": "Donate Now"
+  },
+  "installations": {
+    "pageTitle": "Our Installations",
+    "pageSubtitle": "Schools, bridges, and water tanks built with the support of our donors in Guizhou's impoverished mountainous areas.",
+    "schools": "Schools",
+    "bridges": "Bridges",
+    "waterTanks": "Water Tanks",
+    "empty": "No installations have been published yet."
   },
   "contact": {
     "pageTitle": "Contact Us",

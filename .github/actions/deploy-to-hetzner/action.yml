@@ -86,14 +86,14 @@ runs:
     - name: Write remote .env file
       shell: bash
       run: |
-        mkdir -p deploy
-        cat > deploy/.env <<EOF
+        mkdir -p hetzner_deploy
+        cat > hetzner_deploy/.env <<EOF
         ${{ inputs.env-file-header }}
         EOF
         if [ -n "${{ inputs.env-file-content }}" ]; then
           FILTER_KEYS="${{ inputs.protected-env-keys }}"
           FILTER_PATTERN='^[[:space:]]*('$(echo "$FILTER_KEYS" | tr ',' '|')')='
-          printf '%s\n' "${{ inputs.env-file-content }}" | grep -viE "$FILTER_PATTERN" >> deploy/.env
+          printf '%s\n' "${{ inputs.env-file-content }}" | grep -viE "$FILTER_PATTERN" >> hetzner_deploy/.env
         fi
 
     - name: Prepare SCP source list

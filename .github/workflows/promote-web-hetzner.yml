@@ -1,0 +1,118 @@
+# =============================================================================
+# CONFIG — Edit these values when copying to another repo
+# =============================================================================
+# Domain:     sinkai.tribalorigin.com
+# Server dir: /opt/sinkai-prod  (shared)
+#             /opt/sinkai-prod-standalone  (standalone)
+# =============================================================================
+
+name: Promote Web Staging → Hetzner Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to promote (e.g., staging, staging-abc123)'
+        required: true
+        default: 'staging'
+      deployment_target:
+        description: 'Production deployment target'
+        required: true
+        default: 'shared'
+        type: choice
+        options:
+          - shared
+          - standalone
+      confirm:
+        description: 'Type "promote" to confirm deployment to production'
+        required: true
+        default: ''
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/${{ github.repository }}/app
+  DOMAIN_PROD: sinkai.tribalorigin.com
+  SERVER_DIR_PROD_SHARED: /opt/sinkai-prod
+  SERVER_DIR_PROD_STANDALONE: /opt/sinkai-prod-standalone
+  HEALTH_URL_PROD: https://sinkai.tribalorigin.com
+  COMPOSE_FILE_PROD_SHARED: docker-compose.prod.yml
+  COMPOSE_FILE_PROD_STANDALONE: docker-compose.prod-standalone.yml
+  NGINX_FILE_PROD_SHARED: nginx.dev.conf
+  NGINX_FILE_PROD_STANDALONE: nginx.prod-standalone.conf
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ github.event.inputs.confirm == 'promote' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy promoted image to shared prod
+        if: ${{ github.event.inputs.deployment_target != 'standalone' }}
+        uses: ./.github/actions/deploy-to-hetzner
+        with:
+          host: ${{ secrets.PROD_HETZNER_HOST }}
+          username: ${{ secrets.PROD_HETZNER_USER }}
+          ssh-key: ${{ secrets.PROD_HETZNER_SSH_KEY }}
+          remote-path: ${{ env.SERVER_DIR_PROD_SHARED }}
+          compose-file: ${{ env.COMPOSE_FILE_PROD_SHARED }}
+          files-to-copy: |
+            hetzner_deploy/${{ env.COMPOSE_FILE_PROD_SHARED }}
+            hetzner_deploy/.env
+            hetzner_deploy/${{ env.NGINX_FILE_PROD_SHARED }}
+          env-file-header: |
+            DOMAIN_PROD=${{ env.DOMAIN_PROD }}
+            TRAEFIK_NETWORK=prod
+            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
+          env-file-content: ${{ secrets.PROD_ENV_FILE }}
+          protected-env-keys: APP_IMAGE,DOMAIN_,HEALTH_URL
+          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
+          ghcr-token: ${{ secrets.GH_TOKEN }}
+          post-deploy-script: |
+            echo "Container status:"
+            docker compose -f ${{ env.COMPOSE_FILE_PROD_SHARED }} ps
+            docker compose -f ${{ env.COMPOSE_FILE_PROD_SHARED }} logs --tail 30
+          health-check-url: ${{ env.HEALTH_URL_PROD }}
+          health-check-headers: |
+            User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+
+      - name: Deploy promoted image to standalone prod
+        if: ${{ github.event.inputs.deployment_target == 'standalone' }}
+        uses: ./.github/actions/deploy-to-hetzner
+        with:
+          host: ${{ secrets.PROD_STANDALONE_HETZNER_HOST }}
+          username: ${{ secrets.PROD_STANDALONE_HETZNER_USER }}
+          ssh-key: ${{ secrets.PROD_STANDALONE_HETZNER_SSH_KEY }}
+          remote-path: ${{ env.SERVER_DIR_PROD_STANDALONE }}
+          compose-file: ${{ env.COMPOSE_FILE_PROD_STANDALONE }}
+          files-to-copy: |
+            hetzner_deploy/${{ env.COMPOSE_FILE_PROD_STANDALONE }}
+            hetzner_deploy/.env
+            hetzner_deploy/${{ env.NGINX_FILE_PROD_STANDALONE }}
+          env-file-header: |
+            DOMAIN_PROD=${{ env.DOMAIN_PROD }}
+            APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
+          env-file-content: ${{ secrets.PROD_ENV_FILE }}
+          protected-env-keys: APP_IMAGE,DOMAIN_,HEALTH_URL
+          runtime-env-vars: APP_IMAGE=${{ env.IMAGE_BASE }}:${{ github.event.inputs.image_tag }}
+          ghcr-token: ${{ secrets.GH_TOKEN }}
+          pre-deploy-script: |
+            if [ -n "$CF_ORIGIN_CERT" ]; then
+              mkdir -p ${{ env.SERVER_DIR_PROD_STANDALONE }}/ssl
+              printf '%s\n' "$CF_ORIGIN_CERT" > ${{ env.SERVER_DIR_PROD_STANDALONE }}/ssl/cloudflare-origin.pem
+              printf '%s\n' "$CF_ORIGIN_KEY" > ${{ env.SERVER_DIR_PROD_STANDALONE }}/ssl/cloudflare-origin.key
+              chmod 600 ${{ env.SERVER_DIR_PROD_STANDALONE }}/ssl/cloudflare-origin.key
+              chmod 644 ${{ env.SERVER_DIR_PROD_STANDALONE }}/ssl/cloudflare-origin.pem
+            fi
+          ssh-env-vars: |
+            {"CF_ORIGIN_CERT":${{ toJson(secrets.CF_ORIGIN_CERT) }},"CF_ORIGIN_KEY":${{ toJson(secrets.CF_ORIGIN_KEY) }}}
+          post-deploy-script: |
+            echo "Container status:"
+            docker compose -f ${{ env.COMPOSE_FILE_PROD_STANDALONE }} ps
+            docker compose -f ${{ env.COMPOSE_FILE_PROD_STANDALONE }} logs --tail 30
+          health-check-url: ${{ env.HEALTH_URL_PROD }}
+          health-check-headers: |
+            User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8

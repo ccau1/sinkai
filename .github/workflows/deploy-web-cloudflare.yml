@@ -1,0 +1,73 @@
+name: Deploy Web to Cloudflare Pages (staging → production)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/web/**'
+      - 'packages/cms/src/collections/**'
+      - '.github/workflows/deploy-web-cloudflare.yml'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+  PAGES_PROJECT_NAME_PROD: sinkai-web
+  PAGES_PROJECT_NAME_STAGING: sinkai-web-staging
+
+jobs:
+  deploy-staging:
+    name: Deploy Web to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web (staging)
+        env:
+          CMS_API_URL: ${{ secrets.CMS_API_URL_STAGING }}
+        run: npm run build -w packages/web
+
+      - name: Deploy to Cloudflare Pages (staging)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages deploy packages/web/dist --project-name=${{ env.PAGES_PROJECT_NAME_STAGING }} --branch=main
+
+  promote-to-prod:
+    name: Promote Web to Production
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web (production)
+        env:
+          CMS_API_URL: ${{ secrets.CMS_API_URL_PROD }}
+        run: npm run build -w packages/web
+
+      - name: Deploy to Cloudflare Pages (production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages deploy packages/web/dist --project-name=${{ env.PAGES_PROJECT_NAME_PROD }} --branch=main

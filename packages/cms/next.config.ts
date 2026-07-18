@@ -1,0 +1,34 @@
+import { withPayload } from '@payloadcms/next/withPayload'
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+import type { NextConfig } from 'next'
+
+initOpenNextCloudflareForDev({
+  persist: process.env.PAYLOAD_PERSIST === 'false' ? false : true,
+  remoteBindings: false,
+})
+
+const nextConfig: NextConfig = {
+  images: {
+    localPatterns: [
+      {
+        pathname: '/api/media/file/**',
+      },
+    ],
+  },
+  // Packages with Cloudflare Workers (workerd) specific code
+  // Read more: https://opennext.js.org/cloudflare/howtos/workerd
+  serverExternalPackages: ['jose', 'pg-cloudflare'],
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  webpack: (webpackConfig: any) => {
+    webpackConfig.resolve.extensionAlias = {
+      '.cjs': ['.cts', '.cjs'],
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+
+    return webpackConfig
+  },
+}
+
+export default withPayload(nextConfig, { devBundleServerPackages: false })

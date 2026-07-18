@@ -1,0 +1,59 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "sinkai-cms-staging",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public",
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "routes": [
+    {
+      "pattern": "sinkai-cms.staging.tribalorigin.com",
+      "custom_domain": true,
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_id": "f8fdf96e-eeff-4118-a6eb-a0311c15723e",
+      "database_name": "sinkai-cms-staging",
+      "remote": true,
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "sinkai-cms-media-staging",
+    },
+  ],
+  "env": {
+    "production": {
+      "name": "sinkai-cms-prod",
+      "routes": [
+        {
+          "pattern": "sinkai-cms.tribalorigin.com",
+          "custom_domain": true,
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "D1",
+          "database_id": "8c6943d9-ad8f-438b-9a19-a4d2af0e652d",
+          "database_name": "sinkai-cms-prod",
+          "remote": true,
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "R2",
+          "bucket_name": "sinkai-cms-media-prod",
+        },
+      ],
+    },
+  },
+}

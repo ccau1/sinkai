@@ -1,0 +1,22 @@
+# Next.js
+/.next/
+/out/
+
+# OpenNext / Cloudflare
+/.open-next/
+
+# Local env files
+.env*.local
+.env
+
+# Payload
+/payload.sqlite
+/payload.sqlite-*
+
+# Misc
+.DS_Store
+*.pem
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

@@ -1,8 +1,26 @@
 services:
-  app:
+  cms:
     build:
       context: .
-      dockerfile: packages/web/Dockerfile
+      dockerfile: packages/cms/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:-local-dev-secret}
+    volumes:
+      - cms-data:/app/packages/cms/.wrangler/state:delegated
+    restart: unless-stopped
+
+  app:
+    image: nginx:alpine
     ports:
       - "3200:80"
+    volumes:
+      - ./packages/web/dist:/usr/share/nginx/html:ro
+      - ./packages/web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - cms
     restart: unless-stopped
+
+volumes:
+  cms-data:
