@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useState } from 'react'
 import { transformMediaUrl, type ImageTransformOptions } from '@/lib/image'
 
 type NextImageProps = React.ComponentProps<typeof Image>
@@ -21,6 +22,10 @@ interface CmsImageProps extends Omit<NextImageProps, 'src'> {
  * Pass `transformWidth` (and optionally `transformHeight`, `transformFit`,
  * `transformQuality`, `transformFormat`) to request a resized/optimised
  * variant. External or local images are left untouched.
+ *
+ * If the transformed URL fails to load (for example because Cloudflare Image
+ * Transformations is not yet enabled for the zone), the component falls back
+ * to the original source URL.
  */
 export default function CmsImage({
   src,
@@ -29,6 +34,7 @@ export default function CmsImage({
   transformFit,
   transformQuality,
   transformFormat,
+  onError,
   ...rest
 }: CmsImageProps) {
   const transformedSrc = transformMediaUrl(src, {
@@ -39,5 +45,17 @@ export default function CmsImage({
     format: transformFormat,
   })
 
-  return <Image src={transformedSrc || ''} {...rest} />
+  const [currentSrc, setCurrentSrc] = useState(transformedSrc || '')
+
+  const handleError: NextImageProps['onError'] = (e) => {
+    // Fall back to the original, untransformed URL if we haven't already.
+    if (src && currentSrc !== src) {
+      setCurrentSrc(src)
+    }
+    if (onError) {
+      onError(e)
+    }
+  }
+
+  return <Image src={currentSrc} onError={handleError} {...rest} />
 }

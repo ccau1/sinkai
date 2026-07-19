@@ -71,7 +71,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
         run: npm run seed:remote
-        continue-on-error: true
 
   promote-to-prod:
     name: Promote CMS to Production
@@ -134,4 +133,3 @@ jobs:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
           CLOUDFLARE_ENV: production
         run: npm run seed:production
-        continue-on-error: true

@@ -13,7 +13,7 @@ resource "cloudflare_record" "web" {
   zone_id         = var.cloudflare_zone_id
   name            = var.web_subdomain
   type            = "CNAME"
-  value           = "${var.pages_project_name}.pages.dev"
+  content         = "${var.pages_project_name}.pages.dev"
   proxied         = true
   allow_overwrite = true
 }
@@ -22,7 +22,7 @@ resource "cloudflare_record" "web_staging" {
   zone_id         = var.cloudflare_zone_id
   name            = var.web_staging_subdomain
   type            = "CNAME"
-  value           = "${var.pages_staging_project_name}.pages.dev"
+  content         = "${var.pages_staging_project_name}.pages.dev"
   proxied         = true
   allow_overwrite = true
 }
