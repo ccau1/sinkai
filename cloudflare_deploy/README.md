@@ -63,7 +63,14 @@ Planned URLs:
 
 4. Update `packages/cms/wrangler.jsonc` with the Terraform outputs (only the D1 IDs need to change; R2 bucket names are already hard-coded).
 
-5. Set GitHub secrets:
+5. Ensure Terraform manages the DNS records for the web domains:
+
+   `cloudflare_deploy/terraform/dns.tf` creates CNAME records that point
+   `sinkai.tribalorigin.com` and `sinkai.staging.tribalorigin.com` to the
+   Cloudflare Pages projects. If a stale A record exists (for example pointing
+   to a previous Hetzner server), it will be overwritten.
+
+6. Set GitHub secrets:
 
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
@@ -72,14 +79,14 @@ Planned URLs:
    - `CMS_API_URL_PROD` → `https://sinkai-cms.tribalorigin.com`
    - `CMS_API_URL_STAGING` → `https://sinkai-cms.staging.tribalorigin.com`
 
-6. Enable **Image Transformations** for `tribalorigin.com` in the Cloudflare dashboard:
+7. Enable **Image Transformations** for `tribalorigin.com` in the Cloudflare dashboard:
 
    - Go to **Speed → Images → Transformations** and toggle it on.
    - Under **Sources**, allow the CMS origins:
      - `https://sinkai-cms.tribalorigin.com`
      - `https://sinkai-cms.staging.tribalorigin.com`
 
-7. Push to `main`. The CMS workflow deploys and seeds first; the web workflow then rebuilds against the updated CMS. Approve the `production` environment to promote to prod.
+8. Push to `main`. The CMS workflow deploys and seeds first; the web workflow then rebuilds against the updated CMS. Approve the `production` environment to promote to prod.
 
 ## Notes
 
