@@ -44,6 +44,18 @@ variable "cms_staging_subdomain" {
   default     = "sinkai-cms.staging"
 }
 
+variable "media_subdomain" {
+  description = "Subdomain for the production CMS media R2 custom domain."
+  type        = string
+  default     = "sinkai-cms-media"
+}
+
+variable "media_staging_subdomain" {
+  description = "Subdomain for the staging CMS media R2 custom domain."
+  type        = string
+  default     = "sinkai-cms-media.staging"
+}
+
 variable "environment" {
   description = "Environment name (e.g. prod, staging)."
   type        = string

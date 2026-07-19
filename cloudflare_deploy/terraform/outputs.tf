@@ -58,6 +58,16 @@ output "cms_domain_staging" {
   value       = local.cms_staging_domain
 }
 
+output "media_domain_prod" {
+  description = "Production R2 custom domain where public CMS media is served."
+  value       = local.media_domain
+}
+
+output "media_domain_staging" {
+  description = "Staging R2 custom domain where public CMS media is served."
+  value       = local.media_staging_domain
+}
+
 output "next_steps" {
   description = "Manual steps after running Terraform."
   value       = <<EOT

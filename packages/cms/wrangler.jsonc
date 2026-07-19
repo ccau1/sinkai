@@ -31,6 +31,17 @@
       "bucket_name": "sinkai-cms-media-staging",
     },
   ],
+  "services": [
+    {
+      "binding": "THUMBNAILS",
+      "service": "sinkai-cms-thumbnails-staging",
+    },
+  ],
+  "vars": {
+    "RESEND_FROM_EMAIL": "contact@sinkai.org",
+    "CONTACT_EMAIL_TO": "calvin@tribalorigin.com",
+    "MEDIA_PUBLIC_URL": "https://sinkai-cms-media.staging.tribalorigin.com",
+  },
   "env": {
     "production": {
       "name": "sinkai-cms-prod",
@@ -54,6 +65,17 @@
           "bucket_name": "sinkai-cms-media-prod",
         },
       ],
+      "services": [
+        {
+          "binding": "THUMBNAILS",
+          "service": "sinkai-cms-thumbnails-prod",
+        },
+      ],
+      "vars": {
+        "RESEND_FROM_EMAIL": "contact@sinkai.org",
+        "CONTACT_EMAIL_TO": "calvin@tribalorigin.com",
+        "MEDIA_PUBLIC_URL": "https://sinkai-cms-media.tribalorigin.com",
+      },
     },
   },
 }

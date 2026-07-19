@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": "src/index.ts",
+  "name": "sinkai-cms-thumbnails-staging",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": [
+    "nodejs_compat",
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "sinkai-cms-media-staging",
+    },
+  ],
+  "workflows": [
+    {
+      "name": "media-thumbnails",
+      "binding": "THUMBNAIL_WORKFLOW",
+      "class_name": "ThumbnailWorkflow",
+    },
+  ],
+  "vars": {
+    "MEDIA_PUBLIC_HOST": "sinkai-cms-media.staging.tribalorigin.com",
+  },
+  "env": {
+    "production": {
+      "name": "sinkai-cms-thumbnails-prod",
+      "r2_buckets": [
+        {
+          "binding": "R2",
+          "bucket_name": "sinkai-cms-media-prod",
+        },
+      ],
+      "workflows": [
+        {
+          "name": "media-thumbnails-prod",
+          "binding": "THUMBNAIL_WORKFLOW",
+          "class_name": "ThumbnailWorkflow",
+        },
+      ],
+      "vars": {
+        "MEDIA_PUBLIC_HOST": "sinkai-cms-media.tribalorigin.com",
+      },
+    },
+  },
+}

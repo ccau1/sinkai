@@ -14,7 +14,7 @@ resource "cloudflare_pages_project" "web" {
       environment_variables = {
         CMS_API_URL                            = "https://${local.cms_domain}"
         NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS    = "true"
-        NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN = "https://${local.cms_domain}"
+        NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN = "https://${local.media_domain}"
       }
     }
   }
@@ -42,7 +42,7 @@ resource "cloudflare_pages_project" "web_staging" {
       environment_variables = {
         CMS_API_URL                            = "https://${local.cms_staging_domain}"
         NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS    = "true"
-        NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN = "https://${local.cms_staging_domain}"
+        NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN = "https://${local.media_staging_domain}"
       }
     }
   }

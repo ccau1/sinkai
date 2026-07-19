@@ -8,10 +8,16 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function ContactPage() {
+interface ContactContentProps {
+  formId?: string;
+}
+
+export default function ContactContent({ formId }: ContactContentProps) {
   const t = useTranslations('contact');
   const pageRef = useRef<HTMLDivElement>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
 
   useEffect(() => {
@@ -29,9 +35,53 @@ export default function ContactPage() {
     return () => ctx.revert();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!formId) {
+      setError(t('formError'));
+      return;
+    }
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    // Honeypot: if the hidden field is filled, silently "succeed" without sending.
+    const honeypot = String(formData.get('company') || '').trim();
+    if (honeypot) {
+      setSubmitted(true);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    const submissionData = [
+      { field: 'name', value: String(formData.get('name') || '') },
+      { field: 'email', value: String(formData.get('email') || '') },
+      { field: 'phone', value: String(formData.get('phone') || '') },
+      { field: 'subject', value: String(formData.get('subject') || '') },
+      { field: 'message', value: String(formData.get('message') || '') },
+    ];
+
+    try {
+      const res = await fetch(`${process.env.CMS_API_URL?.replace(/\/$/, '')}/api/form-submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ form: formId, submissionData }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Submission failed: ${res.status}`);
+      }
+
+      setSubmitted(true);
+      form.reset();
+    } catch (err) {
+      setError(t('formError'));
+      console.error('Contact form submission failed:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const infoBlocks = [
@@ -137,8 +187,9 @@ export default function ContactPage() {
                         name={field.name}
                         placeholder={field.placeholder}
                         required={field.required}
+                        disabled={isSubmitting}
                         suppressHydrationWarning
-                        className="w-full text-sm py-3 bg-transparent outline-none transition-colors"
+                        className="w-full text-sm py-3 bg-transparent outline-none transition-colors disabled:opacity-50"
                         style={{
                           borderBottom: '1px solid var(--color-border)',
                           color: 'var(--color-text-primary)',
@@ -157,8 +208,9 @@ export default function ContactPage() {
                       placeholder={t('formMessagePlaceholder')}
                       required
                       rows={4}
+                      disabled={isSubmitting}
                       suppressHydrationWarning
-                      className="w-full text-sm py-3 bg-transparent outline-none resize-y transition-colors"
+                      className="w-full text-sm py-3 bg-transparent outline-none resize-y transition-colors disabled:opacity-50"
                       style={{
                         borderBottom: '1px solid var(--color-border)',
                         color: 'var(--color-text-primary)',
@@ -168,9 +220,18 @@ export default function ContactPage() {
                       onBlur={(e) => { e.currentTarget.style.borderBottomColor = 'var(--color-border)'; }}
                     />
                   </div>
+                  {/* Honeypot field */}
+                  <div className="absolute opacity-0 -z-10" aria-hidden="true">
+                    <input type="text" name="company" tabIndex={-1} autoComplete="off" />
+                  </div>
+                  {error && (
+                    <p className="reveal text-sm" style={{ color: 'var(--color-error, #dc2626)' }}>
+                      {error}
+                    </p>
+                  )}
                   <div className="reveal pt-4">
-                    <button type="submit" className="btn-primary">
-                      {t('formSubmit')}
+                    <button type="submit" disabled={isSubmitting || !formId} className="btn-primary disabled:opacity-50">
+                      {isSubmitting ? t('formSending') : t('formSubmit')}
                     </button>
                   </div>
                 </form>

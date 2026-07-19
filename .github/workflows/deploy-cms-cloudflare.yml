@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'packages/cms/**'
+      - 'packages/cms/workers/**'
       - 'cloudflare_deploy/terraform/**'
       - '.github/workflows/deploy-cms-cloudflare.yml'
   workflow_dispatch:
@@ -39,6 +40,12 @@ jobs:
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json" | jq -r '.result[] | select(.name == "sinkai-cms-staging") | .uuid')
           sed -i "s|\"database_id\": \"STAGING_D1_DATABASE_ID\"|\"database_id\": \"$STAGING_D1_ID\"|" wrangler.jsonc
+
+      - name: Deploy Thumbnails Worker to Staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy -c packages/cms/workers/thumbnails/wrangler.jsonc
 
       - name: Deploy CMS Worker to Staging
         working-directory: packages/cms
@@ -99,6 +106,12 @@ jobs:
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json" | jq -r '.result[] | select(.name == "sinkai-cms-prod") | .uuid')
           sed -i "s|\"database_id\": \"PROD_D1_DATABASE_ID\"|\"database_id\": \"$PROD_D1_ID\"|" wrangler.jsonc
+
+      - name: Deploy Thumbnails Worker to Production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy -c packages/cms/workers/thumbnails/wrangler.jsonc --env production
 
       - name: Deploy CMS Worker to Production
         working-directory: packages/cms

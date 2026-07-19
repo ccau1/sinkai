@@ -19,6 +19,8 @@ import { Blogs } from './collections/Blogs'
 import { Pages } from './collections/Pages'
 import { Testimonies } from './collections/Testimonies'
 import { Navigation } from './globals/Navigation'
+import { ContactSettings } from './globals/ContactSettings'
+import { sendContactSubmissionEmail } from './hooks/sendContactSubmissionEmail'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -76,7 +78,7 @@ export default buildConfig({
     },
   },
   collections: [Blogs, Installations, Testimonies, Pages, Media, Users],
-  globals: [Navigation],
+  globals: [Navigation, ContactSettings],
   graphQL: {
     disable: true,
   },
@@ -96,12 +98,32 @@ export default buildConfig({
     // Disable Drizzle's interactive dev schema push; rely on explicit migrations instead.
     push: false,
   }),
+  cors: [
+    'https://sinkai.tribalorigin.com',
+    'https://sinkai.staging.tribalorigin.com',
+    'http://localhost:3000',
+  ],
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
     r2Storage({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bucket: cloudflare.env.R2 as any,
-      collections: { media: true },
+      collections: {
+        media: {
+          // Empty collection prefix: this makes the plugin inject the hidden
+          // per-document `prefix` field, which the media `visibility` field
+          // manages ('public' | 'private').
+          prefix: '',
+          generateFileURL: ({ filename, prefix }) =>
+            prefix === 'private'
+              ? `/api/media/file/${encodeURIComponent(filename)}?prefix=private`
+              : prefix && process.env.MEDIA_PUBLIC_URL
+                ? `${process.env.MEDIA_PUBLIC_URL}/${prefix}/${filename}`
+                : // Serve through the CMS when the public media domain is not
+                  // configured (e.g. local dev) or for legacy pre-migration files.
+                  `/api/media/file/${encodeURIComponent(filename)}${prefix ? `?prefix=${encodeURIComponent(prefix)}` : ''}`,
+        },
+      },
     }),
     seoPlugin({
       collections: ['blogs', 'installations', 'pages'],
@@ -141,6 +163,11 @@ export default buildConfig({
         text: true,
         textarea: true,
         upload: false,
+      },
+      formSubmissionOverrides: {
+        hooks: {
+          afterChange: [sendContactSubmissionEmail],
+        },
       },
     }),
     ...(process.env.OPENAI_API_KEY

@@ -245,6 +245,8 @@
     "formMessagePlaceholder": "请输入您的讯息...",
     "viewMap": "查看地图",
     "formSubmit": "发送讯息",
-    "formSuccess": "感谢您的讯息，我们会尽快回覆您。"
+    "formSending": "发送中...",
+    "formSuccess": "感谢您的讯息，我们会尽快回覆您。",
+    "formError": "抱歉，无法发送您的讯息，请稍后再试。"
   }
 }

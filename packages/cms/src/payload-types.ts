@@ -102,9 +102,11 @@ export interface Config {
     ('false' | 'none' | 'null') | false | null | ('en' | 'zh-CN' | 'zh-TW') | ('en' | 'zh-CN' | 'zh-TW')[];
   globals: {
     navigation: Navigation;
+    'contact-settings': ContactSetting;
   };
   globalsSelect: {
     navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'contact-settings': ContactSettingsSelect<false> | ContactSettingsSelect<true>;
   };
   locale: 'en' | 'zh-CN' | 'zh-TW';
   widgets: {
@@ -221,6 +223,11 @@ export interface Media {
    * Hide this media from the public gallery page without deleting it.
    */
   hidden?: boolean | null;
+  /**
+   * Private files are only served through the CMS to logged-in users.
+   */
+  visibility: 'public' | 'private';
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -775,6 +782,8 @@ export interface MediaSelect<T extends boolean = true> {
   category?: T;
   sortOrder?: T;
   hidden?: T;
+  visibility?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1032,6 +1041,17 @@ export interface Navigation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-settings".
+ */
+export interface ContactSetting {
+  id: number;
+  fromEmail: string;
+  notificationEmail: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation_select".
  */
 export interface NavigationSelect<T extends boolean = true> {
@@ -1046,6 +1066,17 @@ export interface NavigationSelect<T extends boolean = true> {
         visible?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-settings_select".
+ */
+export interface ContactSettingsSelect<T extends boolean = true> {
+  fromEmail?: T;
+  notificationEmail?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -90,7 +90,7 @@ export interface CMSGallerySection {
   images: CMSMedia[]
 }
 
-function getCMSBaseUrl(): string | undefined {
+export function getCMSBaseUrl(): string | undefined {
   if (typeof process !== 'undefined' && process.env.CMS_API_URL) {
     return process.env.CMS_API_URL.replace(/\/$/, '')
   }

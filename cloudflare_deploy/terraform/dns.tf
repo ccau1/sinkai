@@ -1,8 +1,10 @@
 locals {
-  web_domain         = "${var.web_subdomain}.${var.domain}"
-  web_staging_domain = "${var.web_staging_subdomain}.${var.domain}"
-  cms_domain         = "${var.cms_subdomain}.${var.domain}"
-  cms_staging_domain = "${var.cms_staging_subdomain}.${var.domain}"
+  web_domain           = "${var.web_subdomain}.${var.domain}"
+  web_staging_domain   = "${var.web_staging_subdomain}.${var.domain}"
+  cms_domain           = "${var.cms_subdomain}.${var.domain}"
+  cms_staging_domain   = "${var.cms_staging_subdomain}.${var.domain}"
+  media_domain         = "${var.media_subdomain}.${var.domain}"
+  media_staging_domain = "${var.media_staging_subdomain}.${var.domain}"
 }
 
 # Explicit DNS records for the Cloudflare Pages custom domains.
