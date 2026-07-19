@@ -2,7 +2,7 @@ import type { Locale } from '../locales'
 
 export interface BlogPostImageGroup {
   caption: Record<Locale, string>;
-  images: string[]; // paths to thumb images, e.g. /gallery/snow/16_01-thumb.jpg
+  images: string[]; // paths to images, e.g. /gallery/snow/16_01.jpg
 }
 
 export interface BlogPost {
@@ -21,7 +21,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: 'mountain-area-reality',
     date: '2024-03-15',
-    coverImage: '/gallery/mountain/01_00-thumb.jpg',
+    coverImage: '/gallery/mountain/01_00.jpg',
     imageGroups: [
       {
         caption: {
@@ -30,7 +30,7 @@ export const blogPosts: BlogPost[] = [
           'zh-TW': '貴州山區風貌',
         },
         images: [
-          '/gallery/mountain/01_07-thumb.jpg','/gallery/mountain/01_08-thumb.jpg','/gallery/mountain/01_09-thumb.jpg','/gallery/mountain/01_10-thumb.jpg','/gallery/mountain/01_11-thumb.jpg','/gallery/mountain/01_13-thumb.jpg','/gallery/mountain/01_15-thumb.jpg','/gallery/mountain/01_16-thumb.jpg','/gallery/mountain/01_17-thumb.jpg','/gallery/mountain/01_22-thumb.jpg','/gallery/mountain/01_23-thumb.jpg','/gallery/mountain/01_27-thumb.jpg','/gallery/mountain/01_28-thumb.jpg','/gallery/mountain/01_31-thumb.jpg','/gallery/mountain/01_32-thumb.jpg','/gallery/mountain/01_34-thumb.jpg','/gallery/mountain/01_37-thumb.jpg','/gallery/mountain/01_39-thumb.jpg','/gallery/mountain/01_40-thumb.jpg','/gallery/mountain/01_43-thumb.jpg','/gallery/mountain/01_44-thumb.jpg','/gallery/mountain/01_45-thumb.jpg','/gallery/mountain/01_46-thumb.jpg','/gallery/mountain/01_47-thumb.jpg','/gallery/mountain/01_48-thumb.jpg','/gallery/mountain/01_49-thumb.jpg','/gallery/mountain/01_50-thumb.jpg',
+          '/gallery/mountain/01_07.jpg','/gallery/mountain/01_08.jpg','/gallery/mountain/01_09.jpg','/gallery/mountain/01_10.jpg','/gallery/mountain/01_11.jpg','/gallery/mountain/01_13.jpg','/gallery/mountain/01_15.jpg','/gallery/mountain/01_16.jpg','/gallery/mountain/01_17.jpg','/gallery/mountain/01_22.jpg','/gallery/mountain/01_23.jpg','/gallery/mountain/01_27.jpg','/gallery/mountain/01_28.jpg','/gallery/mountain/01_31.jpg','/gallery/mountain/01_32.jpg','/gallery/mountain/01_34.jpg','/gallery/mountain/01_37.jpg','/gallery/mountain/01_39.jpg','/gallery/mountain/01_40.jpg','/gallery/mountain/01_43.jpg','/gallery/mountain/01_44.jpg','/gallery/mountain/01_45.jpg','/gallery/mountain/01_46.jpg','/gallery/mountain/01_47.jpg','/gallery/mountain/01_48.jpg','/gallery/mountain/01_49.jpg','/gallery/mountain/01_50.jpg',
         ],
       },
     ],
@@ -169,16 +169,16 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '多處貧農凄宿的住所及頻臨或已倒塌的危房',
         },
         images: [
-          '/gallery/snow/16_01-thumb.jpg',
-          '/gallery/snow/16_02-thumb.jpg',
-          '/gallery/snow/16_03-thumb.jpg',
-          '/gallery/snow/16_04-thumb.jpg',
-          '/gallery/snow/16_05-thumb.jpg',
-          '/gallery/snow/16_06-thumb.jpg',
-          '/gallery/snow/16_07-thumb.jpg',
-          '/gallery/snow/16_08-thumb.jpg',
-          '/gallery/snow/16_09-thumb.jpg',
-          '/gallery/snow/16_10-thumb.jpg',
+          '/gallery/snow/16_01.jpg',
+          '/gallery/snow/16_02.jpg',
+          '/gallery/snow/16_03.jpg',
+          '/gallery/snow/16_04.jpg',
+          '/gallery/snow/16_05.jpg',
+          '/gallery/snow/16_06.jpg',
+          '/gallery/snow/16_07.jpg',
+          '/gallery/snow/16_08.jpg',
+          '/gallery/snow/16_09.jpg',
+          '/gallery/snow/16_10.jpg',
         ],
       },
       {
@@ -188,23 +188,23 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '僅存的危房校舍，唯一獲知識希望的地方',
         },
         images: [
-          '/gallery/snow/16_11-thumb.jpg',
-          '/gallery/snow/16_12-thumb.jpg',
-          '/gallery/snow/16_13-thumb.jpg',
-          '/gallery/snow/16_14-thumb.jpg',
-          '/gallery/snow/16_15-thumb.jpg',
-          '/gallery/snow/16_16-thumb.jpg',
-          '/gallery/snow/16_17-thumb.jpg',
-          '/gallery/snow/16_18-thumb.jpg',
-          '/gallery/snow/16_19-thumb.jpg',
-          '/gallery/snow/16_20-thumb.jpg',
-          '/gallery/snow/16_21-thumb.jpg',
-          '/gallery/snow/16_22-thumb.jpg',
-          '/gallery/snow/16_23-thumb.jpg',
-          '/gallery/snow/16_24-thumb.jpg',
-          '/gallery/snow/16_47-thumb.jpg',
-          '/gallery/snow/16_48-thumb.jpg',
-          '/gallery/snow/16_49-thumb.jpg',
+          '/gallery/snow/16_11.jpg',
+          '/gallery/snow/16_12.jpg',
+          '/gallery/snow/16_13.jpg',
+          '/gallery/snow/16_14.jpg',
+          '/gallery/snow/16_15.jpg',
+          '/gallery/snow/16_16.jpg',
+          '/gallery/snow/16_17.jpg',
+          '/gallery/snow/16_18.jpg',
+          '/gallery/snow/16_19.jpg',
+          '/gallery/snow/16_20.jpg',
+          '/gallery/snow/16_21.jpg',
+          '/gallery/snow/16_22.jpg',
+          '/gallery/snow/16_23.jpg',
+          '/gallery/snow/16_24.jpg',
+          '/gallery/snow/16_47.jpg',
+          '/gallery/snow/16_48.jpg',
+          '/gallery/snow/16_49.jpg',
         ],
       },
       {
@@ -214,10 +214,10 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '這些是貧農度日的主要食糧',
         },
         images: [
-          '/gallery/snow/16_25-thumb.jpg',
-          '/gallery/snow/16_26-thumb.jpg',
-          '/gallery/snow/16_27-thumb.jpg',
-          '/gallery/snow/16_28-thumb.jpg',
+          '/gallery/snow/16_25.jpg',
+          '/gallery/snow/16_26.jpg',
+          '/gallery/snow/16_27.jpg',
+          '/gallery/snow/16_28.jpg',
         ],
       },
       {
@@ -227,16 +227,16 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '連生活的基本亦嚴重缺乏，如何建立人生。善啟派發救災物資，希望盡多一些點滴溫暖給有需要的人',
         },
         images: [
-          '/gallery/snow/16_29-thumb.jpg',
-          '/gallery/snow/16_30-thumb.jpg',
-          '/gallery/snow/16_31-thumb.jpg',
-          '/gallery/snow/16_32-thumb.jpg',
-          '/gallery/snow/16_33-thumb.jpg',
-          '/gallery/snow/16_34-thumb.jpg',
-          '/gallery/snow/16_35-thumb.jpg',
-          '/gallery/snow/16_36-thumb.jpg',
-          '/gallery/snow/16_37-thumb.jpg',
-          '/gallery/snow/16_38-thumb.jpg',
+          '/gallery/snow/16_29.jpg',
+          '/gallery/snow/16_30.jpg',
+          '/gallery/snow/16_31.jpg',
+          '/gallery/snow/16_32.jpg',
+          '/gallery/snow/16_33.jpg',
+          '/gallery/snow/16_34.jpg',
+          '/gallery/snow/16_35.jpg',
+          '/gallery/snow/16_36.jpg',
+          '/gallery/snow/16_37.jpg',
+          '/gallery/snow/16_38.jpg',
         ],
       },
       {
@@ -246,9 +246,9 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '沒有知識，一輩子無法脫貧，只能寄望下一代發奮',
         },
         images: [
-          '/gallery/snow/16_39-thumb.jpg',
-          '/gallery/snow/16_40-thumb.jpg',
-          '/gallery/snow/16_41-thumb.jpg',
+          '/gallery/snow/16_39.jpg',
+          '/gallery/snow/16_40.jpg',
+          '/gallery/snow/16_41.jpg',
         ],
       },
       {
@@ -258,11 +258,11 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '再窮不能窮教育，豐富學識，方能啟發智慧人生',
         },
         images: [
-          '/gallery/snow/16_42-thumb.jpg',
-          '/gallery/snow/16_43-thumb.jpg',
-          '/gallery/snow/16_44-thumb.jpg',
-          '/gallery/snow/16_45-thumb.jpg',
-          '/gallery/snow/16_46-thumb.jpg',
+          '/gallery/snow/16_42.jpg',
+          '/gallery/snow/16_43.jpg',
+          '/gallery/snow/16_44.jpg',
+          '/gallery/snow/16_45.jpg',
+          '/gallery/snow/16_46.jpg',
         ],
       },
       {
@@ -272,21 +272,21 @@ Through your generous donations, we have built **18 Hope Schools** and sponsored
           'zh-TW': '特別鳴謝英國華僑夫婦林錦全先生、楊繼善女士及旅歐吉澳游碧蓉女士等人大力募捐資助',
         },
         images: [
-          '/gallery/snow/16_50-thumb.jpg',
-          '/gallery/snow/16_51-thumb.jpg',
-          '/gallery/snow/16_52-thumb.jpg',
-          '/gallery/snow/16_53-thumb.jpg',
-          '/gallery/snow/16_54-thumb.jpg',
-          '/gallery/snow/16_55-thumb.jpg',
-          '/gallery/snow/16_56-thumb.jpg',
-          '/gallery/snow/16_57-thumb.jpg',
-          '/gallery/snow/16_58-thumb.jpg',
-          '/gallery/snow/16_59-thumb.jpg',
-          '/gallery/snow/16_60-thumb.jpg',
-          '/gallery/snow/16_61-thumb.jpg',
-          '/gallery/snow/16_62-thumb.jpg',
-          '/gallery/snow/16_63-thumb.jpg',
-          '/gallery/snow/16_64-thumb.jpg',
+          '/gallery/snow/16_50.jpg',
+          '/gallery/snow/16_51.jpg',
+          '/gallery/snow/16_52.jpg',
+          '/gallery/snow/16_53.jpg',
+          '/gallery/snow/16_54.jpg',
+          '/gallery/snow/16_55.jpg',
+          '/gallery/snow/16_56.jpg',
+          '/gallery/snow/16_57.jpg',
+          '/gallery/snow/16_58.jpg',
+          '/gallery/snow/16_59.jpg',
+          '/gallery/snow/16_60.jpg',
+          '/gallery/snow/16_61.jpg',
+          '/gallery/snow/16_62.jpg',
+          '/gallery/snow/16_63.jpg',
+          '/gallery/snow/16_64.jpg',
         ],
       },
     ],
@@ -385,7 +385,7 @@ The photos in our gallery show both the devastation of the snowstorm and the gra
           'zh-TW': '修建前的舊校舍',
         },
         images: [
-          '/gallery/schools-old/06_osch_01-thumb.jpg','/gallery/schools-old/06_osch_02-thumb.jpg','/gallery/schools-old/06_osch_04-thumb.jpg','/gallery/schools-old/06_osch_05-thumb.jpg','/gallery/schools-old/06_osch_06-thumb.jpg','/gallery/schools-old/06_osch_07-thumb.jpg','/gallery/schools-old/06_osch_08-thumb.jpg','/gallery/schools-old/06_osch_09-thumb.jpg','/gallery/schools-old/06_osch_10-thumb.jpg','/gallery/schools-old/06_osch_12-thumb.jpg','/gallery/schools-old/06_osch_13-thumb.jpg','/gallery/schools-old/06_osch_14-thumb.jpg','/gallery/schools-old/06_osch_15-thumb.jpg','/gallery/schools-old/06_osch_16-thumb.jpg','/gallery/schools-old/06_osch_17-thumb.jpg','/gallery/schools-old/06_osch_18-thumb.jpg','/gallery/schools-old/06_osch_19-thumb.jpg','/gallery/schools-old/06_osch_20-thumb.jpg','/gallery/schools-old/06_osch_21-thumb.jpg','/gallery/schools-old/06_osch_22-thumb.jpg','/gallery/schools-old/06_osch_23-thumb.jpg','/gallery/schools-old/06_osch_24-thumb.jpg','/gallery/schools-old/06_osch_25-thumb.jpg','/gallery/schools-old/06_osch_26-thumb.jpg','/gallery/schools-old/06_osch_27-thumb.jpg','/gallery/schools-old/06_osch_28-thumb.jpg','/gallery/schools-old/06_osch_29-thumb.jpg',
+          '/gallery/schools-old/06_osch_01.jpg','/gallery/schools-old/06_osch_02.jpg','/gallery/schools-old/06_osch_04.jpg','/gallery/schools-old/06_osch_05.jpg','/gallery/schools-old/06_osch_06.jpg','/gallery/schools-old/06_osch_07.jpg','/gallery/schools-old/06_osch_08.jpg','/gallery/schools-old/06_osch_09.jpg','/gallery/schools-old/06_osch_10.jpg','/gallery/schools-old/06_osch_12.jpg','/gallery/schools-old/06_osch_13.jpg','/gallery/schools-old/06_osch_14.jpg','/gallery/schools-old/06_osch_15.jpg','/gallery/schools-old/06_osch_16.jpg','/gallery/schools-old/06_osch_17.jpg','/gallery/schools-old/06_osch_18.jpg','/gallery/schools-old/06_osch_19.jpg','/gallery/schools-old/06_osch_20.jpg','/gallery/schools-old/06_osch_21.jpg','/gallery/schools-old/06_osch_22.jpg','/gallery/schools-old/06_osch_23.jpg','/gallery/schools-old/06_osch_24.jpg','/gallery/schools-old/06_osch_25.jpg','/gallery/schools-old/06_osch_26.jpg','/gallery/schools-old/06_osch_27.jpg','/gallery/schools-old/06_osch_28.jpg','/gallery/schools-old/06_osch_29.jpg',
         ],
       },
       {
@@ -395,7 +395,7 @@ The photos in our gallery show both the devastation of the snowstorm and the gra
           'zh-TW': '修建後的新校舍',
         },
         images: [
-          '/gallery/schools-new/06_osch_32-thumb.jpg','/gallery/schools-new/06_osch_40-thumb.jpg','/gallery/schools-new/06_osch_47-thumb.jpg','/gallery/schools-new/06_osch_48-thumb.jpg','/gallery/schools-new/06_osch_52-thumb.jpg','/gallery/schools-new/06_osch_53-thumb.jpg','/gallery/schools-new/06_osch_54-thumb.jpg','/gallery/schools-new/06_osch_55-thumb.jpg','/gallery/schools-new/06_osch_56-thumb.jpg','/gallery/schools-new/06_osch_59-thumb.jpg','/gallery/schools-new/06_osch_60-thumb.jpg','/gallery/schools-new/06_osch_61-thumb.jpg','/gallery/schools-new/06_osch_63-thumb.jpg','/gallery/schools-new/06_osch_64-thumb.jpg','/gallery/schools-new/06_osch_66-thumb.jpg','/gallery/schools-new/06_osch_67-thumb.jpg','/gallery/schools-new/06_osch_68-thumb.jpg','/gallery/schools-new/06_osch_69-thumb.jpg','/gallery/schools-new/06_osch_70-thumb.jpg','/gallery/schools-new/06_osch_71-thumb.jpg','/gallery/schools-new/06_osch_72-thumb.jpg','/gallery/schools-new/06_osch_73-thumb.jpg',
+          '/gallery/schools-new/06_osch_32.jpg','/gallery/schools-new/06_osch_40.jpg','/gallery/schools-new/06_osch_47.jpg','/gallery/schools-new/06_osch_48.jpg','/gallery/schools-new/06_osch_52.jpg','/gallery/schools-new/06_osch_53.jpg','/gallery/schools-new/06_osch_54.jpg','/gallery/schools-new/06_osch_55.jpg','/gallery/schools-new/06_osch_56.jpg','/gallery/schools-new/06_osch_59.jpg','/gallery/schools-new/06_osch_60.jpg','/gallery/schools-new/06_osch_61.jpg','/gallery/schools-new/06_osch_63.jpg','/gallery/schools-new/06_osch_64.jpg','/gallery/schools-new/06_osch_66.jpg','/gallery/schools-new/06_osch_67.jpg','/gallery/schools-new/06_osch_68.jpg','/gallery/schools-new/06_osch_69.jpg','/gallery/schools-new/06_osch_70.jpg','/gallery/schools-new/06_osch_71.jpg','/gallery/schools-new/06_osch_72.jpg','/gallery/schools-new/06_osch_73.jpg',
         ],
       },
     ],
@@ -525,7 +525,7 @@ To date, **18 Hope Schools** have been completed, serving thousands of children 
   {
     slug: 'student-aid-programme',
     date: '2023-12-05',
-    coverImage: '/gallery/activities/13_05-thumb.jpg',
+    coverImage: '/gallery/activities/13_05.jpg',
     translations: {
       'en': {
         title: 'Student Dream Aid Programme: Education Changes Destiny',
@@ -673,7 +673,7 @@ Thousands of students have completed their education through this programme, man
           'zh-TW': '香港中秋慈善活動',
         },
         images: [
-          '/gallery/hk-charity/07_02-thumb.jpg','/gallery/hk-charity/07_03-thumb.jpg','/gallery/hk-charity/07_04-thumb.jpg','/gallery/hk-charity/07_05-thumb.jpg','/gallery/hk-charity/07_08-thumb.jpg','/gallery/hk-charity/07_09-thumb.jpg','/gallery/hk-charity/07_10-thumb.jpg','/gallery/hk-charity/07_11-thumb.jpg','/gallery/hk-charity/07_12-thumb.jpg','/gallery/hk-charity/07_13-thumb.jpg','/gallery/hk-charity/07_15-thumb.jpg','/gallery/hk-charity/07_2019ma1-thumb.jpg','/gallery/hk-charity/07_2019ma2-thumb.jpg','/gallery/hk-charity/07_2019ma3-thumb.jpg','/gallery/hk-charity/07_2021ma1-thumb.jpg','/gallery/hk-charity/07_2021ma2-thumb.jpg','/gallery/hk-charity/07_20-thumb.jpg','/gallery/hk-charity/07_21-thumb.jpg','/gallery/hk-charity/07_24-thumb.jpg','/gallery/hk-charity/07_27-thumb.jpg','/gallery/hk-charity/07_28-thumb.jpg','/gallery/hk-charity/07_29-thumb.jpg','/gallery/hk-charity/07_30-thumb.jpg',
+          '/gallery/hk-charity/07_02.jpg','/gallery/hk-charity/07_03.jpg','/gallery/hk-charity/07_04.jpg','/gallery/hk-charity/07_05.jpg','/gallery/hk-charity/07_08.jpg','/gallery/hk-charity/07_09.jpg','/gallery/hk-charity/07_10.jpg','/gallery/hk-charity/07_11.jpg','/gallery/hk-charity/07_12.jpg','/gallery/hk-charity/07_13.jpg','/gallery/hk-charity/07_15.jpg','/gallery/hk-charity/07_2019ma1.jpg','/gallery/hk-charity/07_2019ma2.jpg','/gallery/hk-charity/07_2019ma3.jpg','/gallery/hk-charity/07_2021ma1.jpg','/gallery/hk-charity/07_2021ma2.jpg','/gallery/hk-charity/07_20.jpg','/gallery/hk-charity/07_21.jpg','/gallery/hk-charity/07_24.jpg','/gallery/hk-charity/07_27.jpg','/gallery/hk-charity/07_28.jpg','/gallery/hk-charity/07_29.jpg','/gallery/hk-charity/07_30.jpg',
         ],
       },
     ],
@@ -782,7 +782,7 @@ The event is funded entirely through proceeds from our annual **Charity Mooncake
   {
     slug: 'charity-mooncake-sale',
     date: '2023-08-15',
-    coverImage: '/gallery/news/15_mooncake2021-thumb.jpg',
+    coverImage: '/gallery/news/15_mooncake2021.jpg',
     translations: {
       'en': {
         title: 'Charity Mooncake Sale: Sweet Treats for a Good Cause',
@@ -867,7 +867,7 @@ Contact us via phone (2735 1122) or email (info@sinkai.org) to place your order.
   {
     slug: 'emergency-aid-programme',
     date: '2023-07-10',
-    coverImage: '/gallery/activities/13_06-thumb.jpg',
+    coverImage: '/gallery/activities/13_06.jpg',
     imageGroups: [
       {
         caption: {
@@ -876,7 +876,7 @@ Contact us via phone (2735 1122) or email (info@sinkai.org) to place your order.
           'zh-TW': '救災及義工活動',
         },
         images: [
-          '/gallery/activities/13_01-thumb.jpg','/gallery/activities/13_02-thumb.jpg','/gallery/activities/13_03-thumb.jpg','/gallery/activities/13_04-thumb.jpg','/gallery/activities/13_05-thumb.jpg','/gallery/activities/13_06-thumb.jpg','/gallery/activities/13_07-thumb.jpg','/gallery/activities/13_11-thumb.jpg','/gallery/activities/13_12-thumb.jpg','/gallery/activities/13_13-thumb.jpg','/gallery/activities/13_14-thumb.jpg','/gallery/activities/13_15-thumb.jpg','/gallery/activities/13_16-thumb.jpg',
+          '/gallery/activities/13_01.jpg','/gallery/activities/13_02.jpg','/gallery/activities/13_03.jpg','/gallery/activities/13_04.jpg','/gallery/activities/13_05.jpg','/gallery/activities/13_06.jpg','/gallery/activities/13_07.jpg','/gallery/activities/13_11.jpg','/gallery/activities/13_12.jpg','/gallery/activities/13_13.jpg','/gallery/activities/13_14.jpg','/gallery/activities/13_15.jpg','/gallery/activities/13_16.jpg',
         ],
       },
     ],

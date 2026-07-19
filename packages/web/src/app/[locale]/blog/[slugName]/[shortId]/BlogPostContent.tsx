@@ -33,10 +33,6 @@ interface LexicalRoot {
   }
 }
 
-function thumbToOriginal(path: string): string {
-  return path.replace('-thumb.jpg', '.jpg');
-}
-
 export default function BlogPostContent({ post }: Props) {
   const t = useTranslations('blog');
   const currentLocale = useLocale();
@@ -391,7 +387,7 @@ export default function BlogPostContent({ post }: Props) {
             ‹
           </button>
           <Image
-            src={thumbToOriginal(lightbox.images[lightbox.index])}
+            src={lightbox.images[lightbox.index]}
             alt=""
             width={1200}
             height={800}

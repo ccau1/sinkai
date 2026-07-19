@@ -67,28 +67,6 @@ async function seed() {
         limit: 1,
       })
 
-      // Create media for cover image
-      let coverImageId: number | string | undefined
-      const coverPath = path.join(webPublicDir, post.coverImage)
-      if (fs.existsSync(coverPath)) {
-        const media = await payload.create({
-          collection: 'media',
-          data: {
-            alt: {
-              en: post.translations.en.title,
-              'zh-CN': post.translations['zh-CN'].title,
-              'zh-TW': post.translations['zh-TW'].title,
-            },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
-          filePath: coverPath,
-        })
-        coverImageId = media.id
-        console.log(`Created media for cover: ${post.coverImage}`)
-      } else {
-        console.warn(`Cover image not found: ${coverPath}`)
-      }
-
       if (existing.totalDocs > 0) {
         const existingDoc = existing.docs[0]
         const fullDoc = await payload.findByID({
@@ -110,6 +88,40 @@ async function seed() {
           id: existingDoc.id,
         })
         console.log(`Deleted corrupted blog for re-creation: ${post.slug}`)
+      }
+
+      // Create or reuse media for cover image.
+      let coverImageId: number | string | undefined
+      const coverPath = path.join(webPublicDir, post.coverImage)
+      if (fs.existsSync(coverPath)) {
+        const coverFilename = path.basename(post.coverImage)
+        const existingMedia = await payload.find({
+          collection: 'media',
+          where: { filename: { equals: coverFilename } },
+          limit: 1,
+        })
+
+        if (existingMedia.totalDocs > 0) {
+          coverImageId = existingMedia.docs[0].id
+          console.log(`Reusing existing media for cover: ${coverFilename}`)
+        } else {
+          const media = await payload.create({
+            collection: 'media',
+            data: {
+              alt: {
+                en: post.translations.en.title,
+                'zh-CN': post.translations['zh-CN'].title,
+                'zh-TW': post.translations['zh-TW'].title,
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            filePath: coverPath,
+          })
+          coverImageId = media.id
+          console.log(`Created media for cover: ${post.coverImage}`)
+        }
+      } else {
+        console.warn(`Cover image not found: ${coverPath}`)
       }
 
       // Work around a Payload/D1 serialization issue when relationships are
@@ -543,18 +555,27 @@ async function seedGallery(payload: import('payload').Payload) {
 
       if (existing.totalDocs > 0) {
         const existingDoc = existing.docs[0]
-        await payload.update({
-          collection: 'media',
-          id: existingDoc.id,
-          data: {
-            category: section.category as GalleryCategory,
-            sortOrder: i,
-            hidden: false,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
-        })
-        console.log(`Updated existing media for gallery: ${imagePath}`)
-        updated++
+        const needsUpdate =
+          existingDoc.category !== section.category ||
+          existingDoc.sortOrder !== i ||
+          existingDoc.hidden !== false
+
+        if (needsUpdate) {
+          await payload.update({
+            collection: 'media',
+            id: existingDoc.id,
+            data: {
+              category: section.category as GalleryCategory,
+              sortOrder: i,
+              hidden: false,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          })
+          console.log(`Updated existing media for gallery: ${imagePath}`)
+          updated++
+        } else {
+          skipped++
+        }
         continue
       }
 

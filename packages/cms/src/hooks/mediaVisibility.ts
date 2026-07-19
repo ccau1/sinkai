@@ -35,6 +35,10 @@ async function triggerThumbnail(payload: Payload, doc: MediaDocLike): Promise<vo
   if (!doc.filename) return
   try {
     const env = await getCfEnv()
+    if (!env.THUMBNAILS) {
+      payload.logger.warn('[mediaVisibility] THUMBNAILS binding not available; skipping thumbnail trigger.')
+      return
+    }
     await env.THUMBNAILS.fetch('https://thumbnails/trigger', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -151,6 +155,12 @@ export const deleteThumbnailAfterDelete: CollectionAfterDeleteHook = async ({ do
 
   try {
     const env = await getCfEnv()
+    if (!env.R2) {
+      req.payload.logger.warn(
+        `[mediaVisibility] R2 binding not available; skipping thumbnail delete for ${doc.filename}.`,
+      )
+      return doc
+    }
     await env.R2.delete(thumbKeyFor(doc.filename as string))
   } catch (err) {
     req.payload.logger.warn(

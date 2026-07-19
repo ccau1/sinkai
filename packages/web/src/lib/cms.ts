@@ -108,12 +108,12 @@ function requireCMSBaseUrl(): string {
   return base
 }
 
-async function cmsFetchJson(url: string): Promise<any> {
+async function cmsFetchJson<T = unknown>(url: string): Promise<T> {
   const res = await fetch(url, { next: { revalidate: 60 } })
   if (!res.ok) {
     throw new Error(`CMS fetch failed: ${res.status} ${res.statusText} for ${url}`)
   }
-  return res.json()
+  return res.json() as Promise<T>
 }
 
 function resolveMediaUrl(url: string | undefined): string | undefined {
@@ -199,10 +199,10 @@ function isValidBlogDoc(doc: CMSBlog): boolean {
 
 export async function fetchBlogs(locale: Locale): Promise<CMSBlog[]> {
   const base = requireCMSBaseUrl()
-  const data = await cmsFetchJson(
+  const data = await cmsFetchJson<{ docs: CMSBlog[] }>(
     `${base}/api/blogs?where[published][equals]=true&limit=100&sort=-date&${localeQuery(locale)}`,
   )
-  const docs = (data.docs || []) as CMSBlog[]
+  const docs = data.docs || []
   const validDocs = docs.filter(isValidBlogDoc)
   if (validDocs.length !== docs.length) {
     console.warn(
@@ -218,7 +218,7 @@ export async function fetchBlogBySlug(
   locale: Locale,
 ): Promise<CMSBlog | null> {
   const base = requireCMSBaseUrl()
-  const data = await cmsFetchJson(
+  const data = await cmsFetchJson<{ docs: CMSBlog[] }>(
     `${base}/api/blogs?where[and][0][slugName][equals]=${encodeURIComponent(slug)}&where[and][1][shortId][equals]=${encodeURIComponent(shortId)}&depth=1&${localeQuery(locale)}`,
   )
   const doc = data.docs?.[0]
@@ -230,7 +230,7 @@ export async function fetchBlogForRedirect(
   locale: Locale,
 ): Promise<{ slugName: string; shortId: string } | null> {
   const base = requireCMSBaseUrl()
-  const data = await cmsFetchJson(
+  const data = await cmsFetchJson<{ docs: Array<{ slugName: string; shortId: string }> }>(
     `${base}/api/blogs?where[slugName][equals]=${encodeURIComponent(slug)}&${localeQuery(locale)}`,
   )
   const doc = data.docs?.[0]
