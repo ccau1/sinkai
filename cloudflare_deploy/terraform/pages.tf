@@ -12,7 +12,9 @@ resource "cloudflare_pages_project" "web" {
   deployment_configs {
     production {
       environment_variables = {
-        CMS_API_URL = "https://${local.cms_domain}"
+        CMS_API_URL                            = "https://${local.cms_domain}"
+        NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS    = "true"
+        NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN = "https://${local.cms_domain}"
       }
     }
   }
@@ -38,7 +40,9 @@ resource "cloudflare_pages_project" "web_staging" {
   deployment_configs {
     production {
       environment_variables = {
-        CMS_API_URL = "https://${local.cms_staging_domain}"
+        CMS_API_URL                            = "https://${local.cms_staging_domain}"
+        NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS    = "true"
+        NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN = "https://${local.cms_staging_domain}"
       }
     }
   }

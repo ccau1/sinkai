@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import CmsImage from '@/components/CmsImage';
 import { useLocale, useTranslations } from 'next-intl';
 import type { CMSBlog } from '@/lib/cms';
 import type { Locale } from '@/i18n/config';
@@ -54,10 +54,14 @@ export default function BlogContent({ posts }: BlogContentProps) {
                         border: '1px solid var(--color-border)',
                       }}>
                       <div className="relative aspect-video overflow-hidden">
-                        <Image
+                        <CmsImage
                           src={coverUrl}
                           alt={title}
                           fill
+                          transformWidth={600}
+                          transformFit="cover"
+                          transformFormat="auto"
+                          transformQuality={85}
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>

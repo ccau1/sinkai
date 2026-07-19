@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import CmsImage from '@/components/CmsImage';
 import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
@@ -154,7 +155,7 @@ export default function BlogPostContent({ post, locale }: Props) {
           const [, alt, src] = match;
           elements.push(
             <div key={`img-${i}`} className="reveal my-6 rounded-xl overflow-hidden">
-              <Image src={src} alt={alt} width={800} height={600} className="w-full h-auto object-cover" />
+              <CmsImage src={src} alt={alt} width={800} height={600} transformWidth={800} transformFormat="auto" transformQuality={85} className="w-full h-auto object-cover" />
               {alt && <p className="text-sm text-center mt-2" style={{ color: 'var(--color-text-tertiary)' }}>{alt}</p>}
             </div>
           );
@@ -241,7 +242,7 @@ export default function BlogPostContent({ post, locale }: Props) {
         const media = node.value as CMSMedia;
         return (
           <div key={key} className="reveal my-6 rounded-xl overflow-hidden">
-            <Image src={media.url || ''} alt={getMediaAlt(media, locale as Locale)} width={800} height={600} className="w-full h-auto object-cover" />
+            <CmsImage src={media.url || ''} alt={getMediaAlt(media, locale as Locale)} width={800} height={600} transformWidth={800} transformFormat="auto" transformQuality={85} className="w-full h-auto object-cover" />
           </div>
         );
       default:
@@ -307,7 +308,7 @@ export default function BlogPostContent({ post, locale }: Props) {
     <div>
       {/* Hero */}
       <section className="relative h-[50vh] min-h-[300px]">
-        <Image src={coverUrl} alt={title} fill className="object-cover" />
+        <CmsImage src={coverUrl} alt={title} fill transformWidth={1200} transformFormat="auto" transformQuality={85} className="object-cover" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)' }} />
         <div className="absolute inset-0 flex items-end">
           <div className="container-main pb-12">

@@ -5,8 +5,11 @@ on:
     branches: [main]
     paths:
       - 'packages/web/**'
-      - 'packages/cms/src/collections/**'
       - '.github/workflows/deploy-web-cloudflare.yml'
+  workflow_run:
+    workflows: ['Deploy CMS to Cloudflare']
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -17,6 +20,7 @@ env:
 jobs:
   deploy-staging:
     name: Deploy Web to Staging
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -34,6 +38,8 @@ jobs:
       - name: Build web (staging)
         env:
           CMS_API_URL: ${{ secrets.CMS_API_URL_STAGING }}
+          NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS: true
+          NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: https://sinkai-cms.staging.tribalorigin.com
         run: npm run build -w packages/web
 
       - name: Deploy to Cloudflare Pages (staging)
@@ -45,6 +51,7 @@ jobs:
 
   promote-to-prod:
     name: Promote Web to Production
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     needs: deploy-staging
     runs-on: ubuntu-latest
     environment: production
@@ -63,6 +70,8 @@ jobs:
       - name: Build web (production)
         env:
           CMS_API_URL: ${{ secrets.CMS_API_URL_PROD }}
+          NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS: true
+          NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: https://sinkai-cms.tribalorigin.com
         run: npm run build -w packages/web
 
       - name: Deploy to Cloudflare Pages (production)

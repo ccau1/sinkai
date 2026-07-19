@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import CmsImage from '@/components/CmsImage';
 import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
@@ -68,10 +68,14 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
               >
                 {photo && (
                   <div className="relative aspect-video overflow-hidden">
-                    <Image
+                    <CmsImage
                       src={photo.url || ''}
                       alt={getMediaAlt(photo, locale as Locale)}
                       fill
+                      transformWidth={600}
+                      transformFit="cover"
+                      transformFormat="auto"
+                      transformQuality={85}
                       className="object-cover"
                     />
                   </div>
