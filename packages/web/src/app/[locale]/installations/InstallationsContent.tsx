@@ -1,12 +1,12 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import type { CMSInstallation, CMSMedia } from '@/lib/cms';
+import type { CMSInstallation } from '@/lib/cms';
 import { getInstallationTitle, getInstallationLocation, getInstallationDescription, getMediaAlt } from '@/lib/cms';
-import type { Locale } from '@/i18n/config';
+
 
 interface Props {
   schools: CMSInstallation[];
@@ -16,7 +16,6 @@ interface Props {
 
 export default function InstallationsContent({ schools, bridges, waterTanks }: Props) {
   const t = useTranslations('installations');
-  const locale = useLocale();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,9 +51,9 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => {
-            const title = getInstallationTitle(item, locale as Locale);
-            const location = getInstallationLocation(item, locale as Locale);
-            const description = getInstallationDescription(item, locale as Locale);
+            const title = getInstallationTitle(item);
+            const location = getInstallationLocation(item);
+            const description = getInstallationDescription(item);
             const photo = item.photos?.[0];
             return (
               <article
@@ -70,7 +69,7 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
                   <div className="relative aspect-video overflow-hidden">
                     <CmsImage
                       src={photo.url || ''}
-                      alt={getMediaAlt(photo, locale as Locale)}
+                      alt={getMediaAlt(photo)}
                       fill
                       transformWidth={600}
                       transformFit="cover"

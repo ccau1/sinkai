@@ -11,6 +11,8 @@ const accordionItems = [
   { id: '1', key: 'plan1' },
   { id: '2', key: 'plan2' },
   { id: '3', key: 'plan3' },
+  { id: '4', key: 'plan4' },
+  { id: '5', key: 'plan5' },
 ];
 
 export default function AboutPage() {

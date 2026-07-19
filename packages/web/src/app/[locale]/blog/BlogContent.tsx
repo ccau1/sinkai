@@ -4,7 +4,7 @@ import Link from 'next/link';
 import CmsImage from '@/components/CmsImage';
 import { useLocale, useTranslations } from 'next-intl';
 import type { CMSBlog } from '@/lib/cms';
-import type { Locale } from '@/i18n/config';
+
 import { getBlogTitle, getBlogExcerpt, getBlogSlugName } from '@/lib/cms';
 
 interface BlogContentProps {
@@ -42,9 +42,9 @@ export default function BlogContent({ posts }: BlogContentProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => {
-                const title = getBlogTitle(post, locale as Locale);
-                const excerpt = getBlogExcerpt(post, locale as Locale);
-                const slugName = getBlogSlugName(post, locale as Locale);
+                const title = getBlogTitle(post);
+                const excerpt = getBlogExcerpt(post);
+                const slugName = getBlogSlugName(post);
                 const coverUrl = post.coverImage?.url || '';
                 return (
                   <Link key={`${post.shortId}-${locale}`} href={`/${locale}/blog/${slugName}/${post.shortId}/`} className="group">

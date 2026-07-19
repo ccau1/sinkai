@@ -6,6 +6,11 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
+    description: {
+      en: 'Administrative users who can access the CMS and their assigned roles.',
+      'zh-CN': '可访问内容管理系统的管理用户及其分配的角色。',
+      'zh-TW': '可存取內容管理系統的管理用戶及其分配的角色。',
+    },
   },
   auth: true,
   access: {

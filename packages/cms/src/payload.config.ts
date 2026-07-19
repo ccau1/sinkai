@@ -7,11 +7,18 @@ import { fileURLToPath } from 'url'
 import { getCloudflareContext, type CloudflareContext } from '@opennextjs/cloudflare'
 import type { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
+import { seoPlugin } from '@payloadcms/plugin-seo'
+import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { aiLocalization } from 'payload-plugin-ai-localization'
+import { defaultLocale, payloadLocales } from './locales'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Installations } from './collections/Installations'
 import { Blogs } from './collections/Blogs'
+import { Pages } from './collections/Pages'
+import { Testimonies } from './collections/Testimonies'
+import { Navigation } from './globals/Navigation'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -56,6 +63,7 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    suppressHydrationWarning: true,
     dashboard: {
       widgets: [
         {
@@ -67,7 +75,8 @@ export default buildConfig({
       defaultLayout: [{ widgetSlug: 'collection-previews', width: 'full' }],
     },
   },
-  collections: [Users, Media, Installations, Blogs],
+  collections: [Blogs, Installations, Testimonies, Pages, Media, Users],
+  globals: [Navigation],
   graphQL: {
     disable: true,
   },
@@ -77,8 +86,15 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 
+  localization: {
+    locales: payloadLocales,
+    defaultLocale,
+    fallback: true,
+  },
   db: sqliteD1Adapter({
     binding: cloudflare.env.D1,
+    // Disable Drizzle's interactive dev schema push; rely on explicit migrations instead.
+    push: false,
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
@@ -87,6 +103,74 @@ export default buildConfig({
       bucket: cloudflare.env.R2 as any,
       collections: { media: true },
     }),
+    seoPlugin({
+      collections: ['blogs', 'installations', 'pages'],
+      uploadsCollection: 'media',
+      generateTitle: ({ doc }) => (doc as { title?: string }).title || '',
+      generateDescription: ({ doc }) =>
+        (doc as { excerpt?: string }).excerpt || '',
+      generateURL: ({ doc, collectionConfig }) => {
+        const d = doc as {
+          slugName?: string
+          shortId?: string
+          slug?: string
+        }
+        if (collectionConfig?.slug === 'blogs' && d.slugName && d.shortId) {
+          return `/blog/${d.slugName}/${d.shortId}`
+        }
+        if (collectionConfig?.slug === 'installations' && d.slug) {
+          return `/installations/${d.slug}`
+        }
+        if (collectionConfig?.slug === 'pages' && d.slug) {
+          return `/${d.slug}`
+        }
+        return ''
+      },
+      tabbedUI: true,
+    }),
+    formBuilderPlugin({
+      fields: {
+        checkbox: true,
+        country: true,
+        email: true,
+        message: true,
+        number: true,
+        payment: false,
+        select: true,
+        state: true,
+        text: true,
+        textarea: true,
+        upload: false,
+      },
+    }),
+    ...(process.env.OPENAI_API_KEY
+      ? [
+          aiLocalization({
+            openai: {
+              apiKey: process.env.OPENAI_API_KEY,
+              model: 'gpt-4.1-nano',
+            },
+            collections: {
+              blogs: {
+                fields: ['slugName', 'title', 'excerpt', 'content'],
+              },
+              installations: {
+                fields: ['title', 'location', 'description'],
+              },
+              pages: {
+                fields: ['title', 'excerpt', 'content'],
+              },
+              media: {
+                fields: ['alt'],
+              },
+              testimonies: {
+                fields: ['name', 'role', 'synopsis', 'content'],
+              },
+            },
+          }),
+        ]
+      : []),
+
   ],
 })
 

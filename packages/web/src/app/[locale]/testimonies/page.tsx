@@ -1,7 +1,8 @@
+import { Suspense } from 'react';
 import { setRequestLocale } from 'next-intl/server';
-import HomeContent from './HomeContent';
 import { fetchTestimonies } from '@/lib/cms';
 import { type Locale } from '@/i18n/config';
+import TestimoniesContent from './TestimoniesContent';
 
 export default async function Page({
   params,
@@ -11,7 +12,11 @@ export default async function Page({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const testimonies = await fetchTestimonies(locale as Locale, { highlightedOnly: true });
+  const testimonies = await fetchTestimonies(locale as Locale);
 
-  return <HomeContent testimonies={testimonies} />;
+  return (
+    <Suspense>
+      <TestimoniesContent testimonies={testimonies} />
+    </Suspense>
+  );
 }

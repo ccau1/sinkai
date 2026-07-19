@@ -1,44 +1,41 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import CmsImage from '@/components/CmsImage';
+import type { CMSGallerySection, GalleryCategory } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
-function thumbToOriginal(path: string): string {
-  return path.replace('-thumb.jpg', '.jpg');
+interface GalleryContentProps {
+  sections: CMSGallerySection[];
 }
 
-interface GallerySection {
-  id: string;
-  images: string[];
+function toCamelCase(value: string): string {
+  return value.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
-const gallerySections: GallerySection[] = [
-  { id: 'snowDisaster', images: ['16_01-thumb.jpg','16_02-thumb.jpg','16_07-thumb.jpg','16_08-thumb.jpg','16_09-thumb.jpg','16_10-thumb.jpg','16_13-thumb.jpg','16_15-thumb.jpg','16_23-thumb.jpg','16_25-thumb.jpg','16_26-thumb.jpg','16_27-thumb.jpg','16_28-thumb.jpg','16_29-thumb.jpg','16_30-thumb.jpg','16_31-thumb.jpg','16_32-thumb.jpg','16_33-thumb.jpg','16_34-thumb.jpg','16_35-thumb.jpg','16_36-thumb.jpg','16_37-thumb.jpg','16_38-thumb.jpg','16_39-thumb.jpg','16_40-thumb.jpg','16_41-thumb.jpg','16_42-thumb.jpg','16_43-thumb.jpg','16_44-thumb.jpg','16_45-thumb.jpg','16_46-thumb.jpg','16_47-thumb.jpg','16_48-thumb.jpg','16_49-thumb.jpg'] },
-  { id: 'oldSchools', images: ['06_osch_01-thumb.jpg','06_osch_02-thumb.jpg','06_osch_04-thumb.jpg','06_osch_05-thumb.jpg','06_osch_06-thumb.jpg','06_osch_07-thumb.jpg','06_osch_08-thumb.jpg','06_osch_09-thumb.jpg','06_osch_10-thumb.jpg','06_osch_12-thumb.jpg','06_osch_13-thumb.jpg','06_osch_14-thumb.jpg','06_osch_15-thumb.jpg','06_osch_16-thumb.jpg','06_osch_17-thumb.jpg','06_osch_18-thumb.jpg','06_osch_19-thumb.jpg','06_osch_20-thumb.jpg','06_osch_21-thumb.jpg','06_osch_22-thumb.jpg','06_osch_23-thumb.jpg','06_osch_24-thumb.jpg','06_osch_25-thumb.jpg','06_osch_26-thumb.jpg','06_osch_27-thumb.jpg','06_osch_28-thumb.jpg','06_osch_29-thumb.jpg'] },
-  { id: 'newSchools', images: ['06_osch_32-thumb.jpg','06_osch_40-thumb.jpg','06_osch_47-thumb.jpg','06_osch_48-thumb.jpg','06_osch_52-thumb.jpg','06_osch_53-thumb.jpg','06_osch_54-thumb.jpg','06_osch_55-thumb.jpg','06_osch_56-thumb.jpg','06_osch_59-thumb.jpg','06_osch_60-thumb.jpg','06_osch_61-thumb.jpg','06_osch_63-thumb.jpg','06_osch_64-thumb.jpg','06_osch_66-thumb.jpg','06_osch_67-thumb.jpg','06_osch_68-thumb.jpg','06_osch_69-thumb.jpg','06_osch_70-thumb.jpg','06_osch_71-thumb.jpg','06_osch_72-thumb.jpg','06_osch_73-thumb.jpg'] },
-  { id: 'fieldTrip', images: ['04_02-thumb.jpg','04_03-thumb.jpg','04_05-thumb.jpg','04_06-thumb.jpg','04_07-thumb.jpg','04_12-thumb.jpg','04_13-thumb.jpg','04_16-thumb.jpg','04_17-thumb.jpg','04_18-thumb.jpg','04_19-thumb.jpg','04_20-thumb.jpg','04_25-thumb.jpg','04_29-thumb.jpg','04_31-thumb.jpg','04_32-thumb.jpg','04_33-thumb.jpg','04_34-thumb.jpg','04_35-thumb.jpg','04_36-thumb.jpg','04_37-thumb.jpg','04_38-thumb.jpg','04_41-thumb.jpg','04_43-thumb.jpg'] },
-  { id: 'hkCharity', images: ['07_02-thumb.jpg','07_03-thumb.jpg','07_04-thumb.jpg','07_05-thumb.jpg','07_08-thumb.jpg','07_09-thumb.jpg','07_10-thumb.jpg','07_11-thumb.jpg','07_12-thumb.jpg','07_13-thumb.jpg','07_15-thumb.jpg','07_2019ma1-thumb.jpg','07_2019ma2-thumb.jpg','07_2019ma3-thumb.jpg','07_2021ma1-thumb.jpg','07_2021ma2-thumb.jpg','07_20-thumb.jpg','07_21-thumb.jpg','07_24-thumb.jpg','07_27-thumb.jpg','07_28-thumb.jpg','07_29-thumb.jpg','07_30-thumb.jpg'] },
-  { id: 'mountain', images: ['01_00-thumb.jpg','01_07-thumb.jpg','01_08-thumb.jpg','01_09-thumb.jpg','01_10-thumb.jpg','01_11-thumb.jpg','01_13-thumb.jpg','01_15-thumb.jpg','01_16-thumb.jpg','01_17-thumb.jpg','01_22-thumb.jpg','01_23-thumb.jpg','01_27-thumb.jpg','01_28-thumb.jpg','01_31-thumb.jpg','01_32-thumb.jpg','01_34-thumb.jpg','01_37-thumb.jpg','01_39-thumb.jpg','01_40-thumb.jpg','01_43-thumb.jpg','01_44-thumb.jpg','01_45-thumb.jpg','01_46-thumb.jpg','01_47-thumb.jpg','01_48-thumb.jpg','01_49-thumb.jpg','01_50-thumb.jpg'] },
-  { id: 'activities', images: ['13_01-thumb.jpg','13_02-thumb.jpg','13_03-thumb.jpg','13_04-thumb.jpg','13_05-thumb.jpg','13_06-thumb.jpg','13_07-thumb.jpg','13_11-thumb.jpg','13_12-thumb.jpg','13_13-thumb.jpg','13_14-thumb.jpg','13_15-thumb.jpg','13_16-thumb.jpg'] },
-];
+function categoryToKeys(category: GalleryCategory) {
+  const id = toCamelCase(category)
+  switch (category) {
+    case 'news':
+      return { labelKey: 'newsLabel', titleKey: 'newsTitle', descKey: 'newsDesc' as const };
+    case 'others':
+      return { labelKey: 'othersLabel' as const, titleKey: 'othersTitle' as const, descKey: undefined };
+    default:
+      return {
+        labelKey: `${id}En` as const,
+        titleKey: `${id}Title` as const,
+        descKey: `${id}Desc` as const,
+      };
+  }
+}
 
-const dirMap: Record<string, string> = {
-  snowDisaster: '/gallery/snow/',
-  oldSchools: '/gallery/schools-old/',
-  newSchools: '/gallery/schools-new/',
-  fieldTrip: '/gallery/field-trip/',
-  hkCharity: '/gallery/hk-charity/',
-  mountain: '/gallery/mountain/',
-  activities: '/gallery/activities/',
-};
-
-export default function GalleryPage() {
+export default function GalleryContent({ sections }: GalleryContentProps) {
   const t = useTranslations('gallery');
-  const [lightbox, setLightbox] = useState<{ dir: string; images: string[]; index: number } | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: CMSGallerySection['images']; index: number } | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -84,13 +81,10 @@ export default function GalleryPage() {
       </section>
 
       {/* Gallery Sections */}
-      {gallerySections.map((section, idx) => {
-        const dir = dirMap[section.id] || '/gallery/';
-        const titleKey = `${section.id}Title`;
-        const enKey = `${section.id}En`;
-        const descKey = `${section.id}Desc`;
+      {sections.map((section, idx) => {
+        const { labelKey, titleKey, descKey } = categoryToKeys(section.category);
         return (
-          <section key={section.id} className="py-12"
+          <section key={section.category} className="py-12"
             style={{
               backgroundColor: idx % 2 === 0 ? 'var(--color-bg-base)' : 'var(--color-bg-surface)',
               borderBottom: '1px solid var(--color-border)',
@@ -98,20 +92,31 @@ export default function GalleryPage() {
             <div className="container-main">
               <div className="mb-6">
                 <p className="reveal text-label mb-2" style={{ color: 'var(--color-primary-600)' }}>
-                  {t(enKey)}
+                  {t(labelKey)}
                 </p>
                 <h2 className="reveal text-title font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                   {t(titleKey)}
                 </h2>
-                <p className="reveal text-body-sm max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
-                  {t(descKey)}
-                </p>
+                {descKey && (
+                  <p className="reveal text-body-sm max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
+                    {t(descKey)}
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                {section.images.map((img, i) => (
-                  <div key={i} className="reveal aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
-                    onClick={() => setLightbox({ dir, images: section.images, index: i })}>
-                    <img src={`${dir}${img}`} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" />
+                {section.images.map((image, i) => (
+                  <div key={image.id} className="reveal aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
+                    onClick={() => setLightbox({ images: section.images, index: i })}>
+                    <CmsImage
+                      src={image.url}
+                      alt={image.alt || ''}
+                      transformWidth={400}
+                      transformFit="cover"
+                      transformFormat="auto"
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
                   </div>
                 ))}
               </div>
@@ -148,38 +153,6 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* News & Others */}
-      <section className="py-12" style={{ backgroundColor: 'var(--color-bg-base)', borderBottom: '1px solid var(--color-border)' }}>
-        <div className="container-main">
-          <p className="reveal text-label mb-2" style={{ color: 'var(--color-primary-600)' }}>{t('newsLabel')}</p>
-          <h2 className="reveal text-title font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>{t('newsTitle')}</h2>
-          <p className="reveal text-body-sm mb-6 max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>{t('newsDesc')}</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            {['15_145-thumb.jpg','15_146-thumb.jpg','15_147-thumb.jpg','15_148-thumb.jpg','15_149-thumb.jpg','15_News7-thumb.jpg','15_mooncake2018-thumb.jpg','15_mooncake2019-thumb.jpg','15_mooncake2020-thumb.jpg','15_mooncake2021-thumb.jpg'].map((img, i) => (
-              <div key={i} className="reveal aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
-                onClick={() => setLightbox({ dir: '/gallery/news/', images: ['15_145-thumb.jpg','15_146-thumb.jpg','15_147-thumb.jpg','15_148-thumb.jpg','15_149-thumb.jpg','15_News7-thumb.jpg','15_mooncake2018-thumb.jpg','15_mooncake2019-thumb.jpg','15_mooncake2020-thumb.jpg','15_mooncake2021-thumb.jpg'], index: i })}>
-                <img src={`/gallery/news/${img}`} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12" style={{ backgroundColor: 'var(--color-bg-surface)' }}>
-        <div className="container-main">
-          <p className="reveal text-label mb-2" style={{ color: 'var(--color-primary-600)' }}>{t('othersLabel')}</p>
-          <h2 className="reveal text-title font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>{t('othersTitle')}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            {['12_01-thumb.jpg','12_02a-thumb.jpg','12_02b-thumb.jpg','12_03-thumb.jpg','12_04-thumb.jpg','12_05-thumb.jpg','12_06-thumb.jpg','12_07-thumb.jpg','12_08-thumb.jpg','12_09-thumb.jpg','12_10-thumb.jpg','12_11-thumb.jpg','12_12-thumb.jpg','12_13-thumb.jpg','12_14-thumb.jpg'].map((img, i) => (
-              <div key={i} className="reveal aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
-                onClick={() => setLightbox({ dir: '/gallery/others/', images: ['12_01-thumb.jpg','12_02a-thumb.jpg','12_02b-thumb.jpg','12_03-thumb.jpg','12_04-thumb.jpg','12_05-thumb.jpg','12_06-thumb.jpg','12_07-thumb.jpg','12_08-thumb.jpg','12_09-thumb.jpg','12_10-thumb.jpg','12_11-thumb.jpg','12_12-thumb.jpg','12_13-thumb.jpg','12_14-thumb.jpg'], index: i })}>
-                <img src={`/gallery/others/${img}`} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Lightbox */}
       {lightbox && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center"
@@ -200,9 +173,16 @@ export default function GalleryPage() {
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           )}
-          <img src={`${lightbox.dir}${thumbToOriginal(lightbox.images[lightbox.index])}`} alt=""
+          <CmsImage
+            src={lightbox.images[lightbox.index].url}
+            alt={lightbox.images[lightbox.index].alt || ''}
+            transformWidth={1600}
+            transformFormat="auto"
+            width={1200}
+            height={800}
             className="max-w-[90vw] max-h-[85vh] object-contain"
-            onClick={(e) => e.stopPropagation()} />
+            onClick={(e) => e.stopPropagation()}
+          />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-xs font-medium tracking-wider">
             {lightbox.index + 1} / {lightbox.images.length}
           </div>

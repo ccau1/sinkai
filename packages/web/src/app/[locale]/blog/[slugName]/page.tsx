@@ -1,14 +1,14 @@
-import { blogPosts } from '@/data/blog';
 import { locales, type Locale } from '@/i18n/config';
-import { fetchBlogForRedirect } from '@/lib/cms';
+import { fetchBlogs, fetchBlogForRedirect } from '@/lib/cms';
 
 export const dynamic = 'force-static';
 
 export async function generateStaticParams() {
   const params: { locale: string; slugName: string }[] = [];
   for (const locale of locales) {
-    for (const post of blogPosts) {
-      params.push({ locale, slugName: post.slug });
+    const blogs = await fetchBlogs(locale as Locale);
+    for (const blog of blogs) {
+      params.push({ locale, slugName: blog.slugName });
     }
   }
   return params;

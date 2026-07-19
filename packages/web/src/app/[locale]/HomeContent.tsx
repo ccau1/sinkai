@@ -6,10 +6,16 @@ import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import CmsImage from '@/components/CmsImage';
+import type { CMSTestimony } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function HomePage() {
+interface HomeContentProps {
+  testimonies: CMSTestimony[];
+}
+
+export default function HomeContent({ testimonies }: HomeContentProps) {
   const locale = useLocale();
   const t = useTranslations('home');
   const tAbout = useTranslations('about');
@@ -17,11 +23,13 @@ export default function HomePage() {
   const storyRef = useRef<HTMLDivElement>(null);
   const impactRef = useRef<HTMLDivElement>(null);
   const workRef = useRef<HTMLDivElement>(null);
+  const testimoniesRef = useRef<HTMLDivElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
 
   const [counts, setCounts] = useState({ schools: 0, donation: 0, years: 0 });
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentTestimony, setCurrentTestimony] = useState(0);
 
   const heroSlides = [
     '/gallery/activities/13_16.jpg',
@@ -84,7 +92,7 @@ export default function HomePage() {
       // Vertical texts stay visible on scroll (same as hands)
 
       // Reveal animations for sections
-      const revealSections = [storyRef, impactRef, workRef, quoteRef, ctaRef];
+      const revealSections = [storyRef, impactRef, workRef, testimoniesRef, quoteRef, ctaRef];
       revealSections.forEach((ref) => {
         if (!ref.current) return;
         gsap.fromTo(
@@ -175,6 +183,14 @@ export default function HomePage() {
     }, 6000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
+
+  useEffect(() => {
+    if (testimonies.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentTestimony((prev) => (prev + 1) % testimonies.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [testimonies.length]);
 
   const stats = [
     { number: `${counts.schools}+`, label: t('statSchools'), desc: t('statSchoolsDesc') },
@@ -498,6 +514,106 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ============================================
+          TESTIMONIES SECTION
+          Carousel of highlighted testimonies
+          ============================================ */}
+      {testimonies.length > 0 && (
+        <section ref={testimoniesRef}
+          className="relative py-24 md:py-32 overflow-hidden"
+          style={{ backgroundColor: 'var(--color-bg-surface)' }}>
+          <div className="container-main relative z-10">
+            <div className="text-center mb-12 md:mb-16">
+              <p className="reveal text-label mb-3 tracking-widest" style={{ color: 'var(--color-primary-600)' }}>
+                {t('testimoniesLabel')}
+              </p>
+              <h2 className="reveal text-headline font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                {t('testimoniesTitle')}
+              </h2>
+            </div>
+
+            <div className="reveal max-w-4xl mx-auto">
+              <div className="relative">
+                {testimonies.map((testimony, i) => {
+                  const photo = testimony.photos?.[0];
+                  const isActive = i === currentTestimony;
+                  return (
+                    <div
+                      key={String(testimony.id)}
+                      className={`transition-all duration-500 ${isActive ? 'opacity-100 relative' : 'opacity-0 absolute inset-0 pointer-events-none'}`}
+                    >
+                      <div
+                        className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-center rounded-2xl overflow-hidden"
+                        style={{
+                          backgroundColor: 'var(--color-bg-base)',
+                          border: '1px solid var(--color-border)',
+                        }}
+                      >
+                        <div className="relative aspect-square md:aspect-[4/5]">
+                          <CmsImage
+                            src={photo?.url}
+                            alt={testimony.name}
+                            fill
+                            transformWidth={600}
+                            transformFit="cover"
+                            transformFormat="auto"
+                            transformQuality={85}
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="md:col-span-2 p-6 md:p-8 lg:p-10 text-left">
+                          <svg className="w-10 h-10 mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--color-primary-600)' }}>
+                            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                          </svg>
+                          <blockquote className="text-lg md:text-xl lg:text-2xl font-medium leading-relaxed mb-6" style={{ color: 'var(--color-text-primary)' }}>
+                            {testimony.synopsis}
+                          </blockquote>
+                          <div className="mb-6">
+                            <p className="font-semibold text-lg" style={{ color: 'var(--color-text-primary)' }}>
+                              {testimony.name}
+                            </p>
+                            {testimony.role && (
+                              <p className="text-body-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                                {testimony.role}
+                              </p>
+                            )}
+                          </div>
+                          <Link
+                            href={`/${locale}/testimonies?id=${encodeURIComponent(String(testimony.id))}`}
+                            className="inline-flex items-center gap-1 text-sm font-semibold"
+                            style={{ color: 'var(--color-primary-600)' }}
+                          >
+                            {t('testimoniesCta')} →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Dots */}
+              {testimonies.length > 1 && (
+                <div className="flex justify-center gap-2 mt-8">
+                  {testimonies.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentTestimony(i)}
+                      className="w-2.5 h-2.5 rounded-full transition-all duration-300"
+                      style={{
+                        backgroundColor: i === currentTestimony ? 'var(--color-primary-600)' : 'var(--color-border)',
+                        transform: i === currentTestimony ? 'scale(1.2)' : 'scale(1)',
+                      }}
+                      aria-label={`Go to testimony ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ============================================
           QUOTE / TESTIMONIAL SECTION

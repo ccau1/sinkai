@@ -3,18 +3,17 @@
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 
-export default function Footer() {
+interface FooterProps {
+  dynamicNavLinks?: { label: string; href: string }[];
+}
+
+export default function Footer({ dynamicNavLinks = [] }: FooterProps) {
   const locale = useLocale();
   const t = useTranslations();
 
   const links = [
     { href: '/', label: t('nav.home') },
-    { href: '/about', label: t('nav.about') },
-    { href: '/installations', label: t('nav.installations') },
-    { href: '/blog', label: t('nav.blog') },
-    { href: '/gallery', label: t('nav.gallery') },
-    { href: '/donate', label: t('nav.donate') },
-    { href: '/contact', label: t('nav.contact') },
+    ...dynamicNavLinks,
   ];
 
   return (

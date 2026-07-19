@@ -1,40 +1,20 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig } from 'payload'
 import {
   isAdmin,
   isInstallationEditor,
   publishedOrAuthenticated,
 } from '../util/access'
-import { createLocaleTabs, type LocaleSuffix } from '../util/localeTabs'
-
-function buildInstallationLocaleFields(suffix: LocaleSuffix, label: string): Field[] {
-  const isEnglish = suffix === 'En'
-
-  return [
-    {
-      name: `title${suffix}`,
-      type: 'text',
-      label: isEnglish ? 'Title' : label === '简体中文' ? '标题' : '標題',
-      required: true,
-    },
-    {
-      name: `location${suffix}`,
-      type: 'text',
-      label: isEnglish ? 'Location' : label === '简体中文' ? '地点' : '地點',
-      required: true,
-    },
-    {
-      name: `description${suffix}`,
-      type: 'richText',
-      label: isEnglish ? 'Description' : '描述',
-    },
-  ]
-}
 
 export const Installations: CollectionConfig = {
   slug: 'installations',
   admin: {
-    useAsTitle: 'titleEn',
-    defaultColumns: ['titleEn', 'type', 'locationEn', 'completionDate', 'updatedAt'],
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'type', 'location', 'completionDate', 'updatedAt'],
+    description: {
+      en: 'Infrastructure and equipment built or donated by the charity, such as schools, bridges, roads and water tanks. This collection shows the physical contributions made to communities.',
+      'zh-CN': '慈善机构建造或捐赠的基础设施与设备，例如学校、桥梁、道路和水塔。此集合展示了为社区提供的实物贡献。',
+      'zh-TW': '慈善機構建造或捐贈的基礎設施與設備，例如學校、橋樑、道路和水塔。此集合展示了為社區提供的實物貢獻。',
+    },
   },
   access: {
     read: publishedOrAuthenticated,
@@ -44,9 +24,26 @@ export const Installations: CollectionConfig = {
     admin: ({ req }) => Boolean(req.user),
   },
   fields: [
-    createLocaleTabs(buildInstallationLocaleFields, {
-      copyFromEnglish: ['title', 'location', 'description'],
-    }),
+    {
+      name: 'title',
+      type: 'text',
+      label: 'Title',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'location',
+      type: 'text',
+      label: 'Location',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'description',
+      type: 'richText',
+      label: 'Description',
+      localized: true,
+    },
     {
       name: 'slug',
       type: 'text',
@@ -72,9 +69,10 @@ export const Installations: CollectionConfig = {
     },
     {
       name: 'photos',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       hasMany: true,
+      displayPreview: true,
     },
     {
       name: 'published',

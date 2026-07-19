@@ -9,7 +9,9 @@ export async function generateStaticParams() {
   for (const locale of locales) {
     const posts = await fetchBlogs(locale as Locale);
     for (const post of posts) {
-      params.push({ locale, slugName: getBlogSlugName(post, locale as Locale), shortId: post.shortId });
+      const slugName = getBlogSlugName(post);
+      if (!slugName || !post.shortId) continue;
+      params.push({ locale, slugName, shortId: post.shortId });
     }
   }
   return params;
@@ -26,5 +28,5 @@ export default async function BlogPostPage({
   const post = await fetchBlogBySlug(slugName, shortId, locale as Locale);
   if (!post) notFound();
 
-  return <BlogPostContent post={post} locale={locale} />;
+  return <BlogPostContent post={post} />;
 }

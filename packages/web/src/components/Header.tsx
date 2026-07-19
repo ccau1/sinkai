@@ -7,7 +7,11 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from './ThemeProvider';
 import { locales, localeLabels, type Locale } from '@/i18n/config';
 
-export default function Header() {
+interface HeaderProps {
+  dynamicNavLinks?: { label: string; href: string }[];
+}
+
+export default function Header({ dynamicNavLinks = [] }: HeaderProps) {
   const t = useTranslations('nav');
   const locale = useLocale();
   const pathname = usePathname();
@@ -30,12 +34,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: t('home') },
-    { href: '/about', label: t('about') },
-    { href: '/installations', label: t('installations') },
-    { href: '/blog', label: t('blog') },
-    { href: '/gallery', label: t('gallery') },
-    { href: '/donate', label: t('donate') },
-    { href: '/contact', label: t('contact') },
+    ...dynamicNavLinks,
   ];
 
   const isActive = (href: string) => {

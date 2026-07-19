@@ -1,4 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
+import { fetchPageBySlug } from '@/lib/cms';
+import { type Locale } from '@/i18n/config';
+import CMSPageContent from '@/components/CMSPageContent';
 import ContactContent from './ContactContent';
 
 export default async function Page({
@@ -8,5 +11,11 @@ export default async function Page({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const page = await fetchPageBySlug('contact', locale as Locale);
+  if (page) {
+    return <CMSPageContent page={page} />;
+  }
+
   return <ContactContent />;
 }

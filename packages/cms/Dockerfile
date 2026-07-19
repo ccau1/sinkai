@@ -16,5 +16,5 @@ EXPOSE 3001
 
 ENV NODE_ENV=development
 
-# Seed the local D1 database on first start, then run the Payload/Next dev server.
-CMD ["sh", "-c", "npm run seed -w packages/cms && npm run dev -w packages/cms"]
+# Run pending migrations, seed the local D1 database on first start, then run the Payload/Next dev server.
+CMD ["sh", "-c", "npm run migrate -w packages/cms && npm run seed -w packages/cms && npm run dev -w packages/cms"]

@@ -1,4 +1,4 @@
-type Locale = 'en' | 'zh-CN' | 'zh-TW';
+import type { Locale } from '../locales'
 
 export interface BlogPostImageGroup {
   caption: Record<Locale, string>;

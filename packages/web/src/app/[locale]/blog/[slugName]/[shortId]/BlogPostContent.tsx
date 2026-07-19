@@ -8,11 +8,10 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import type { CMSBlog, CMSMedia } from '@/lib/cms';
 import { getBlogTitle, getBlogExcerpt, getBlogContent, getInstallationTitle, getMediaAlt } from '@/lib/cms';
-import type { Locale } from '@/i18n/config';
+
 
 interface Props {
   post: CMSBlog;
-  locale: string;
 }
 
 interface LexicalNode {
@@ -38,15 +37,15 @@ function thumbToOriginal(path: string): string {
   return path.replace('-thumb.jpg', '.jpg');
 }
 
-export default function BlogPostContent({ post, locale }: Props) {
+export default function BlogPostContent({ post }: Props) {
   const t = useTranslations('blog');
   const currentLocale = useLocale();
   const contentRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
-  const title = getBlogTitle(post, locale as Locale);
-  const excerpt = getBlogExcerpt(post, locale as Locale);
-  const content = getBlogContent(post, locale as Locale);
+  const title = getBlogTitle(post);
+  const excerpt = getBlogExcerpt(post);
+  const content = getBlogContent(post);
   const coverUrl = post.coverImage?.url || '';
 
   useEffect(() => {
@@ -242,7 +241,7 @@ export default function BlogPostContent({ post, locale }: Props) {
         const media = node.value as CMSMedia;
         return (
           <div key={key} className="reveal my-6 rounded-xl overflow-hidden">
-            <CmsImage src={media.url || ''} alt={getMediaAlt(media, locale as Locale)} width={800} height={600} transformWidth={800} transformFormat="auto" transformQuality={85} className="w-full h-auto object-cover" />
+            <CmsImage src={media.url || ''} alt={getMediaAlt(media)} width={800} height={600} transformWidth={800} transformFormat="auto" transformQuality={85} className="w-full h-auto object-cover" />
           </div>
         );
       default:
@@ -346,7 +345,7 @@ export default function BlogPostContent({ post, locale }: Props) {
                         className="px-3 py-1 rounded-full text-sm"
                         style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
                       >
-                        {getInstallationTitle(inst, locale as Locale)}
+                        {getInstallationTitle(inst)}
                       </Link>
                     ))}
                   </div>

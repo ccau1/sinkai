@@ -38,6 +38,11 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
   const { admin: adminRoute } = payload.config.routes
 
   const collections = payload.config.collections.filter((collection) => {
+    // Skip hidden/internal collections (e.g. Payload migrations, preferences, locked docs).
+    if (collection.admin?.hidden) {
+      return false
+    }
+
     // Only show collections the current user is allowed to read in the admin panel.
     const collectionPerms = permissions?.collections?.[collection.slug]
     return Boolean(collectionPerms?.read)
@@ -104,7 +109,21 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
                   className="collection-previews__card-create"
                   href={preview.createHref}
                 >
-                  +
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    height="12"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    width="12"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line x1="12" x2="12" y1="5" y2="19" />
+                    <line x1="5" x2="19" y1="12" y2="12" />
+                  </svg>
                 </a>
               )}
             </div>
