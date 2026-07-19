@@ -95,6 +95,7 @@ export interface Config {
   globalsSelect: {};
   locale: null;
   widgets: {
+    'collection-previews': CollectionPreviewsWidget;
     collections: CollectionsWidget;
   };
   user: User;
@@ -553,6 +554,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-previews_widget".
+ */
+export interface CollectionPreviewsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

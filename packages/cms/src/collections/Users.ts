@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { isAdmin } from '../util/access'
+import { isAdmin, userIsAdmin } from '../util/access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -13,7 +13,7 @@ export const Users: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
-    admin: ({ req }) => Boolean(req.user),
+    admin: ({ req: { user } }) => userIsAdmin(user),
   },
   fields: [
     {

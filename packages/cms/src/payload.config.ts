@@ -56,6 +56,16 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    dashboard: {
+      widgets: [
+        {
+          slug: 'collection-previews',
+          Component: './components/Dashboard/CollectionPreviews#default',
+          minWidth: 'full',
+        },
+      ],
+      defaultLayout: [{ widgetSlug: 'collection-previews', width: 'full' }],
+    },
   },
   collections: [Users, Media, Installations, Blogs],
   graphQL: {
