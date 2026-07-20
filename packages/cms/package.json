@@ -54,6 +54,7 @@
     "dotenv": "^16.4.7",
     "graphql": "^16.8.1",
     "image-size": "^2.0.2",
+    "json5": "^2.2.3",
     "next": "16.2.6",
     "payload": "^3.86.0",
     "payload-plugin-ai-localization": "^1.0.3",

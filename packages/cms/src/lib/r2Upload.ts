@@ -8,15 +8,13 @@
 
 import fs from 'fs'
 import path from 'path'
+import JSON5 from 'json5'
 
 function getWranglerJsonc(): unknown {
   const filename = path.resolve(process.cwd(), 'wrangler.jsonc')
   const raw = fs.readFileSync(filename, 'utf-8')
-  // Strip single-line and block comments so the file can be parsed as JSON.
-  const stripped = raw
-    .replace(/\/\/.*$/gm, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-  return JSON.parse(stripped)
+  // wrangler.jsonc is JSON5 (comments, trailing commas).
+  return JSON5.parse(raw)
 }
 
 function getBucketNameFromWrangler(): string {
