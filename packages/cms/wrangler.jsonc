@@ -41,6 +41,7 @@
     "RESEND_FROM_EMAIL": "contact@sinkai.org",
     "CONTACT_EMAIL_TO": "calvin@tribalorigin.com",
     "MEDIA_PUBLIC_URL": "https://sinkai-cms-media.staging.tribalorigin.com",
+    "WEB_APP_URL": "https://sinkai.staging.tribalorigin.com",
   },
   "env": {
     "production": {
@@ -75,6 +76,7 @@
         "RESEND_FROM_EMAIL": "contact@sinkai.org",
         "CONTACT_EMAIL_TO": "calvin@tribalorigin.com",
         "MEDIA_PUBLIC_URL": "https://sinkai-cms-media.tribalorigin.com",
+        "WEB_APP_URL": "https://sinkai.tribalorigin.com",
       },
     },
   },

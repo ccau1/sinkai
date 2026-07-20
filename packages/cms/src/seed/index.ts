@@ -7,7 +7,7 @@ import { imageSize } from 'image-size'
 import { blogPosts } from './blog-data'
 import { testimonies } from './testimonies-data'
 import { installations } from './installations-data'
-import { gallerySections, type GalleryCategory } from './gallery-data'
+import { galleryCategories, type GalleryCategorySeed } from './gallery-data'
 import { generateShortId } from '../util/shortId'
 import { locales, type Locale } from '../locales'
 import { r2ObjectExists, r2UploadFile, getMimeType } from '../lib/r2Upload'
@@ -333,6 +333,7 @@ async function seed() {
   await seedTestimonies(payload)
   await seedInstallations(payload)
   await seedGallery(payload)
+  await seedForms(payload)
 
   console.log(`\nBlog seed complete: ${created} created, ${updated} updated`)
   process.exit(0)
@@ -706,12 +707,89 @@ async function seedInstallations(payload: import('payload').Payload) {
   console.log(`Installations seed complete: ${created} created, ${updated} updated, ${skipped} skipped`)
 }
 
+async function findOrCreateGalleryCategory(
+  payload: import('payload').Payload,
+  category: GalleryCategorySeed,
+): Promise<number | string> {
+  const existing = await payload.find({
+    collection: 'gallery-categories',
+    where: { slug: { equals: category.slug } },
+    limit: 1,
+  })
+
+  const data = {
+    slug: category.slug,
+    label: category.label['zh-TW'],
+    title: category.title['zh-TW'],
+    description: category.description?.['zh-TW'] || '',
+    sortOrder: category.sortOrder,
+    showInGallery: category.showInGallery,
+  }
+
+  if (existing.totalDocs > 0) {
+    const doc = existing.docs[0]
+    await payload.update({
+      collection: 'gallery-categories',
+      id: doc.id,
+      locale: 'zh-TW',
+      data,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+
+    for (const locale of ['en', 'zh-CN'] as const) {
+      await payload.update({
+        collection: 'gallery-categories',
+        id: doc.id,
+        locale,
+        data: {
+          label: category.label[locale],
+          title: category.title[locale],
+          description: category.description?.[locale] || '',
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
+    }
+
+    return doc.id
+  }
+
+  const created = await payload.create({
+    collection: 'gallery-categories',
+    locale: 'zh-TW',
+    data,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any)
+
+  for (const locale of ['en', 'zh-CN'] as const) {
+    await payload.update({
+      collection: 'gallery-categories',
+      id: created.id,
+      locale,
+      data: {
+        label: category.label[locale],
+        title: category.title[locale],
+        description: category.description?.[locale] || '',
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+  }
+
+  return created.id
+}
+
 async function seedGallery(payload: import('payload').Payload) {
   let created = 0
   let updated = 0
   let skipped = 0
 
-  for (const section of gallerySections) {
+  // Ensure categories exist and collect their IDs.
+  const categoryIdsBySlug: Record<string, number | string> = {}
+  for (const category of galleryCategories) {
+    categoryIdsBySlug[category.slug] = await findOrCreateGalleryCategory(payload, category)
+  }
+
+  for (const section of galleryCategories) {
+    const categoryId = categoryIdsBySlug[section.slug]
     for (let i = 0; i < section.images.length; i++) {
       const imagePath = section.images[i]
       const fullPath = path.join(webPublicDir, imagePath)
@@ -726,12 +804,12 @@ async function seedGallery(payload: import('payload').Payload) {
         payload,
         fullPath,
         {
-          en: `Gallery image: ${section.category}`,
-          'zh-CN': `图库图片：${section.category}`,
-          'zh-TW': `圖庫圖片：${section.category}`,
+          en: `Gallery image: ${section.slug}`,
+          'zh-CN': `图库图片：${section.slug}`,
+          'zh-TW': `圖庫圖片：${section.slug}`,
         },
         {
-          category: section.category as GalleryCategory,
+          category: categoryId,
           sortOrder: i,
           hidden: false,
         },
@@ -742,8 +820,12 @@ async function seedGallery(payload: import('payload').Payload) {
           collection: 'media',
           id: media.id,
         })
+        const existingCategoryId =
+          existingDoc.category && typeof existingDoc.category === 'object'
+            ? existingDoc.category.id
+            : existingDoc.category
         const needsUpdate =
-          existingDoc.category !== section.category ||
+          existingCategoryId !== categoryId ||
           existingDoc.sortOrder !== i ||
           existingDoc.hidden !== false
 
@@ -752,7 +834,7 @@ async function seedGallery(payload: import('payload').Payload) {
             collection: 'media',
             id: media.id,
             data: {
-              category: section.category as GalleryCategory,
+              category: categoryId,
               sortOrder: i,
               hidden: false,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -771,6 +853,133 @@ async function seedGallery(payload: import('payload').Payload) {
   }
 
   console.log(`Gallery seed complete: ${created} created, ${updated} updated, ${skipped} skipped`)
+}
+
+async function seedForms(payload: import('payload').Payload) {
+  const existing = await payload.find({
+    collection: 'forms',
+    where: { title: { equals: 'Contact' } },
+    limit: 1,
+    overrideAccess: true,
+  })
+
+  if (existing.totalDocs > 0) {
+    console.log('Contact form already exists; skipping form seed.')
+    return
+  }
+
+  const confirmationMessage = (text: string) => ({
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text }],
+        },
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  })
+
+  const formFields = (
+    name: string,
+    email: string,
+    phone: string,
+    subject: string,
+    message: string,
+  ) => [
+    { blockType: 'text', name: 'name', label: name, required: true },
+    { blockType: 'email', name: 'email', label: email, required: true },
+    { blockType: 'text', name: 'phone', label: phone, required: false },
+    { blockType: 'text', name: 'subject', label: subject, required: true },
+    { blockType: 'textarea', name: 'message', label: message, required: true },
+  ]
+
+  const translations: Record<
+    Locale,
+    {
+      name: string
+      email: string
+      phone: string
+      subject: string
+      message: string
+      submit: string
+      success: string
+    }
+  > = {
+    en: {
+      name: 'Name',
+      email: 'Email',
+      phone: 'Phone (optional)',
+      subject: 'Subject',
+      message: 'Message',
+      submit: 'Send Message',
+      success: 'Thank you for your message. We will get back to you soon.',
+    },
+    'zh-CN': {
+      name: '姓名',
+      email: '电邮',
+      phone: '电话（可选）',
+      subject: '主旨',
+      message: '讯息',
+      submit: '发送讯息',
+      success: '感谢您的讯息，我们会尽快回复您。',
+    },
+    'zh-TW': {
+      name: '姓名',
+      email: '電郵',
+      phone: '電話（可選）',
+      subject: '主旨',
+      message: '訊息',
+      submit: '發送訊息',
+      success: '感謝您的訊息，我們會盡快回覆您。',
+    },
+  }
+
+  const created = await payload.create({
+    collection: 'forms',
+    locale: defaultLocale,
+    data: {
+      title: 'Contact',
+      submitButtonLabel: translations[defaultLocale].submit,
+      confirmationType: 'message',
+      confirmationMessage: confirmationMessage(translations[defaultLocale].success),
+      fields: formFields(
+        translations[defaultLocale].name,
+        translations[defaultLocale].email,
+        translations[defaultLocale].phone,
+        translations[defaultLocale].subject,
+        translations[defaultLocale].message,
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
+    overrideAccess: true,
+  })
+
+  for (const locale of locales.filter((l) => l !== defaultLocale)) {
+    await payload.update({
+      collection: 'forms',
+      id: created.id,
+      locale,
+      data: {
+        submitButtonLabel: translations[locale].submit,
+        confirmationMessage: confirmationMessage(translations[locale].success),
+        fields: formFields(
+          translations[locale].name,
+          translations[locale].email,
+          translations[locale].phone,
+          translations[locale].subject,
+          translations[locale].message,
+        ),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+    })
+  }
+
+  console.log('Created default Contact form')
 }
 
 seed().catch((err) => {

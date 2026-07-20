@@ -70,8 +70,10 @@ export interface Config {
     blogs: Blog;
     installations: Installation;
     testimonies: Testimony;
+    donations: Donation;
     pages: Page;
     media: Media;
+    'gallery-categories': GalleryCategory;
     users: User;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -85,8 +87,10 @@ export interface Config {
     blogs: BlogsSelect<false> | BlogsSelect<true>;
     installations: InstallationsSelect<false> | InstallationsSelect<true>;
     testimonies: TestimoniesSelect<false> | TestimoniesSelect<true>;
+    donations: DonationsSelect<false> | DonationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'gallery-categories': GalleryCategoriesSelect<false> | GalleryCategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -213,20 +217,11 @@ export interface Media {
   /**
    * Used to group images on the gallery page.
    */
-  category?:
-    | (
-        | 'snow-disaster'
-        | 'old-schools'
-        | 'new-schools'
-        | 'field-trip'
-        | 'hk-charity'
-        | 'mountain'
-        | 'activities'
-        | 'news'
-        | 'others'
-        | 'general'
-      )
-    | null;
+  category?: (number | null) | GalleryCategory;
+  /**
+   * Optional tags for future filtering and grouping.
+   */
+  tags?: string[] | null;
   /**
    * Position within the gallery category. Lower numbers appear first.
    */
@@ -249,6 +244,38 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+}
+/**
+ * Categories used to group images on the public gallery page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-categories".
+ */
+export interface GalleryCategory {
+  id: number;
+  /**
+   * Stable identifier used in code, e.g. snow-disaster.
+   */
+  slug: string;
+  /**
+   * Small uppercase eyebrow text above the section title.
+   */
+  label: string;
+  title: string;
+  /**
+   * Optional paragraph shown under the section title.
+   */
+  description?: string | null;
+  /**
+   * Position of this section on the gallery page. Lower numbers appear first.
+   */
+  sortOrder?: number | null;
+  /**
+   * Uncheck to hide this category from the public gallery page.
+   */
+  showInGallery?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Infrastructure and equipment built or donated by the charity, such as schools, bridges, roads and water tanks. This collection shows the physical contributions made to communities.
@@ -335,6 +362,47 @@ export interface Testimony {
     [k: string]: unknown;
   } | null;
   published?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Track donations received by the charity, including donor details, amount, transfer date and the installations they support.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "donations".
+ */
+export interface Donation {
+  id: number;
+  name: string;
+  /**
+   * Email address for donation receipt and follow-up.
+   */
+  email?: string | null;
+  phone?: string | null;
+  /**
+   * Donation amount in the selected currency.
+   */
+  amount: number;
+  currency: 'HKD' | 'USD' | 'CNY' | 'TWD' | 'EUR' | 'GBP';
+  transferDate: string;
+  paymentMethod?: ('bank-transfer' | 'fps' | 'payme' | 'cheque' | 'cash' | 'other') | null;
+  /**
+   * Installations that this donation supports.
+   */
+  installations?: (number | Installation)[] | null;
+  /**
+   * Optional note or dedication from the donor.
+   */
+  message?: string | null;
+  /**
+   * Staff-only notes about this donation (not shown to the donor).
+   */
+  notes?: string | null;
+  status: 'confirmed' | 'pending' | 'refunded' | 'cancelled';
+  /**
+   * Whether a donation receipt has been sent to the donor.
+   */
+  receiptSent?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -583,6 +651,10 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Copy the link for the locale you need and send it to end users.
+   */
+  shareableLinks?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -640,12 +712,20 @@ export interface PayloadLockedDocument {
         value: number | Testimony;
       } | null)
     | ({
+        relationTo: 'donations';
+        value: number | Donation;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: number | Page;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'gallery-categories';
+        value: number | GalleryCategory;
       } | null)
     | ({
         relationTo: 'users';
@@ -766,6 +846,26 @@ export interface TestimoniesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "donations_select".
+ */
+export interface DonationsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  amount?: T;
+  currency?: T;
+  transferDate?: T;
+  paymentMethod?: T;
+  installations?: T;
+  message?: T;
+  notes?: T;
+  status?: T;
+  receiptSent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
@@ -793,6 +893,7 @@ export interface PagesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   category?: T;
+  tags?: T;
   sortOrder?: T;
   hidden?: T;
   visibility?: T;
@@ -806,6 +907,20 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery-categories_select".
+ */
+export interface GalleryCategoriesSelect<T extends boolean = true> {
+  slug?: T;
+  label?: T;
+  title?: T;
+  description?: T;
+  sortOrder?: T;
+  showInGallery?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -971,6 +1086,7 @@ export interface FormsSelect<T extends boolean = true> {
         message?: T;
         id?: T;
       };
+  shareableLinks?: T;
   updatedAt?: T;
   createdAt?: T;
 }

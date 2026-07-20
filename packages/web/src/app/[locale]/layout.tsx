@@ -29,6 +29,7 @@ async function getFallbackNavigation(locale: Locale): Promise<CMSNavigation> {
       { label: t('about'), linkType: 'fixed', path: '/about', visible: true },
       { label: t('testimonies'), linkType: 'fixed', path: '/testimonies', visible: true },
       { label: t('installations'), linkType: 'fixed', path: '/installations', visible: true },
+      { label: t('forms'), linkType: 'fixed', path: '/forms', visible: true },
       { label: t('blog'), linkType: 'fixed', path: '/blog', visible: true },
       { label: t('gallery'), linkType: 'fixed', path: '/gallery', visible: true },
       { label: t('donate'), linkType: 'fixed', path: '/donate', visible: true },

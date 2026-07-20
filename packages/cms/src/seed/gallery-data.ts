@@ -1,27 +1,40 @@
-export type GalleryCategory =
-  | 'snow-disaster'
-  | 'old-schools'
-  | 'new-schools'
-  | 'field-trip'
-  | 'hk-charity'
-  | 'mountain'
-  | 'activities'
-  | 'news'
-  | 'others'
+import type { Locale } from '../locales'
 
-export interface GallerySection {
-  category: GalleryCategory
+export interface GalleryCategorySeed {
+  slug: string
+  label: Record<Locale, string>
+  title: Record<Locale, string>
+  description?: Record<Locale, string>
+  sortOrder: number
+  showInGallery: boolean
   images: string[] // full-size paths in packages/web/public
 }
 
 /**
- * Full-size image paths for each gallery section, in the same order as
- * GalleryContent.tsx. These are uploaded to the CMS media collection and
- * tagged with the corresponding category.
+ * Gallery categories and their images. Categories are rendered on the public
+ * gallery page ordered by sortOrder. Text is seeded into the CMS so editors can
+ * manage categories and their localized headings without code changes.
  */
-export const gallerySections: GallerySection[] = [
+export const galleryCategories: GalleryCategorySeed[] = [
   {
-    category: 'snow-disaster',
+    slug: 'snow-disaster',
+    label: {
+      en: 'SNOW DISASTER RELIEF',
+      'zh-CN': 'SNOW DISASTER RELIEF',
+      'zh-TW': 'SNOW DISASTER RELIEF',
+    },
+    title: {
+      en: 'Snow Disaster Relief',
+      'zh-CN': '雪灾苦寒考察实况',
+      'zh-TW': '雪災苦寒考察實況',
+    },
+    description: {
+      en: 'In 2008, severe snowstorms devastated Guizhou Province. Sin Kai quickly organised relief efforts, distributing over a thousand bags of rice and two thousand quilts to 2,300+ extreme hardship households.',
+      'zh-CN': '2008年极严峻的雪灾风暴笼罩整个贵州省，善启迅速组织救援，派发过千包大米及二千多张棉被给2,300多个特困户。这些照片记录了灾后的凄凉景象与我们的救援行动。',
+      'zh-TW': '2008年極嚴峻的雪災風暴籠罩整個貴州省，善啓迅速組織救援，派發過千包大米及二千多張棉被給2,300多個特困戶。這些照片記錄了災後的淒涼景象與我們的救援行動。',
+    },
+    sortOrder: 10,
+    showInGallery: true,
     images: [
       '/gallery/snow/16_01.jpg',
       '/gallery/snow/16_02.jpg',
@@ -60,7 +73,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'old-schools',
+    slug: 'old-schools',
+    label: {
+      en: 'OLD SCHOOL BUILDINGS',
+      'zh-CN': 'OLD SCHOOL BUILDINGS',
+      'zh-TW': 'OLD SCHOOL BUILDINGS',
+    },
+    title: {
+      en: 'Old School Buildings',
+      'zh-CN': '旧校舍面貌',
+      'zh-TW': '舊校舍面貌',
+    },
+    description: {
+      en: "These are the real conditions of schools in Guizhou's mountainous areas before Sin Kai's aid — mud-built dangerous structures, broken roofs, dim classrooms, yet the only place where countless children could access knowledge.",
+      'zh-CN': '这些是善启援助前贵州山区的校舍真实面貌。泥沙建造的危楼、破烂的屋顶、昏暗的课室，却是无数孩子唯一获取知识的地方。',
+      'zh-TW': '這些是善啓援助前貴州山區的校舍真實面貌。泥沙建造的危樓、破爛的屋頂、昏暗的課室，卻是無數孩子唯一獲取知識的地方。',
+    },
+    sortOrder: 20,
+    showInGallery: true,
     images: [
       '/gallery/schools-old/06_osch_01.jpg',
       '/gallery/schools-old/06_osch_02.jpg',
@@ -92,7 +122,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'new-schools',
+    slug: 'new-schools',
+    label: {
+      en: 'NEW SCHOOL BUILDINGS',
+      'zh-CN': 'NEW SCHOOL BUILDINGS',
+      'zh-TW': 'NEW SCHOOL BUILDINGS',
+    },
+    title: {
+      en: 'New School Buildings',
+      'zh-CN': '新校舍面貌',
+      'zh-TW': '新校舍面貌',
+    },
+    description: {
+      en: "Through Sin Kai and generous donors' efforts, new Hope Primary Schools have been built in Guizhou's mountainous areas. Children finally have safe, bright learning environments.",
+      'zh-CN': '经过善启及各方善长的努力，一所所崭新的希望小学在贵州山区落成。孩子们终于有了安全、明亮的学习环境。',
+      'zh-TW': '經過善啓及各方善長的努力，一所所嶄新的希望小學在貴州山區落成。孩子們終於有了安全、明亮的學習環境。',
+    },
+    sortOrder: 30,
+    showInGallery: true,
     images: [
       '/gallery/schools-new/06_osch_32.jpg',
       '/gallery/schools-new/06_osch_40.jpg',
@@ -119,7 +166,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'field-trip',
+    slug: 'field-trip',
+    label: {
+      en: 'FIELD TRIP HIGHLIGHTS',
+      'zh-CN': 'FIELD TRIP HIGHLIGHTS',
+      'zh-TW': 'FIELD TRIP HIGHLIGHTS',
+    },
+    title: {
+      en: 'Field Trip Highlights',
+      'zh-CN': '实地考察剪影',
+      'zh-TW': '實地考察剪影',
+    },
+    description: {
+      en: "Sin Kai volunteers visit Guizhou's impoverished mountainous areas multiple times each year, personally understanding villagers' needs, recording impoverished students' information, and monitoring school construction progress.",
+      'zh-CN': '善启义工每年多次深入贵州贫困山区实地考察，亲身了解当地村民的需要，记录贫困学童的资料，监督建校工程进度。',
+      'zh-TW': '善啓義工每年多次深入貴州貧困山區實地考察，親身瞭解當地村民的需要，記錄貧困學童的資料，監督建校工程進度。',
+    },
+    sortOrder: 40,
+    showInGallery: true,
     images: [
       '/gallery/field-trip/04_02.jpg',
       '/gallery/field-trip/04_03.jpg',
@@ -148,7 +212,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'hk-charity',
+    slug: 'hk-charity',
+    label: {
+      en: 'CHARITY IN HONG KONG',
+      'zh-CN': 'CHARITY IN HONG KONG',
+      'zh-TW': 'CHARITY IN HONG KONG',
+    },
+    title: {
+      en: 'Charity in Hong Kong',
+      'zh-CN': '在港慈善活动',
+      'zh-TW': '在港慈善活動',
+    },
+    description: {
+      en: "Each year before the Mid-Autumn Festival, Sin Kai organises the 'Mid-Autumn Love for the Elderly' event in multiple Hong Kong housing estates, distributing festival mooncakes, fruit and daily necessities to elderly residents living alone.",
+      'zh-CN': '每年中秋节前夕，善启在多个香港长者屋村举办「中秋爱心敬老活动」，派发贺节月饼、水果及日用品给独居长者。',
+      'zh-TW': '每年中秋節前夕，善啓在多個香港長者屋村舉辦「中秋愛心敬老活動」，派發賀節月餅、水果及日用品給獨居長者。',
+    },
+    sortOrder: 50,
+    showInGallery: true,
     images: [
       '/gallery/hk-charity/07_02.jpg',
       '/gallery/hk-charity/07_03.jpg',
@@ -176,7 +257,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'mountain',
+    slug: 'mountain',
+    label: {
+      en: 'GUIZHOU MOUNTAIN REALITY',
+      'zh-CN': 'GUIZHOU MOUNTAIN REALITY',
+      'zh-TW': 'GUIZHOU MOUNTAIN REALITY',
+    },
+    title: {
+      en: 'Guizhou Mountain Reality',
+      'zh-CN': '贵州山区实景',
+      'zh-TW': '貴州山區實景',
+    },
+    description: {
+      en: 'Guizhou Province is located on a plateau, 92.5% mountainous. These photos truthfully document the living conditions of impoverished villagers — rugged mountain roads, dilapidated houses, and rudimentary facilities.',
+      'zh-CN': '贵州省地处高原，92.5%为山地。这些照片真实记录了当地贫困村民的生活环境——崎岖山路、破旧房屋、简陋的设施。',
+      'zh-TW': '貴州省地處高原，92.5%爲山地。這些照片真實記錄了當地貧困村民的生活環境——崎嶇山路、破舊房屋、簡陋的設施。',
+    },
+    sortOrder: 60,
+    showInGallery: true,
     images: [
       '/gallery/mountain/01_00.jpg',
       '/gallery/mountain/01_07.jpg',
@@ -209,7 +307,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'activities',
+    slug: 'activities',
+    label: {
+      en: 'ANNUAL ACTIVITIES',
+      'zh-CN': 'ANNUAL ACTIVITIES',
+      'zh-TW': 'ANNUAL ACTIVITIES',
+    },
+    title: {
+      en: 'Annual Activities',
+      'zh-CN': '全年周期活动',
+      'zh-TW': '全年週期活動',
+    },
+    description: {
+      en: 'Sin Kai regularly organises multiple annual activities, including Guizhou field trips, Mid-Autumn elderly care events, charity mooncake sales, and more, continuously bringing warmth and hope to impoverished mountainous areas.',
+      'zh-CN': '善启每年定期举办多项活动，包括贵州实地考察、中秋敬老活动、慈善月饼义卖等，持续为贫困山区送去温暖与希望。',
+      'zh-TW': '善啓每年定期舉辦多項活動，包括貴州實地考察、中秋敬老活動、慈善月餅義賣等，持續爲貧困山區送去溫暖與希望。',
+    },
+    sortOrder: 70,
+    showInGallery: true,
     images: [
       '/gallery/activities/13_01.jpg',
       '/gallery/activities/13_02.jpg',
@@ -227,7 +342,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'news',
+    slug: 'news',
+    label: {
+      en: 'NEWS & MOONCAKE',
+      'zh-CN': 'NEWS & MOONCAKE',
+      'zh-TW': 'NEWS & MOONCAKE',
+    },
+    title: {
+      en: 'Latest News & Mid-Autumn Mooncake',
+      'zh-CN': '最新资讯与中秋月饼',
+      'zh-TW': '最新資訊與中秋月餅',
+    },
+    description: {
+      en: "Each year before the Mid-Autumn Festival, Sin Kai sells charity mooncakes with all proceeds going to school building in Guizhou's impoverished mountainous areas. Over the years, 18 Hope Schools have been built with mooncake proceeds.",
+      'zh-CN': '每年中秋节前夕，善启售卖慈善月饼，所有收益悉数拨作贵州省贫困山区建校用途。多年来由月饼收益建成的希望学校已达18所。',
+      'zh-TW': '每年中秋節前夕，善啓售賣慈善月餅，所有收益悉數撥作貴州省貧困山區建校用途。多年來由月餅收益建成的希望學校已達18所。',
+    },
+    sortOrder: 80,
+    showInGallery: true,
     images: [
       '/gallery/news/15_145.jpg',
       '/gallery/news/15_146.jpg',
@@ -242,7 +374,24 @@ export const gallerySections: GallerySection[] = [
     ],
   },
   {
-    category: 'others',
+    slug: 'others',
+    label: {
+      en: 'THANK YOU LETTERS & POSTERS',
+      'zh-CN': 'THANK YOU LETTERS & POSTERS',
+      'zh-TW': 'THANK YOU LETTERS & POSTERS',
+    },
+    title: {
+      en: 'Thank You Letters & Event Posters',
+      'zh-CN': '感谢信与活动海报',
+      'zh-TW': '感謝信與活動海報',
+    },
+    description: {
+      en: '',
+      'zh-CN': '',
+      'zh-TW': '',
+    },
+    sortOrder: 90,
+    showInGallery: true,
     images: [
       '/gallery/others/12_01.jpg',
       '/gallery/others/12_02a.jpg',
@@ -262,3 +411,9 @@ export const gallerySections: GallerySection[] = [
     ],
   },
 ]
+
+/** @deprecated Use galleryCategories directly. */
+export type GalleryCategory = string
+
+/** @deprecated Use galleryCategories directly. */
+export const gallerySections = galleryCategories

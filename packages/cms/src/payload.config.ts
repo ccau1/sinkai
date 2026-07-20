@@ -14,13 +14,16 @@ import { defaultLocale, payloadLocales } from './locales'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { GalleryCategories } from './collections/GalleryCategories'
 import { Installations } from './collections/Installations'
 import { Blogs } from './collections/Blogs'
 import { Pages } from './collections/Pages'
 import { Testimonies } from './collections/Testimonies'
+import { Donations } from './collections/Donations'
 import { Navigation } from './globals/Navigation'
 import { ContactSettings } from './globals/ContactSettings'
 import { sendContactSubmissionEmail } from './hooks/sendContactSubmissionEmail'
+import { populateShareableLinks } from './hooks/populateShareableLinks'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -88,7 +91,7 @@ export default buildConfig({
       defaultLayout: [{ widgetSlug: 'collection-previews', width: 'full' }],
     },
   },
-  collections: [Blogs, Installations, Testimonies, Pages, Media, Users],
+  collections: [Blogs, Installations, Testimonies, Donations, Pages, Media, GalleryCategories, Users],
   globals: [Navigation, ContactSettings],
   graphQL: {
     disable: true,
@@ -174,6 +177,27 @@ export default buildConfig({
         text: true,
         textarea: true,
         upload: false,
+      },
+      formOverrides: {
+        fields: ({ defaultFields }) => [
+          ...defaultFields,
+          {
+            name: 'shareableLinks',
+            type: 'textarea',
+            virtual: true,
+            label: 'Shareable links',
+            admin: {
+              readOnly: true,
+              position: 'sidebar',
+              description:
+                'Copy the link for the locale you need and send it to end users.',
+              rows: 3,
+            },
+          },
+        ],
+        hooks: {
+          afterRead: [populateShareableLinks],
+        },
       },
       formSubmissionOverrides: {
         hooks: {

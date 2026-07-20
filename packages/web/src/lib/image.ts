@@ -29,19 +29,28 @@ function getSizeWidth(size?: ImageSize): number | undefined {
 }
 
 function getTransformOrigin(): string | undefined {
-  const explicit =
-    typeof process !== 'undefined'
-      ? process.env.NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN
-      : undefined
-  if (explicit) {
-    return explicit.replace(/\/$/, '')
-  }
+  const explicit = getExplicitTransformOrigin()
+  if (explicit) return explicit
 
   const cms =
     typeof process !== 'undefined'
       ? process.env.CMS_API_URL || process.env.NEXT_PUBLIC_CMS_API_URL
       : undefined
   return cms ? cms.replace(/\/$/, '') : undefined
+}
+
+/**
+ * Returns the explicitly configured public media host, if any.
+ * Pre-generated thumbnails live on this host; when it is not configured
+ * (typical local dev), we fall back to the original image instead of guessing
+ * a thumbnail URL that does not exist.
+ */
+function getExplicitTransformOrigin(): string | undefined {
+  const explicit =
+    typeof process !== 'undefined'
+      ? process.env.NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN
+      : undefined
+  return explicit ? explicit.replace(/\/$/, '') : undefined
 }
 
 function getProxyOrigin(): string | undefined {
@@ -110,12 +119,13 @@ export function transformMediaUrl(
   const origin = proxyOrigin ?? transformOrigin
 
   // Pre-generated thumbnails: static R2 webp files produced by the
-  // sinkai-cms-thumbnails workflow. These are available regardless of whether
-  // on-the-fly Cloudflare Image Transformations are enabled.
+  // sinkai-cms-thumbnails workflow. Only use them when the public media host is
+  // explicitly configured; in local dev the CMS API origin is not the media
+  // host and thumbnails are not generated, so fall through to the original URL.
   if (options.size === 'thumb') {
+    const thumbBase = getExplicitTransformOrigin()
     const filename = options.filename || extractFilenameFromSrc(src)
-    const thumbBase = transformOrigin || origin
-    if (filename && thumbBase) {
+    if (thumbBase && filename) {
       const basename = filename.replace(/\.[^.]+$/, '')
       return `${thumbBase}/public/thumbnails/${basename}.webp`
     }

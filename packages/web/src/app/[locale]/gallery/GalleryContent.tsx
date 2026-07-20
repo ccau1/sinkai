@@ -5,33 +5,13 @@ import { useTranslations, useLocale } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CmsImage from '@/components/CmsImage';
-import type { CMSGallerySection, GalleryCategory } from '@/lib/cms';
+import type { CMSGallerySection } from '@/lib/cms';
 import { getMediaAlt } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface GalleryContentProps {
   sections: CMSGallerySection[];
-}
-
-function toCamelCase(value: string): string {
-  return value.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
-}
-
-function categoryToKeys(category: GalleryCategory) {
-  const id = toCamelCase(category)
-  switch (category) {
-    case 'news':
-      return { labelKey: 'newsLabel', titleKey: 'newsTitle', descKey: 'newsDesc' as const };
-    case 'others':
-      return { labelKey: 'othersLabel' as const, titleKey: 'othersTitle' as const, descKey: undefined };
-    default:
-      return {
-        labelKey: `${id}En` as const,
-        titleKey: `${id}Title` as const,
-        descKey: `${id}Desc` as const,
-      };
-  }
 }
 
 export default function GalleryContent({ sections }: GalleryContentProps) {
@@ -83,50 +63,53 @@ export default function GalleryContent({ sections }: GalleryContentProps) {
       </section>
 
       {/* Gallery Sections */}
-      {sections.map((section, idx) => {
-        const { labelKey, titleKey, descKey } = categoryToKeys(section.category);
-        return (
-          <section key={section.category} className="py-12"
-            style={{
-              backgroundColor: idx % 2 === 0 ? 'var(--color-bg-base)' : 'var(--color-bg-surface)',
-              borderBottom: '1px solid var(--color-border)',
-            }}>
-            <div className="container-main">
-              <div className="mb-6">
+      {sections.map((section, idx) => (
+        <section key={section.category.id} className="py-12"
+          style={{
+            backgroundColor: idx % 2 === 0 ? 'var(--color-bg-base)' : 'var(--color-bg-surface)',
+            borderBottom: '1px solid var(--color-border)',
+            contentVisibility: 'auto',
+          }}>
+          <div className="container-main">
+            <div className="mb-6">
+              {section.category.label && (
                 <p className="reveal text-label mb-2" style={{ color: 'var(--color-primary-600)' }}>
-                  {t(labelKey)}
+                  {section.category.label}
                 </p>
+              )}
+              {section.category.title && (
                 <h2 className="reveal text-title font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-                  {t(titleKey)}
+                  {section.category.title}
                 </h2>
-                {descKey && (
-                  <p className="reveal text-body-sm max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
-                    {t(descKey)}
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                {section.images.map((image, i) => (
-                  <div key={image.id} className="reveal aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
-                    onClick={() => setLightbox({ images: section.images, index: i })}>
-                    <CmsImage
-                      src={image.url}
-                      filename={image.filename}
-                      alt={getMediaAlt(image, locale)}
-                      size="thumb"
-                      transformFit="cover"
-                      transformFormat="auto"
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                ))}
-              </div>
+              )}
+              {section.category.description && (
+                <p className="reveal text-body-sm max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
+                  {section.category.description}
+                </p>
+              )}
             </div>
-          </section>
-        );
-      })}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+              {section.images.map((image, i) => (
+                <div key={image.id} className="reveal aspect-[4/3] rounded-lg overflow-hidden cursor-pointer group"
+                  onClick={() => setLightbox({ images: section.images, index: i })}>
+                  <CmsImage
+                    src={image.url}
+                    filename={image.filename}
+                    alt={getMediaAlt(image, locale)}
+                    size="thumb"
+                    transformFit="cover"
+                    transformFormat="auto"
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                    priority={i < 10}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
 
       {/* Volunteer Quotes */}
       <section className="section" style={{ backgroundColor: 'var(--color-bg-inverted)' }}>
@@ -176,16 +159,14 @@ export default function GalleryContent({ sections }: GalleryContentProps) {
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           )}
-          <CmsImage
-            key={`lightbox-${lightbox.index}`}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={lightbox.index}
             src={lightbox.images[lightbox.index].url}
             alt={getMediaAlt(lightbox.images[lightbox.index], locale)}
-            size="full"
-            transformFormat="auto"
-            width={1200}
-            height={800}
             className="max-w-[90vw] max-h-[85vh] object-contain"
             onClick={(e) => e.stopPropagation()}
+            decoding="async"
           />
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-xs font-medium tracking-wider">
             {lightbox.index + 1} / {lightbox.images.length}

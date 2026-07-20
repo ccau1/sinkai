@@ -68,23 +68,21 @@ export const Media: CollectionConfig = {
     },
     {
       name: 'category',
-      type: 'select',
+      type: 'relationship',
+      relationTo: 'gallery-categories',
       label: 'Gallery Category',
       admin: {
         description: 'Used to group images on the gallery page.',
       },
-      options: [
-        { label: 'Snow Disaster', value: 'snow-disaster' },
-        { label: 'Old Schools', value: 'old-schools' },
-        { label: 'New Schools', value: 'new-schools' },
-        { label: 'Field Trip', value: 'field-trip' },
-        { label: 'HK Charity', value: 'hk-charity' },
-        { label: 'Mountain', value: 'mountain' },
-        { label: 'Activities', value: 'activities' },
-        { label: 'News', value: 'news' },
-        { label: 'Others', value: 'others' },
-        { label: 'General', value: 'general' },
-      ],
+    },
+    {
+      name: 'tags',
+      type: 'text',
+      label: 'Tags',
+      hasMany: true,
+      admin: {
+        description: 'Optional tags for future filtering and grouping.',
+      },
     },
     {
       name: 'sortOrder',

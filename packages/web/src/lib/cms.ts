@@ -1,12 +1,23 @@
 import type { Locale } from '@/i18n/config'
 
+export interface CMSGalleryCategory {
+  id: number | string
+  slug: string
+  label?: string
+  title?: string
+  description?: string
+  sortOrder?: number
+  showInGallery?: boolean
+}
+
 export interface CMSMedia {
   id: number | string
   url?: string
   filename?: string
   /** May be a localized object, a JSON-stringified object, or a plain string. */
   alt?: string | Record<string, string>
-  category?: string
+  category?: CMSGalleryCategory | number | string
+  tags?: string[]
   sortOrder?: number
   hidden?: boolean
 }
@@ -75,19 +86,8 @@ export interface CMSNavigation {
   items: CMSNavItem[]
 }
 
-export type GalleryCategory =
-  | 'snow-disaster'
-  | 'old-schools'
-  | 'new-schools'
-  | 'field-trip'
-  | 'hk-charity'
-  | 'mountain'
-  | 'activities'
-  | 'news'
-  | 'others'
-
 export interface CMSGallerySection {
-  category: GalleryCategory
+  category: CMSGalleryCategory
   images: CMSMedia[]
 }
 
@@ -127,6 +127,21 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
   return url
 }
 
+function normalizeGalleryCategory(
+  category: CMSGalleryCategory | number | string | undefined,
+  locale?: Locale,
+): CMSGalleryCategory | number | string | undefined {
+  if (!category || typeof category !== 'object') return category
+  return {
+    ...category,
+    label: locale ? resolveLocalizedField(category.label, locale, '') : category.label,
+    title: locale ? resolveLocalizedField(category.title, locale, '') : category.title,
+    description: locale
+      ? resolveLocalizedField(category.description, locale, '')
+      : category.description,
+  }
+}
+
 function normalizeMedia(
   media: CMSMedia | undefined,
   locale?: Locale,
@@ -136,6 +151,7 @@ function normalizeMedia(
     ...media,
     url: resolveMediaUrl(media.url) || media.filename,
     alt: locale ? resolveLocalizedField(media.alt, locale, '') : media.alt,
+    category: normalizeGalleryCategory(media.category, locale),
   }
 }
 
@@ -364,25 +380,13 @@ export async function fetchTestimonies(
   }
 }
 
-const gallerySectionOrder: GalleryCategory[] = [
-  'snow-disaster',
-  'old-schools',
-  'new-schools',
-  'field-trip',
-  'hk-charity',
-  'mountain',
-  'activities',
-  'news',
-  'others',
-]
-
 export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySection[]> {
   const base = getCMSBaseUrl()
   if (!base) return []
 
   try {
     const res = await fetch(
-      `${base}/api/media?where[and][0][hidden][equals]=false&where[and][1][category][exists]=true&limit=300&sort=sortOrder&${localeQuery(locale)}`,
+      `${base}/api/media?where[and][0][hidden][equals]=false&where[and][1][category][exists]=true&limit=300&sort=sortOrder&depth=1&${localeQuery(locale)}`,
       { next: { revalidate: 60 } },
     )
     if (!res.ok) {
@@ -392,22 +396,25 @@ export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySecti
     const data = await res.json()
     const docs = (data.docs || []) as CMSMedia[]
 
-    const grouped = new Map<GalleryCategory, CMSMedia[]>()
+    const grouped = new Map<number | string, CMSGallerySection>()
     for (const doc of docs) {
-      const category = doc.category as GalleryCategory
-      if (!category) continue
-      if (!grouped.has(category)) {
-        grouped.set(category, [])
+      const normalized = normalizeMedia(doc, locale)
+      if (!normalized) continue
+      const category = normalized.category
+      if (!category || typeof category !== 'object') continue
+      if (category.showInGallery === false) continue
+
+      const existing = grouped.get(category.id)
+      if (existing) {
+        existing.images.push(normalized)
+      } else {
+        grouped.set(category.id, { category, images: [normalized] })
       }
-      grouped.get(category)!.push(normalizeMedia(doc, locale)!)
     }
 
-    return gallerySectionOrder
-      .filter((category) => grouped.has(category))
-      .map((category) => ({
-        category,
-        images: grouped.get(category)!,
-      }))
+    return Array.from(grouped.values()).sort(
+      (a, b) => (a.category.sortOrder ?? 0) - (b.category.sortOrder ?? 0),
+    )
   } catch (err) {
     console.warn('CMS gallery fetch error:', err)
     return []
@@ -537,5 +544,163 @@ function normalizeNavigation(
         }
       })
       .filter((item) => item.visible !== false),
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Forms (via Payload Form Builder plugin)
+// ---------------------------------------------------------------------------
+
+export interface CMSFormBaseField {
+  id?: string | null
+  blockName?: string | null
+}
+
+export interface CMSFormCheckboxField extends CMSFormBaseField {
+  blockType: 'checkbox'
+  name: string
+  label?: string | null
+  width?: number | null
+  required?: boolean | null
+  defaultValue?: boolean | null
+}
+
+export interface CMSFormCountryField extends CMSFormBaseField {
+  blockType: 'country'
+  name: string
+  label?: string | null
+  width?: number | null
+  required?: boolean | null
+}
+
+export interface CMSFormEmailField extends CMSFormBaseField {
+  blockType: 'email'
+  name: string
+  label?: string | null
+  width?: number | null
+  required?: boolean | null
+}
+
+export interface CMSFormMessageField extends CMSFormBaseField {
+  blockType: 'message'
+  message?: unknown | null
+}
+
+export interface CMSFormNumberField extends CMSFormBaseField {
+  blockType: 'number'
+  name: string
+  label?: string | null
+  width?: number | null
+  defaultValue?: number | null
+  required?: boolean | null
+}
+
+export interface CMSFormSelectOption {
+  label: string
+  value: string
+  id?: string | null
+}
+
+export interface CMSFormSelectField extends CMSFormBaseField {
+  blockType: 'select'
+  name: string
+  label?: string | null
+  width?: number | null
+  defaultValue?: string | null
+  placeholder?: string | null
+  options?: CMSFormSelectOption[] | null
+  required?: boolean | null
+}
+
+export interface CMSFormStateField extends CMSFormBaseField {
+  blockType: 'state'
+  name: string
+  label?: string | null
+  width?: number | null
+  required?: boolean | null
+}
+
+export interface CMSFormTextField extends CMSFormBaseField {
+  blockType: 'text'
+  name: string
+  label?: string | null
+  width?: number | null
+  defaultValue?: string | null
+  required?: boolean | null
+}
+
+export interface CMSFormTextareaField extends CMSFormBaseField {
+  blockType: 'textarea'
+  name: string
+  label?: string | null
+  width?: number | null
+  defaultValue?: string | null
+  required?: boolean | null
+}
+
+export type CMSFormField =
+  | CMSFormCheckboxField
+  | CMSFormCountryField
+  | CMSFormEmailField
+  | CMSFormMessageField
+  | CMSFormNumberField
+  | CMSFormSelectField
+  | CMSFormStateField
+  | CMSFormTextField
+  | CMSFormTextareaField
+
+export interface CMSForm {
+  id: number | string
+  title: string
+  fields?: CMSFormField[] | null
+  submitButtonLabel?: string | null
+  confirmationType?: ('message' | 'redirect') | null
+  confirmationMessage?: unknown | null
+  redirect?: {
+    url: string
+  } | null
+}
+
+export async function fetchForms(locale: Locale): Promise<CMSForm[]> {
+  const base = getCMSBaseUrl()
+  if (!base) return []
+
+  try {
+    const res = await fetch(
+      `${base}/api/forms?limit=100&depth=0&${localeQuery(locale)}`,
+      { next: { revalidate: 60 } },
+    )
+    if (!res.ok) {
+      console.warn(`CMS forms fetch failed: ${res.status}. Returning empty list.`)
+      return []
+    }
+    const data = (await res.json()) as { docs?: CMSForm[] }
+    return data.docs || []
+  } catch (err) {
+    console.warn('CMS forms fetch error:', err)
+    return []
+  }
+}
+
+export async function fetchFormById(
+  id: number | string,
+  locale: Locale,
+): Promise<CMSForm | null> {
+  const base = getCMSBaseUrl()
+  if (!base) return null
+
+  try {
+    const res = await fetch(
+      `${base}/api/forms/${encodeURIComponent(String(id))}?depth=0&${localeQuery(locale)}`,
+      { next: { revalidate: 60 } },
+    )
+    if (!res.ok) {
+      console.warn(`CMS form fetch failed: ${res.status}.`)
+      return null
+    }
+    return (await res.json()) as CMSForm
+  } catch (err) {
+    console.warn('CMS form fetch error:', err)
+    return null
   }
 }

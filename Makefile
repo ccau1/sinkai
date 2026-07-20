@@ -5,7 +5,7 @@ up:
 	docker compose up -d --build cms
 	@echo "Waiting for CMS to be ready on http://localhost:3001..."
 	@ready=0; \
-	for i in $$(seq 1 30); do \
+	for i in $$(seq 1 60); do \
 		if curl -sf http://localhost:3001/api/blogs > /dev/null 2>&1 \
 		   && curl -sf http://localhost:3001/api/globals/navigation > /dev/null 2>&1; then \
 			echo "CMS is ready."; \
@@ -13,11 +13,11 @@ up:
 			ready=1; \
 			break; \
 		fi; \
-		echo "  CMS not ready yet, sleeping... (attempt $$i/30)"; \
+		echo "  CMS not ready yet, sleeping... (attempt $$i/60)"; \
 		sleep 3; \
 	done; \
 	if [ "$$ready" -ne 1 ]; then \
-		echo "CMS failed to become ready after 90 seconds; aborting."; \
+		echo "CMS failed to become ready after 180 seconds; aborting."; \
 		docker compose logs cms --tail 50; \
 		exit 1; \
 	fi
