@@ -39,7 +39,7 @@ jobs:
         env:
           CMS_API_URL: ${{ secrets.CMS_API_URL_STAGING }}
           NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS: true
-          NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: https://sinkai-cms-media.staging.tribalorigin.com
+          NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: ${{ secrets.MEDIA_PUBLIC_URL_STAGING || 'https://sinkai-cms-media.staging.tribalorigin.com' }}
         run: npm run build -w packages/web
 
       - name: Deploy to Cloudflare Pages (staging)
@@ -81,7 +81,7 @@ jobs:
         env:
           CMS_API_URL: ${{ secrets.CMS_API_URL_PROD }}
           NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS: true
-          NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: https://sinkai-cms-media.tribalorigin.com
+          NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: ${{ secrets.MEDIA_PUBLIC_URL_PROD || 'https://sinkai-cms-media.tribalorigin.com' }}
         run: npm run build -w packages/web
 
       - name: Deploy to Cloudflare Pages (production)

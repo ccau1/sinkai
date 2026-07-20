@@ -3,47 +3,173 @@ import path from 'path'
 
 import { config as dotenvConfig } from 'dotenv'
 import { getPayload } from 'payload'
+import { imageSize } from 'image-size'
 import { blogPosts } from './blog-data'
 import { testimonies } from './testimonies-data'
 import { installations } from './installations-data'
 import { gallerySections, type GalleryCategory } from './gallery-data'
 import { generateShortId } from '../util/shortId'
 import { locales, type Locale } from '../locales'
+import { r2ObjectExists, r2UploadFile, getMimeType } from '../lib/r2Upload'
 
 dotenvConfig({ path: '.env' })
 
 const defaultLocale: Locale = 'zh-TW'
 
-async function createLocalizedMedia(
+function shouldUploadToRemoteR2(): boolean {
+  return (
+    process.env.PAYLOAD_REMOTE === 'true' &&
+    Boolean(process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID)
+  )
+}
+
+async function createMediaWithFileUpload(
   payload: import('payload').Payload,
   filePath: string,
   alt: Record<Locale, string>,
   extraData: Record<string, unknown> = {},
-): Promise<{ id: number | string }> {
-  // Work around a Payload/D1 serialization issue: creating a media doc with a
-  // localized object for `alt` in a single call can store it as a JSON string.
-  // Create the default locale first, then update the remaining locales.
+): Promise<{ id: number | string; existed: boolean }> {
+  const filename = path.basename(filePath)
+  const existing = await payload.find({
+    collection: 'media',
+    where: { filename: { equals: filename } },
+    limit: 1,
+    overrideAccess: true,
+  })
+
+  if (existing.totalDocs > 0) {
+    return { id: existing.docs[0].id, existed: true }
+  }
+
   const created = await payload.create({
     collection: 'media',
+    locale: defaultLocale,
     data: {
       alt: alt[defaultLocale],
       ...extraData,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     filePath,
+    overrideAccess: true,
   })
 
-  for (const locale of ['en', 'zh-CN'] as const) {
+  for (const locale of locales.filter((l) => l !== defaultLocale)) {
     await payload.update({
       collection: 'media',
       id: created.id,
       locale,
       data: { alt: alt[locale] },
+      overrideAccess: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
   }
 
-  return created
+  return { id: created.id, existed: false }
+}
+
+async function createMediaWithRemoteR2(
+  payload: import('payload').Payload,
+  filePath: string,
+  alt: Record<Locale, string>,
+  extraData: Record<string, unknown> = {},
+): Promise<{ id: number | string; existed: boolean }> {
+  const filename = path.basename(filePath)
+  const objectKey = `public/${filename}`
+
+  // Reuse an existing non-private record with the same filename when possible.
+  const existing = await payload.find({
+    collection: 'media',
+    where: { filename: { equals: filename } },
+    limit: 100,
+    overrideAccess: true,
+  })
+
+  const usable = existing.docs.find((doc: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prefix = (doc as any).prefix
+    return prefix !== 'private'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as any
+
+  if (usable) {
+    const exists = await r2ObjectExists(objectKey)
+    if (!exists) {
+      console.log(`Uploading missing R2 object for existing media: ${filename}`)
+      await r2UploadFile(filePath, objectKey)
+    }
+
+    const updates: Record<string, unknown> = {}
+    if (usable.prefix !== 'public') {
+      updates.prefix = 'public'
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await payload.update({
+        collection: 'media',
+        id: usable.id as number | string,
+        data: updates,
+        overrideAccess: true,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
+    }
+
+    return { id: usable.id as number | string, existed: true }
+  }
+
+  // No usable record exists: upload to R2 and create a new media document.
+  console.log(`Uploading new R2 object: ${objectKey}`)
+  const buffer = fs.readFileSync(filePath)
+  await r2UploadFile(filePath, objectKey, buffer)
+
+  const stats = fs.statSync(filePath)
+  const dims = imageSize(buffer)
+  const mimeType = getMimeType(filePath)
+
+  const created = await payload.create({
+    collection: 'media',
+    locale: defaultLocale,
+    data: {
+      alt: alt[defaultLocale],
+      filename,
+      mimeType,
+      filesize: stats.size,
+      width: dims.width,
+      height: dims.height,
+      ...extraData,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
+    overrideAccess: true,
+  })
+
+  for (const locale of locales.filter((l) => l !== defaultLocale)) {
+    await payload.update({
+      collection: 'media',
+      id: created.id,
+      locale,
+      data: { alt: alt[locale] },
+      overrideAccess: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+  }
+
+  return { id: created.id, existed: false }
+}
+
+async function findOrCreateMediaFromFile(
+  payload: import('payload').Payload,
+  filePath: string,
+  alt: Record<Locale, string>,
+  extraData: Record<string, unknown> = {},
+): Promise<{ id: number | string; existed: boolean }> {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found: ${filePath}`)
+  }
+
+  if (shouldUploadToRemoteR2()) {
+    return createMediaWithRemoteR2(payload, filePath, alt, extraData)
+  }
+
+  return createMediaWithFileUpload(payload, filePath, alt, extraData)
 }
 
 const cwd = process.cwd()
@@ -110,11 +236,33 @@ async function seed() {
         })
         const slugName = (fullDoc.slugName || {}) as Record<string, string>
         const hasAllLocales = locales.every((locale) => Boolean(slugName[locale]))
+
+        // Ensure the cover image exists in R2 even if the record already exists.
+        let coverImageId: number | string | undefined = (existingDoc.coverImage as number | string) || undefined
+        const coverPath = path.join(webPublicDir, post.coverImage)
+        if (fs.existsSync(coverPath)) {
+          const coverMedia = await findOrCreateMediaFromFile(payload, coverPath, {
+            en: post.translations.en.title,
+            'zh-CN': post.translations['zh-CN'].title,
+            'zh-TW': post.translations['zh-TW'].title,
+          })
+          coverImageId = coverMedia.id
+          if (coverImageId !== (existingDoc.coverImage as number | string)) {
+            await payload.update({
+              collection: 'blogs',
+              id: existingDoc.id,
+              data: { coverImage: coverImageId as number },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any)
+          }
+        }
+
         if (hasAllLocales) {
           console.log(`Skipping existing blog: ${post.slug}`)
           skipped++
           continue
         }
+
         // Localized fields were lost (Payload/D1 serialization bug). Delete and
         // recreate the doc rather than trying to repair corrupted locale rows.
         await payload.delete({
@@ -128,25 +276,13 @@ async function seed() {
       let coverImageId: number | string | undefined
       const coverPath = path.join(webPublicDir, post.coverImage)
       if (fs.existsSync(coverPath)) {
-        const coverFilename = path.basename(post.coverImage)
-        const existingMedia = await payload.find({
-          collection: 'media',
-          where: { filename: { equals: coverFilename } },
-          limit: 1,
+        const coverMedia = await findOrCreateMediaFromFile(payload, coverPath, {
+          en: post.translations.en.title,
+          'zh-CN': post.translations['zh-CN'].title,
+          'zh-TW': post.translations['zh-TW'].title,
         })
-
-        if (existingMedia.totalDocs > 0) {
-          coverImageId = existingMedia.docs[0].id
-          console.log(`Reusing existing media for cover: ${coverFilename}`)
-        } else {
-          const media = await createLocalizedMedia(payload, coverPath, {
-            en: post.translations.en.title,
-            'zh-CN': post.translations['zh-CN'].title,
-            'zh-TW': post.translations['zh-TW'].title,
-          })
-          coverImageId = media.id
-          console.log(`Created media for cover: ${post.coverImage}`)
-        }
+        coverImageId = coverMedia.id
+        console.log(`Prepared cover media: ${post.coverImage}`)
       } else {
         console.warn(`Cover image not found: ${coverPath}`)
       }
@@ -345,6 +481,7 @@ function textToLexical(text: string): unknown {
 
 async function seedTestimonies(payload: import('payload').Payload) {
   let created = 0
+  let updated = 0
   let skipped = 0
 
   for (const testimony of testimonies) {
@@ -357,12 +494,6 @@ async function seedTestimonies(payload: import('payload').Payload) {
       limit: 1,
     })
 
-    if (existing.totalDocs > 0) {
-      console.log(`Skipping existing testimony: ${en.name}`)
-      skipped++
-      continue
-    }
-
     const photoIds: (number | string)[] = []
     for (const photoPath of testimony.photos) {
       const fullPath = path.join(webPublicDir, photoPath)
@@ -371,17 +502,55 @@ async function seedTestimonies(payload: import('payload').Payload) {
         continue
       }
 
-      const media = await createLocalizedMedia(payload, fullPath, {
+      const media = await findOrCreateMediaFromFile(payload, fullPath, {
         en: en.name,
         'zh-CN': testimony.translations['zh-CN'].name,
         'zh-TW': testimony.translations['zh-TW'].name,
       })
       photoIds.push(media.id)
-      console.log(`Created media for testimony photo: ${photoPath}`)
+      console.log(`Prepared testimony photo: ${photoPath}`)
     }
 
     if (photoIds.length === 0) {
       console.warn(`No valid photos for testimony: ${en.name}. Skipping.`)
+      skipped++
+      continue
+    }
+
+    if (existing.totalDocs > 0) {
+      const existingDoc = existing.docs[0]
+      await payload.update({
+        collection: 'testimonies',
+        id: existingDoc.id,
+        locale: 'en',
+        data: {
+          name: en.name,
+          role: en.role,
+          synopsis: en.synopsis,
+          content: textToLexical(en.content),
+          photos: photoIds as number[],
+          highlighted: testimony.highlighted,
+          published: true,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      })
+      for (const locale of ['zh-CN', 'zh-TW'] as const) {
+        const t = testimony.translations[locale]
+        await payload.update({
+          collection: 'testimonies',
+          id: existingDoc.id,
+          locale,
+          data: {
+            name: t.name,
+            role: t.role,
+            synopsis: t.synopsis,
+            content: textToLexical(t.content),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        })
+      }
+      console.log(`Updated testimony: ${en.name}`)
+      updated++
       continue
     }
 
@@ -423,7 +592,7 @@ async function seedTestimonies(payload: import('payload').Payload) {
     created++
   }
 
-  console.log(`Testimonies seed complete: ${created} created, ${skipped} skipped`)
+  console.log(`Testimonies seed complete: ${created} created, ${updated} updated, ${skipped} skipped`)
 }
 
 async function seedInstallations(payload: import('payload').Payload) {
@@ -436,14 +605,34 @@ async function seedInstallations(payload: import('payload').Payload) {
     const existing = await payload.find({
       collection: 'installations',
       where: {
-        'slug': { equals: installation.slug },
+        slug: { equals: installation.slug },
       },
       limit: 1,
     })
 
+    const photoIds: (number | string)[] = []
+    for (const photoPath of installation.photos) {
+      const fullPath = path.join(webPublicDir, photoPath)
+      if (!fs.existsSync(fullPath)) {
+        console.warn(`Installation photo not found: ${fullPath}`)
+        continue
+      }
+
+      const media = await findOrCreateMediaFromFile(payload, fullPath, {
+        en: en.title,
+        'zh-CN': installation.translations['zh-CN'].title,
+        'zh-TW': installation.translations['zh-TW'].title,
+      })
+      photoIds.push(media.id)
+      console.log(`Prepared installation photo: ${photoPath}`)
+    }
+
+    if (photoIds.length === 0) {
+      console.warn(`No valid photos for installation: ${en.title}. Skipping.`)
+      continue
+    }
+
     if (existing.totalDocs > 0) {
-      // Update existing installation with plain-text descriptions in case it
-      // was previously seeded with Lexical objects.
       const existingDoc = existing.docs[0]
       await payload.update({
         collection: 'installations',
@@ -453,6 +642,7 @@ async function seedInstallations(payload: import('payload').Payload) {
           title: en.title,
           location: en.location,
           description: en.description,
+          photos: photoIds as number[],
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
       })
@@ -470,30 +660,8 @@ async function seedInstallations(payload: import('payload').Payload) {
           } as any,
         })
       }
-      console.log(`Updated existing installation: ${en.title}`)
+      console.log(`Updated installation: ${en.title}`)
       updated++
-      continue
-    }
-
-    const photoIds: (number | string)[] = []
-    for (const photoPath of installation.photos) {
-      const fullPath = path.join(webPublicDir, photoPath)
-      if (!fs.existsSync(fullPath)) {
-        console.warn(`Installation photo not found: ${fullPath}`)
-        continue
-      }
-
-      const media = await createLocalizedMedia(payload, fullPath, {
-        en: en.title,
-        'zh-CN': installation.translations['zh-CN'].title,
-        'zh-TW': installation.translations['zh-TW'].title,
-      })
-      photoIds.push(media.id)
-      console.log(`Created media for installation photo: ${photoPath}`)
-    }
-
-    if (photoIds.length === 0) {
-      console.warn(`No valid photos for installation: ${en.title}. Skipping.`)
       continue
     }
 
@@ -554,45 +722,7 @@ async function seedGallery(payload: import('payload').Payload) {
         continue
       }
 
-      const filename = path.basename(imagePath)
-
-      // Try to find an existing media record with the same filename to avoid
-      // uploading the same gallery image twice.
-      const existing = await payload.find({
-        collection: 'media',
-        where: {
-          filename: { equals: filename },
-        },
-        limit: 1,
-      })
-
-      if (existing.totalDocs > 0) {
-        const existingDoc = existing.docs[0]
-        const needsUpdate =
-          existingDoc.category !== section.category ||
-          existingDoc.sortOrder !== i ||
-          existingDoc.hidden !== false
-
-        if (needsUpdate) {
-          await payload.update({
-            collection: 'media',
-            id: existingDoc.id,
-            data: {
-              category: section.category as GalleryCategory,
-              sortOrder: i,
-              hidden: false,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any,
-          })
-          console.log(`Updated existing media for gallery: ${imagePath}`)
-          updated++
-        } else {
-          skipped++
-        }
-        continue
-      }
-
-      await createLocalizedMedia(
+      const media = await findOrCreateMediaFromFile(
         payload,
         fullPath,
         {
@@ -606,8 +736,37 @@ async function seedGallery(payload: import('payload').Payload) {
           hidden: false,
         },
       )
-      console.log(`Created media for gallery: ${imagePath}`)
-      created++
+
+      if (media.existed) {
+        const existingDoc = await payload.findByID({
+          collection: 'media',
+          id: media.id,
+        })
+        const needsUpdate =
+          existingDoc.category !== section.category ||
+          existingDoc.sortOrder !== i ||
+          existingDoc.hidden !== false
+
+        if (needsUpdate) {
+          await payload.update({
+            collection: 'media',
+            id: media.id,
+            data: {
+              category: section.category as GalleryCategory,
+              sortOrder: i,
+              hidden: false,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          })
+          console.log(`Updated existing media for gallery: ${imagePath}`)
+          updated++
+        } else {
+          skipped++
+        }
+      } else {
+        console.log(`Created media for gallery: ${imagePath}`)
+        created++
+      }
     }
   }
 

@@ -77,6 +77,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          MEDIA_PUBLIC_URL: https://sinkai-cms-media.staging.tribalorigin.com
         run: npm run seed:remote
 
   promote-to-prod:
@@ -145,4 +146,5 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
           CLOUDFLARE_ENV: production
+          MEDIA_PUBLIC_URL: https://sinkai-cms-media.tribalorigin.com
         run: npm run seed:production

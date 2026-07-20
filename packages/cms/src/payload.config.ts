@@ -66,6 +66,8 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     suppressHydrationWarning: true,
+    // Lock the admin panel to light mode for a bright, charity-friendly UI.
+    theme: 'light',
     dashboard: {
       widgets: [
         {

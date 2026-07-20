@@ -1,1 +1,68 @@
-// Add custom Payload admin styles here
+// Custom Payload admin styles for a bright, charity-friendly light theme.
+// The admin panel is locked to light mode in payload.config.ts.
+@layer payload {
+  :root {
+    // Warm off-white page background instead of a stark clinic-white.
+    --theme-bg: #fdfcf9;
+    --theme-input-bg: #ffffff;
+
+    // Friendly charcoal for body text — softer than pure black.
+    --theme-text: #2d2a26;
+
+    // Warm gray elevation scale (cards, borders, hover states).
+    --theme-elevation-0: #fdfcf9;
+    --theme-elevation-50: #f7f5f1;
+    --theme-elevation-100: #f0ede7;
+    --theme-elevation-150: #e4e0d8;
+    --theme-elevation-200: #d7d3cc;
+    --theme-elevation-250: #cac5be;
+    --theme-elevation-300: #bdb8b1;
+    --theme-elevation-350: #b0aba4;
+    --theme-elevation-400: #a39e97;
+    --theme-elevation-450: #96918b;
+    --theme-elevation-500: #89847e;
+    --theme-elevation-550: #7c7771;
+    --theme-elevation-600: #6f6a65;
+    --theme-elevation-650: #625e59;
+    --theme-elevation-700: #55514d;
+    --theme-elevation-750: #484540;
+    --theme-elevation-800: #3b3834;
+    --theme-elevation-850: #2e2b28;
+    --theme-elevation-900: #211f1c;
+    --theme-elevation-950: #141311;
+    --theme-elevation-1000: #0a0909;
+
+    // Soft, trustworthy accent color for links, buttons, and highlights.
+    --color-success-50: rgb(240, 249, 245);
+    --color-success-100: rgb(220, 243, 234);
+    --color-success-150: rgb(188, 231, 214);
+    --color-success-200: rgb(156, 221, 196);
+    --color-success-250: rgb(125, 210, 178);
+    --color-success-300: rgb(97, 199, 162);
+    --color-success-350: rgb(65, 188, 145);
+    --color-success-400: rgb(36, 176, 130);
+    --color-success-450: rgb(18, 162, 116);
+    --color-success-500: rgb(21, 150, 105);
+    --color-success-550: rgb(12, 135, 94);
+    --color-success-600: rgb(11, 122, 86);
+    --color-success-650: rgb(11, 108, 76);
+    --color-success-700: rgb(17, 95, 68);
+    --color-success-750: rgb(17, 82, 59);
+    --color-success-800: rgb(18, 71, 51);
+    --color-success-850: rgb(18, 60, 44);
+    --color-success-900: rgb(19, 48, 36);
+    --color-success-950: rgb(22, 36, 28);
+
+    --theme-border-color: var(--theme-elevation-150);
+    --theme-overlay: rgba(45, 42, 38, 0.35);
+  }
+
+  // Keep any dark-mode rules consistent just in case a user agent
+  // forces dark color-scheme, but this admin is locked to light.
+  html[data-theme='dark'] {
+    --theme-bg: #fdfcf9;
+    --theme-text: #2d2a26;
+    --theme-input-bg: #ffffff;
+    color-scheme: light;
+  }
+}
