@@ -646,6 +646,22 @@ export interface CMSFormTextareaField extends CMSFormBaseField {
   required?: boolean | null
 }
 
+export interface CMSFormUploadMimeType {
+  mimeType: string
+}
+
+export interface CMSFormUploadField extends CMSFormBaseField {
+  blockType: 'upload'
+  name: string
+  label?: string | null
+  width?: number | null
+  required?: boolean | null
+  multiple?: boolean | null
+  uploadCollection: string
+  mimeTypes?: CMSFormUploadMimeType[] | null
+  maxFileSize?: number | null
+}
+
 export type CMSFormField =
   | CMSFormCheckboxField
   | CMSFormCountryField
@@ -656,6 +672,7 @@ export type CMSFormField =
   | CMSFormStateField
   | CMSFormTextField
   | CMSFormTextareaField
+  | CMSFormUploadField
 
 export interface CMSForm {
   id: number | string
@@ -667,6 +684,35 @@ export interface CMSForm {
   redirect?: {
     url: string
   } | null
+}
+
+function normalizeForm(form: CMSForm, locale: Locale): CMSForm {
+  const normalizeField = (field: CMSFormField): CMSFormField => {
+    switch (field.blockType) {
+      case 'select':
+        return {
+          ...field,
+          label: resolveLocalizedField(field.label, locale),
+          options: (field.options || []).map((option) => ({
+            ...option,
+            label: resolveLocalizedField(option.label, locale),
+          })),
+        }
+      case 'message':
+        return field
+      default:
+        return {
+          ...field,
+          label: resolveLocalizedField(field.label, locale),
+        }
+    }
+  }
+
+  return {
+    ...form,
+    submitButtonLabel: resolveLocalizedField(form.submitButtonLabel, locale),
+    fields: (form.fields || []).map(normalizeField),
+  }
 }
 
 export async function fetchForms(locale: Locale): Promise<CMSForm[]> {
@@ -683,7 +729,7 @@ export async function fetchForms(locale: Locale): Promise<CMSForm[]> {
       return []
     }
     const data = (await res.json()) as { docs?: CMSForm[] }
-    return data.docs || []
+    return (data.docs || []).map((form) => normalizeForm(form, locale))
   } catch (err) {
     console.warn('CMS forms fetch error:', err)
     return []
@@ -706,7 +752,8 @@ export async function fetchFormById(
       console.warn(`CMS form fetch failed: ${res.status}.`)
       return null
     }
-    return (await res.json()) as CMSForm
+    const form = (await res.json()) as CMSForm
+    return normalizeForm(form, locale)
   } catch (err) {
     console.warn('CMS form fetch error:', err)
     return null
@@ -730,7 +777,8 @@ export async function fetchFormByTitle(
       return null
     }
     const data = (await res.json()) as { docs?: CMSForm[] }
-    return data.docs?.[0] ?? null
+    const form = data.docs?.[0]
+    return form ? normalizeForm(form, locale) : null
   } catch (err) {
     console.warn('CMS form fetch error:', err)
     return null

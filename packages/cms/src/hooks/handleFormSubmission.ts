@@ -1,5 +1,5 @@
 import type { CollectionAfterChangeHook } from 'payload'
-import type { Form, SubmissionValue } from '@payloadcms/plugin-form-builder/types'
+import type { Form, FormSubmission, SubmissionValue } from '@payloadcms/plugin-form-builder/types'
 import type { Donation } from '../payload-types'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
@@ -167,6 +167,23 @@ async function handleContactSubmission(
   })
 }
 
+function getUploadIds(
+  submissionDoc: FormSubmission,
+  fieldName: string,
+): (number | string)[] | undefined {
+  const entry = submissionDoc.submissionUploads?.find((u) => u.field === fieldName)
+  if (!entry?.value?.length) return undefined
+
+  return entry.value
+    .map((item) => {
+      const raw = item.value
+      if (typeof raw === 'number' || typeof raw === 'string') return raw
+      if (raw && typeof raw === 'object' && 'id' in raw) return raw.id as number | string
+      return undefined
+    })
+    .filter((id): id is number | string => id !== undefined && id !== '')
+}
+
 async function handleDonationSubmission(
   doc: Record<string, unknown>,
   req: Parameters<CollectionAfterChangeHook>[0]['req'],
@@ -190,6 +207,8 @@ async function handleDonationSubmission(
     return
   }
 
+  const receiptIds = getUploadIds(doc as unknown as FormSubmission, 'receipt')
+
   let donation: Donation | undefined
   try {
     donation = (await req.payload.create({
@@ -204,6 +223,7 @@ async function handleDonationSubmission(
         paymentMethod,
         message,
         status: 'pending',
+        ...(receiptIds?.length ? { receipts: receiptIds } : {}),
       },
       overrideAccess: true,
       req,

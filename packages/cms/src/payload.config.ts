@@ -178,8 +178,9 @@ export default buildConfig({
         state: true,
         text: true,
         textarea: true,
-        upload: false,
+        upload: true,
       },
+      uploadCollections: ['media'],
       formOverrides: {
         fields: ({ defaultFields }) => [
           ...defaultFields,

@@ -43,3 +43,4 @@ secrets:
 	@echo "  - PAYLOAD_SECRET"
 	@echo "  - CMS_API_URL_PROD"
 	@echo "  - CMS_API_URL_STAGING"
+	@echo "  - RESEND_API_KEY"

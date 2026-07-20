@@ -872,7 +872,38 @@ async function seedForms(payload: import('payload').Payload) {
     },
   })
 
-  async function createFormIfMissing(
+  function assignFieldIds(sourceFields: unknown[], targetFields: unknown[]): unknown[] {
+    const sourceMap = new Map<string, Record<string, unknown>>()
+    ;(sourceFields as Record<string, unknown>[]).forEach((field) => {
+      const key = field.name ? `${field.blockType}-${field.name}` : `${field.blockType}-${field.blockName ?? ''}`
+      sourceMap.set(key, field)
+    })
+
+    return targetFields.map((field) => {
+      const target = field as Record<string, unknown>
+      const key = target.name ? `${target.blockType}-${target.name}` : `${target.blockType}-${target.blockName ?? ''}`
+      const source = sourceMap.get(key)
+      if (!source) return field
+
+      const result: Record<string, unknown> = { ...target, id: source.id }
+
+      if (target.blockType === 'select' && Array.isArray(target.options) && Array.isArray(source.options)) {
+        const sourceOptionMap = new Map<string, Record<string, unknown>>()
+        ;(source.options as Record<string, unknown>[]).forEach((option) => {
+          sourceOptionMap.set(String(option.value), option)
+        })
+        result.options = target.options.map((option) => {
+          const targetOption = option as Record<string, unknown>
+          const sourceOption = sourceOptionMap.get(String(targetOption.value))
+          return sourceOption ? { ...targetOption, id: sourceOption.id } : targetOption
+        })
+      }
+
+      return result
+    })
+  }
+
+  async function ensureForm(
     title: string,
     buildFields: (locale: Locale) => unknown[],
     translations: Record<Locale, { submit: string; success: string }>,
@@ -884,8 +915,49 @@ async function seedForms(payload: import('payload').Payload) {
       overrideAccess: true,
     })
 
+    const defaultFields = buildFields(defaultLocale)
+
     if (existing.totalDocs > 0) {
-      console.log(`${title} form already exists; skipping.`)
+      const doc = existing.docs[0]
+      const existingFields = (doc.fields || []) as unknown[]
+      const fieldsWithIds = assignFieldIds(existingFields, defaultFields)
+
+      const updated = await payload.update({
+        collection: 'forms',
+        id: doc.id,
+        locale: defaultLocale,
+        data: {
+          title,
+          submitButtonLabel: translations[defaultLocale].submit,
+          confirmationType: 'message',
+          confirmationMessage: confirmationMessage(translations[defaultLocale].success),
+          fields: fieldsWithIds,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+        overrideAccess: true,
+      })
+
+      const baseFields = ((updated.fields || fieldsWithIds) as unknown[]).length > 0
+        ? (updated.fields || fieldsWithIds) as unknown[]
+        : fieldsWithIds
+
+      for (const locale of locales.filter((l) => l !== defaultLocale)) {
+        const localeFields = buildFields(locale)
+        const localizedFieldsWithIds = assignFieldIds(baseFields, localeFields)
+        await payload.update({
+          collection: 'forms',
+          id: doc.id,
+          locale,
+          data: {
+            submitButtonLabel: translations[locale].submit,
+            confirmationMessage: confirmationMessage(translations[locale].success),
+            fields: localizedFieldsWithIds,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        })
+      }
+
+      console.log(`Updated default ${title} form`)
       return
     }
 
@@ -897,13 +969,19 @@ async function seedForms(payload: import('payload').Payload) {
         submitButtonLabel: translations[defaultLocale].submit,
         confirmationType: 'message',
         confirmationMessage: confirmationMessage(translations[defaultLocale].success),
-        fields: buildFields(defaultLocale),
+        fields: defaultFields,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       overrideAccess: true,
     })
 
+    const baseFields = ((created.fields || defaultFields) as unknown[]).length > 0
+      ? (created.fields || defaultFields) as unknown[]
+      : defaultFields
+
     for (const locale of locales.filter((l) => l !== defaultLocale)) {
+      const localeFields = buildFields(locale)
+      const localizedFieldsWithIds = assignFieldIds(baseFields, localeFields)
       await payload.update({
         collection: 'forms',
         id: created.id,
@@ -911,7 +989,7 @@ async function seedForms(payload: import('payload').Payload) {
         data: {
           submitButtonLabel: translations[locale].submit,
           confirmationMessage: confirmationMessage(translations[locale].success),
-          fields: buildFields(locale),
+          fields: localizedFieldsWithIds,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
       })
@@ -950,7 +1028,7 @@ async function seedForms(payload: import('payload').Payload) {
     },
   }
 
-  await createFormIfMissing(
+  await ensureForm(
     'Contact',
     (locale) => {
       const t = contactTranslations[locale]
@@ -980,6 +1058,7 @@ async function seedForms(payload: import('payload').Payload) {
       transferDate: string
       paymentMethod: string
       message: string
+      receipt: string
       submit: string
       success: string
     }
@@ -993,6 +1072,7 @@ async function seedForms(payload: import('payload').Payload) {
       transferDate: 'Transfer Date',
       paymentMethod: 'Payment Method',
       message: 'Message / Dedication',
+      receipt: 'Receipt Image (optional)',
       submit: 'Submit Donation',
       success: 'Thank you for your donation. We will verify the transfer and send a receipt soon.',
     },
@@ -1005,6 +1085,7 @@ async function seedForms(payload: import('payload').Payload) {
       transferDate: '转账日期',
       paymentMethod: '支付方式',
       message: '留言 / 纪念',
+      receipt: '收据图片（可选）',
       submit: '提交捐款',
       success: '感谢您的捐款。我们核实转账后将尽快发出收据。',
     },
@@ -1017,30 +1098,67 @@ async function seedForms(payload: import('payload').Payload) {
       transferDate: '轉賬日期',
       paymentMethod: '支付方式',
       message: '留言 / 紀念',
+      receipt: '收據圖片（可選）',
       submit: '提交捐款',
       success: '感謝您的捐款。我們核實轉賬後將盡快發出收據。',
     },
   }
 
-  const currencyOptions = [
-    { label: 'Hong Kong Dollar (HKD)', value: 'HKD' },
-    { label: 'US Dollar (USD)', value: 'USD' },
-    { label: 'Chinese Yuan (CNY)', value: 'CNY' },
-    { label: 'New Taiwan Dollar (TWD)', value: 'TWD' },
-    { label: 'Euro (EUR)', value: 'EUR' },
-    { label: 'British Pound (GBP)', value: 'GBP' },
-  ]
+  const currencyOptions: Record<Locale, { label: string; value: string }[]> = {
+    en: [
+      { label: 'Hong Kong Dollar (HKD)', value: 'HKD' },
+      { label: 'US Dollar (USD)', value: 'USD' },
+      { label: 'Chinese Yuan (CNY)', value: 'CNY' },
+      { label: 'New Taiwan Dollar (TWD)', value: 'TWD' },
+      { label: 'Euro (EUR)', value: 'EUR' },
+      { label: 'British Pound (GBP)', value: 'GBP' },
+    ],
+    'zh-CN': [
+      { label: '港币 (HKD)', value: 'HKD' },
+      { label: '美元 (USD)', value: 'USD' },
+      { label: '人民币 (CNY)', value: 'CNY' },
+      { label: '新台币 (TWD)', value: 'TWD' },
+      { label: '欧元 (EUR)', value: 'EUR' },
+      { label: '英镑 (GBP)', value: 'GBP' },
+    ],
+    'zh-TW': [
+      { label: '港幣 (HKD)', value: 'HKD' },
+      { label: '美元 (USD)', value: 'USD' },
+      { label: '人民幣 (CNY)', value: 'CNY' },
+      { label: '新臺幣 (TWD)', value: 'TWD' },
+      { label: '歐元 (EUR)', value: 'EUR' },
+      { label: '英鎊 (GBP)', value: 'GBP' },
+    ],
+  }
 
-  const paymentMethodOptions = [
-    { label: 'Bank Transfer', value: 'bank-transfer' },
-    { label: 'FPS', value: 'fps' },
-    { label: 'PayMe', value: 'payme' },
-    { label: 'Cheque', value: 'cheque' },
-    { label: 'Cash', value: 'cash' },
-    { label: 'Other', value: 'other' },
-  ]
+  const paymentMethodOptions: Record<Locale, { label: string; value: string }[]> = {
+    en: [
+      { label: 'Bank Transfer', value: 'bank-transfer' },
+      { label: 'FPS', value: 'fps' },
+      { label: 'PayMe', value: 'payme' },
+      { label: 'Cheque', value: 'cheque' },
+      { label: 'Cash', value: 'cash' },
+      { label: 'Other', value: 'other' },
+    ],
+    'zh-CN': [
+      { label: '银行转账', value: 'bank-transfer' },
+      { label: '转数快', value: 'fps' },
+      { label: 'PayMe', value: 'payme' },
+      { label: '支票', value: 'cheque' },
+      { label: '现金', value: 'cash' },
+      { label: '其他', value: 'other' },
+    ],
+    'zh-TW': [
+      { label: '銀行轉賬', value: 'bank-transfer' },
+      { label: '轉數快', value: 'fps' },
+      { label: 'PayMe', value: 'payme' },
+      { label: '支票', value: 'cheque' },
+      { label: '現金', value: 'cash' },
+      { label: '其他', value: 'other' },
+    ],
+  }
 
-  await createFormIfMissing(
+  await ensureForm(
     'Donation',
     (locale) => {
       const t = donationTranslations[locale]
@@ -1055,7 +1173,7 @@ async function seedForms(payload: import('payload').Payload) {
           label: t.currency,
           required: true,
           defaultValue: 'HKD',
-          options: currencyOptions,
+          options: currencyOptions[locale],
         },
         { blockType: 'text', name: 'transferDate', label: t.transferDate, required: true },
         {
@@ -1063,9 +1181,19 @@ async function seedForms(payload: import('payload').Payload) {
           name: 'paymentMethod',
           label: t.paymentMethod,
           required: true,
-          options: paymentMethodOptions,
+          options: paymentMethodOptions[locale],
         },
         { blockType: 'textarea', name: 'message', label: t.message, required: false },
+        {
+          blockType: 'upload',
+          name: 'receipt',
+          label: t.receipt,
+          uploadCollection: 'media',
+          multiple: true,
+          required: false,
+          mimeTypes: [{ mimeType: 'image/*' }],
+          maxFileSize: 5 * 1024 * 1024,
+        },
       ]
     },
     {

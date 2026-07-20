@@ -5,10 +5,11 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import FormRenderer from '@/components/FormRenderer';
 import type { CMSForm } from '@/lib/cms';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 interface DonateContentProps {
   donationForm?: CMSForm | null;
@@ -18,6 +19,7 @@ export default function DonateContent({ donationForm }: DonateContentProps) {
   const t = useTranslations('donate');
   const pageRef = useRef<HTMLDivElement>(null);
   const shimmerRef = useRef<HTMLDivElement>(null);
+  const methodsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -39,6 +41,12 @@ export default function DonateContent({ donationForm }: DonateContentProps) {
   };
   const shimmerOut = () => {
     if (shimmerRef.current) gsap.to(shimmerRef.current, { left: '-100%', duration: 0.3, ease: 'none' });
+  };
+
+  const scrollToMethods = () => {
+    if (methodsRef.current) {
+      gsap.to(window, { scrollTo: { y: methodsRef.current, offsetY: 80 }, duration: 0.8, ease: 'power2.inOut' });
+    }
   };
 
   const methods = [
@@ -74,7 +82,7 @@ export default function DonateContent({ donationForm }: DonateContentProps) {
       </section>
 
       {/* Methods */}
-      <section className="section" style={{ backgroundColor: 'var(--color-bg-base)' }}>
+      <section ref={methodsRef} className="section" style={{ backgroundColor: 'var(--color-bg-base)' }}>
         <div className="container-main">
           <h2 className="reveal text-title font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
             {t('methodsTitle')}
@@ -181,6 +189,7 @@ export default function DonateContent({ donationForm }: DonateContentProps) {
             <button
               className="relative px-12 py-4 font-semibold overflow-hidden rounded-lg"
               style={{ backgroundColor: 'var(--color-primary-600)', color: 'var(--color-text-on-primary)' }}
+              onClick={scrollToMethods}
               onMouseEnter={shimmerIn}
               onMouseLeave={shimmerOut}
             >

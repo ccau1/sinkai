@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import type { CMSForm, CMSFormField } from '@/lib/cms';
+import type { CMSForm, CMSFormField, CMSFormUploadField } from '@/lib/cms';
 import RichTextContent from '@/components/RichTextContent';
 
 interface FormRendererProps {
@@ -22,7 +22,12 @@ export default function FormRenderer({ form }: FormRendererProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<Record<string, File[]>>({});
   const formRef = useRef<HTMLFormElement>(null);
+
+  const handleFilesChange = (fieldName: string, selected: File[]) => {
+    setFiles((prev) => ({ ...prev, [fieldName]: selected }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,9 +46,15 @@ export default function FormRenderer({ form }: FormRendererProps) {
     setSubmitting(true);
     setError(null);
 
+    const uploadFieldNames = new Set(
+      (form.fields || [])
+        .filter((f): f is CMSFormUploadField => f.blockType === 'upload')
+        .map((f) => f.name),
+    );
+
     const submissionData: { field: string; value: string }[] = [];
     for (const field of form.fields || []) {
-      if (field.blockType === 'message') continue;
+      if (field.blockType === 'message' || field.blockType === 'upload') continue;
 
       const name = field.name;
       if (field.blockType === 'checkbox') {
@@ -61,10 +72,26 @@ export default function FormRenderer({ form }: FormRendererProps) {
         throw new Error('NEXT_PUBLIC_CMS_API_URL is not configured');
       }
 
+      let body: FormData | string;
+      const headers: Record<string, string> = {};
+
+      if (uploadFieldNames.size > 0) {
+        body = new FormData();
+        body.append('_payload', JSON.stringify({ form: form.id, submissionData }));
+        for (const name of uploadFieldNames) {
+          for (const file of files[name] || []) {
+            body.append(name, file);
+          }
+        }
+      } else {
+        body = JSON.stringify({ form: form.id, submissionData });
+        headers['Content-Type'] = 'application/json';
+      }
+
       const res = await fetch(`${base}/api/form-submissions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ form: form.id, submissionData }),
+        headers,
+        body,
       });
 
       if (!res.ok) {
@@ -122,7 +149,12 @@ export default function FormRenderer({ form }: FormRendererProps) {
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
       {form.fields?.map((field, index) => (
-        <FieldInput key={field.id || `field-${index}`} field={field} disabled={submitting} />
+        <FieldInput
+          key={field.id || `field-${index}`}
+          field={field}
+          disabled={submitting}
+          onFilesChange={handleFilesChange}
+        />
       ))}
 
       {/* Honeypot field */}
@@ -149,7 +181,90 @@ export default function FormRenderer({ form }: FormRendererProps) {
   );
 }
 
-function FieldInput({ field, disabled }: { field: CMSFormField; disabled: boolean }) {
+const MAX_UPLOAD_FILES = 2;
+const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+function formatAccept(mimeTypes?: CMSFormUploadField['mimeTypes']): string {
+  if (!mimeTypes || mimeTypes.length === 0) return 'image/*';
+  return mimeTypes.map((m) => m.mimeType).join(',');
+}
+
+function UploadFieldInput({
+  field,
+  disabled,
+  onChange,
+}: {
+  field: CMSFormUploadField;
+  disabled?: boolean;
+  onChange: (files: File[]) => void;
+}) {
+  const t = useTranslations('forms');
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const maxFileSize = field.maxFileSize || DEFAULT_MAX_FILE_SIZE;
+  const accept = formatAccept(field.mimeTypes);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    const chosen = Array.from(e.target.files || []);
+    if (chosen.length > MAX_UPLOAD_FILES) {
+      setError(t('fileTooMany', { max: MAX_UPLOAD_FILES }));
+      onChange(chosen.slice(0, MAX_UPLOAD_FILES));
+      return;
+    }
+    const oversized = chosen.find((file) => file.size > maxFileSize);
+    if (oversized) {
+      const sizeMB = (maxFileSize / (1024 * 1024)).toFixed(0);
+      setError(t('fileTooLarge', { name: oversized.name, sizeMB }));
+      onChange(chosen.filter((file) => file.size <= maxFileSize));
+      return;
+    }
+    onChange(chosen);
+  };
+
+  const labelText = field.label || field.name;
+
+  return (
+    <div>
+      <label
+        className="block text-xs font-medium mb-1.5"
+        style={{ color: 'var(--color-text-tertiary)' }}
+      >
+        {labelText}
+        {field.required && <span style={{ color: 'var(--color-primary-500)' }}> *</span>}
+      </label>
+      <input
+        ref={inputRef}
+        type="file"
+        name={field.name}
+        accept={accept}
+        multiple={!!field.multiple}
+        disabled={disabled}
+        onChange={handleChange}
+        className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold"
+        style={{ color: 'var(--color-text-secondary)' }}
+      />
+      <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+        {t('uploadHint', { max: MAX_UPLOAD_FILES, sizeMB: (maxFileSize / (1024 * 1024)).toFixed(0) })}
+      </p>
+      {error && (
+        <p className="text-xs mt-1" style={{ color: 'var(--color-error, #dc2626)' }}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function FieldInput({
+  field,
+  disabled,
+  onFilesChange,
+}: {
+  field: CMSFormField;
+  disabled: boolean;
+  onFilesChange?: (name: string, files: File[]) => void;
+}) {
   const t = useTranslations('forms');
 
   if (field.blockType === 'message') {
@@ -315,6 +430,15 @@ function FieldInput({ field, disabled }: { field: CMSFormField; disabled: boolea
             }}
           />
         </div>
+      );
+
+    case 'upload':
+      return (
+        <UploadFieldInput
+          field={field as CMSFormUploadField}
+          disabled={disabled}
+          onChange={(selected) => onFilesChange?.(field.name, selected)}
+        />
       );
 
     case 'text':

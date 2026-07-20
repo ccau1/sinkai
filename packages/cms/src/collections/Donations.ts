@@ -113,6 +113,17 @@ export const Donations: CollectionConfig = {
       },
     },
     {
+      name: 'receipts',
+      type: 'relationship',
+      relationTo: 'media',
+      hasMany: true,
+      maxRows: 2,
+      label: 'Receipt Images',
+      admin: {
+        description: 'Receipt images uploaded through the donation form.',
+      },
+    },
+    {
       name: 'notes',
       type: 'textarea',
       label: 'Internal Notes',

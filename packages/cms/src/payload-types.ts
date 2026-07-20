@@ -213,7 +213,7 @@ export interface Blog {
  */
 export interface Media {
   id: number;
-  alt: string;
+  alt?: string | null;
   /**
    * Used to organize media files. Media in this category can be shown on the gallery page.
    */
@@ -394,6 +394,10 @@ export interface Donation {
    * Optional note or dedication from the donor.
    */
   message?: string | null;
+  /**
+   * Receipt images uploaded through the donation form.
+   */
+  receipts?: (number | Media)[] | null;
   /**
    * Staff-only notes about this donation (not shown to the donor).
    */
@@ -603,6 +607,24 @@ export interface Form {
             blockName?: string | null;
             blockType: 'textarea';
           }
+        | {
+            name: string;
+            label?: string | null;
+            uploadCollection: 'media';
+            mimeTypes?:
+              | {
+                  mimeType: string;
+                  id?: string | null;
+                }[]
+              | null;
+            width?: number | null;
+            maxFileSize?: number | null;
+            required?: boolean | null;
+            multiple?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'upload';
+          }
       )[]
     | null;
   submitButtonLabel?: string | null;
@@ -669,6 +691,16 @@ export interface FormSubmission {
     | {
         field: string;
         value: string;
+        id?: string | null;
+      }[]
+    | null;
+  submissionUploads?:
+    | {
+        field: string;
+        value: {
+          relationTo: 'media';
+          value: number | Media;
+        }[];
         id?: string | null;
       }[]
     | null;
@@ -858,6 +890,7 @@ export interface DonationsSelect<T extends boolean = true> {
   paymentMethod?: T;
   installations?: T;
   message?: T;
+  receipts?: T;
   notes?: T;
   status?: T;
   receiptSent?: T;
@@ -1065,6 +1098,25 @@ export interface FormsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        upload?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              uploadCollection?: T;
+              mimeTypes?:
+                | T
+                | {
+                    mimeType?: T;
+                    id?: T;
+                  };
+              width?: T;
+              maxFileSize?: T;
+              required?: T;
+              multiple?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   submitButtonLabel?: T;
   confirmationType?: T;
@@ -1097,6 +1149,13 @@ export interface FormsSelect<T extends boolean = true> {
 export interface FormSubmissionsSelect<T extends boolean = true> {
   form?: T;
   submissionData?:
+    | T
+    | {
+        field?: T;
+        value?: T;
+        id?: T;
+      };
+  submissionUploads?:
     | T
     | {
         field?: T;

@@ -25,7 +25,9 @@ export const Media: CollectionConfig = {
   },
   access: {
     read: ({ req }) => (req.user ? true : { prefix: { not_equals: 'private' } }),
-    create: isContentEditor,
+    // Allow public uploads so the donation form can accept receipt images.
+    // The form-builder plugin enforces per-field MIME type and size limits.
+    create: () => true,
     update: isContentEditor,
     delete: ({ req: { user } }) =>
       userIsAdmin(user) || hasPermission(user, PERMISSIONS.DELETE_MEDIA),
@@ -64,7 +66,7 @@ export const Media: CollectionConfig = {
       type: 'text',
       label: 'Alt Text',
       localized: true,
-      required: true,
+      required: false,
     },
     {
       name: 'category',
