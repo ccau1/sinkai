@@ -4,7 +4,8 @@ export interface CMSMedia {
   id: number | string
   url?: string
   filename?: string
-  alt?: string
+  /** May be a localized object, a JSON-stringified object, or a plain string. */
+  alt?: string | Record<string, string>
   category?: string
   sortOrder?: number
   hidden?: boolean
@@ -126,30 +127,37 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
   return url
 }
 
-function normalizeMedia(media: CMSMedia | undefined): CMSMedia | undefined {
+function normalizeMedia(
+  media: CMSMedia | undefined,
+  locale?: Locale,
+): CMSMedia | undefined {
   if (!media) return media
   return {
     ...media,
     url: resolveMediaUrl(media.url) || media.filename,
+    alt: locale ? resolveLocalizedField(media.alt, locale, '') : media.alt,
   }
 }
 
-function normalizeLexicalContent(content: unknown): unknown {
+function normalizeLexicalContent(
+  content: unknown,
+  locale?: Locale,
+): unknown {
   if (!content || typeof content !== 'object') return content
   if (Array.isArray(content)) {
-    return content.map(normalizeLexicalContent)
+    return content.map((item) => normalizeLexicalContent(item, locale))
   }
   const node = content as Record<string, unknown>
   if (node.type === 'upload' && node.value && typeof node.value === 'object') {
     return {
       ...node,
-      value: normalizeMedia(node.value as CMSMedia),
+      value: normalizeMedia(node.value as CMSMedia, locale),
     }
   }
   if (node.children && Array.isArray(node.children)) {
     return {
       ...node,
-      children: node.children.map(normalizeLexicalContent),
+      children: node.children.map((child) => normalizeLexicalContent(child, locale)),
     }
   }
   return content
@@ -185,8 +193,13 @@ export function getInstallationDescription(doc: CMSInstallation): string | undef
   return doc.description
 }
 
-export function getMediaAlt(media: CMSMedia): string {
-  return media.alt || ''
+export function getMediaAlt(media: CMSMedia, locale?: Locale | string): string {
+  if (!media.alt) return ''
+  if (locale) {
+    return resolveLocalizedField(media.alt, locale as Locale, '')
+  }
+  if (typeof media.alt === 'string') return media.alt
+  return ''
 }
 
 function localeQuery(locale: Locale): string {
@@ -209,7 +222,7 @@ export async function fetchBlogs(locale: Locale): Promise<CMSBlog[]> {
       `CMS blogs returned ${docs.length - validDocs.length} invalid doc(s) (missing slugName/shortId). Excluding them.`,
     )
   }
-  return validDocs.map(normalizeBlog)
+  return validDocs.map((doc) => normalizeBlog(doc, locale))
 }
 
 export async function fetchBlogBySlug(
@@ -222,7 +235,7 @@ export async function fetchBlogBySlug(
     `${base}/api/blogs?where[and][0][slugName][equals]=${encodeURIComponent(slug)}&where[and][1][shortId][equals]=${encodeURIComponent(shortId)}&depth=1&${localeQuery(locale)}`,
   )
   const doc = data.docs?.[0]
-  return doc ? normalizeBlog(doc) : null
+  return doc ? normalizeBlog(doc, locale) : null
 }
 
 export async function fetchBlogForRedirect(
@@ -255,8 +268,8 @@ export async function fetchInstallations(
       console.warn(`CMS installations fetch failed: ${res.status}. Returning empty list.`)
       return []
     }
-    const data = await res.json()
-    return (data.docs || []).map(normalizeInstallation)
+    const data = (await res.json()) as { docs?: CMSInstallation[] }
+    return (data.docs || []).map((doc) => normalizeInstallation(doc, locale))
   } catch (err) {
     console.warn('CMS installations fetch error:', err)
     return []
@@ -281,7 +294,7 @@ export async function fetchInstallationBySlug(
     }
     const data = await res.json()
     const doc = data.docs?.[0]
-    return doc ? normalizeInstallation(doc) : null
+    return doc ? normalizeInstallation(doc, locale) : null
   } catch (err) {
     console.warn('CMS installation fetch error:', err)
     return null
@@ -306,7 +319,7 @@ export async function fetchPageBySlug(
     }
     const data = await res.json()
     const doc = data.docs?.[0]
-    return doc ? normalizePage(doc) : null
+    return doc ? normalizePage(doc, locale) : null
   } catch (err) {
     console.warn('CMS page fetch error:', err)
     return null
@@ -331,8 +344,8 @@ export async function fetchTestimonies(
       console.warn(`CMS testimonies fetch failed: ${res.status}. Returning empty list.`)
       return []
     }
-    const data = await res.json()
-    return (data.docs || []).map(normalizeTestimony)
+    const data = (await res.json()) as { docs?: CMSTestimony[] }
+    return (data.docs || []).map((doc) => normalizeTestimony(doc, locale))
   } catch (err) {
     console.warn('CMS testimonies fetch error:', err)
     return []
@@ -374,7 +387,7 @@ export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySecti
       if (!grouped.has(category)) {
         grouped.set(category, [])
       }
-      grouped.get(category)!.push(normalizeMedia(doc)!)
+      grouped.get(category)!.push(normalizeMedia(doc, locale)!)
     }
 
     return gallerySectionOrder
@@ -422,39 +435,48 @@ export function resolveNavItemHref(
   return undefined
 }
 
-function normalizeBlog(doc: CMSBlog): CMSBlog {
+function normalizeBlog(doc: CMSBlog, locale: Locale): CMSBlog {
   return {
     ...doc,
-    content: normalizeLexicalContent(doc.content),
-    coverImage: normalizeMedia(doc.coverImage),
-    installations: (doc.installations || []).map(normalizeInstallation),
+    content: normalizeLexicalContent(doc.content, locale),
+    coverImage: normalizeMedia(doc.coverImage, locale),
+    installations: (doc.installations || []).map((installation) =>
+      normalizeInstallation(installation, locale),
+    ),
   }
 }
 
-function normalizeInstallation(doc: CMSInstallation): CMSInstallation {
+function normalizeInstallation(
+  doc: CMSInstallation,
+  locale: Locale,
+): CMSInstallation {
   return {
     ...doc,
-    photos: (doc.photos || []).map(normalizeMedia).filter(Boolean) as CMSMedia[],
+    photos: (doc.photos || [])
+      .map((photo) => normalizeMedia(photo, locale))
+      .filter(Boolean) as CMSMedia[],
   }
 }
 
-function normalizePage(doc: CMSPage): CMSPage {
+function normalizePage(doc: CMSPage, locale: Locale): CMSPage {
   return {
     ...doc,
-    content: normalizeLexicalContent(doc.content),
-    coverImage: normalizeMedia(doc.coverImage),
+    content: normalizeLexicalContent(doc.content, locale),
+    coverImage: normalizeMedia(doc.coverImage, locale),
   }
 }
 
-function normalizeTestimony(doc: CMSTestimony): CMSTestimony {
+function normalizeTestimony(doc: CMSTestimony, locale: Locale): CMSTestimony {
   return {
     ...doc,
-    content: normalizeLexicalContent(doc.content),
-    photos: (doc.photos || []).map(normalizeMedia).filter(Boolean) as CMSMedia[],
+    content: normalizeLexicalContent(doc.content, locale),
+    photos: (doc.photos || [])
+      .map((photo) => normalizeMedia(photo, locale))
+      .filter(Boolean) as CMSMedia[],
   }
 }
 
-function resolveLocalizedField(
+export function resolveLocalizedField(
   value: unknown,
   locale: Locale,
   fallback = '',
@@ -484,7 +506,10 @@ function resolveLocalizedField(
   return fallback
 }
 
-function normalizeNavigation(data: unknown, locale: Locale): CMSNavigation {
+function normalizeNavigation(
+  data: unknown,
+  locale: Locale,
+): CMSNavigation {
   const nav = (data || {}) as { items?: CMSNavItemRaw[] }
   return {
     items: (nav.items || [])
@@ -495,7 +520,7 @@ function normalizeNavigation(data: unknown, locale: Locale): CMSNavigation {
           label: resolveLocalizedField(label, locale),
           page:
             item.page && typeof item.page === 'object'
-              ? normalizePage(item.page as CMSPage)
+              ? normalizePage(item.page as CMSPage, locale)
               : item.page,
         }
       })

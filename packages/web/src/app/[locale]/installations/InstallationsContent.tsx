@@ -1,7 +1,7 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import type { CMSInstallation } from '@/lib/cms';
@@ -16,6 +16,7 @@ interface Props {
 
 export default function InstallationsContent({ schools, bridges, waterTanks }: Props) {
   const t = useTranslations('installations');
+  const locale = useLocale();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,9 +70,9 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
                   <div className="relative aspect-video overflow-hidden">
                     <CmsImage
                       src={photo.url || ''}
-                      alt={getMediaAlt(photo)}
+                      alt={getMediaAlt(photo, locale)}
                       fill
-                      transformWidth={600}
+                      size="md"
                       transformFit="cover"
                       transformFormat="auto"
                       transformQuality={85}

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CmsImage from '@/components/CmsImage';
 import type { CMSGallerySection, GalleryCategory } from '@/lib/cms';
+import { getMediaAlt } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,6 +36,7 @@ function categoryToKeys(category: GalleryCategory) {
 
 export default function GalleryContent({ sections }: GalleryContentProps) {
   const t = useTranslations('gallery');
+  const locale = useLocale();
   const [lightbox, setLightbox] = useState<{ images: CMSGallerySection['images']; index: number } | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -109,8 +111,8 @@ export default function GalleryContent({ sections }: GalleryContentProps) {
                     onClick={() => setLightbox({ images: section.images, index: i })}>
                     <CmsImage
                       src={image.url}
-                      alt={image.alt || ''}
-                      transformWidth={400}
+                      alt={getMediaAlt(image, locale)}
+                      size="sm"
                       transformFit="cover"
                       transformFormat="auto"
                       fill
@@ -175,8 +177,8 @@ export default function GalleryContent({ sections }: GalleryContentProps) {
           )}
           <CmsImage
             src={lightbox.images[lightbox.index].url}
-            alt={lightbox.images[lightbox.index].alt || ''}
-            transformWidth={1600}
+            alt={getMediaAlt(lightbox.images[lightbox.index], locale)}
+            size="full"
             transformFormat="auto"
             width={1200}
             height={800}

@@ -12,6 +12,40 @@ import { locales, type Locale } from '../locales'
 
 dotenvConfig({ path: '.env' })
 
+const defaultLocale: Locale = 'zh-TW'
+
+async function createLocalizedMedia(
+  payload: import('payload').Payload,
+  filePath: string,
+  alt: Record<Locale, string>,
+  extraData: Record<string, unknown> = {},
+): Promise<{ id: number | string }> {
+  // Work around a Payload/D1 serialization issue: creating a media doc with a
+  // localized object for `alt` in a single call can store it as a JSON string.
+  // Create the default locale first, then update the remaining locales.
+  const created = await payload.create({
+    collection: 'media',
+    data: {
+      alt: alt[defaultLocale],
+      ...extraData,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
+    filePath,
+  })
+
+  for (const locale of ['en', 'zh-CN'] as const) {
+    await payload.update({
+      collection: 'media',
+      id: created.id,
+      locale,
+      data: { alt: alt[locale] },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+  }
+
+  return created
+}
+
 const cwd = process.cwd()
 const webPublicDir = path.resolve(cwd, '../web/public')
 
@@ -105,17 +139,10 @@ async function seed() {
           coverImageId = existingMedia.docs[0].id
           console.log(`Reusing existing media for cover: ${coverFilename}`)
         } else {
-          const media = await payload.create({
-            collection: 'media',
-            data: {
-              alt: {
-                en: post.translations.en.title,
-                'zh-CN': post.translations['zh-CN'].title,
-                'zh-TW': post.translations['zh-TW'].title,
-              },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any,
-            filePath: coverPath,
+          const media = await createLocalizedMedia(payload, coverPath, {
+            en: post.translations.en.title,
+            'zh-CN': post.translations['zh-CN'].title,
+            'zh-TW': post.translations['zh-TW'].title,
           })
           coverImageId = media.id
           console.log(`Created media for cover: ${post.coverImage}`)
@@ -344,17 +371,10 @@ async function seedTestimonies(payload: import('payload').Payload) {
         continue
       }
 
-      const media = await payload.create({
-        collection: 'media',
-        data: {
-          alt: {
-            en: en.name,
-            'zh-CN': testimony.translations['zh-CN'].name,
-            'zh-TW': testimony.translations['zh-TW'].name,
-          },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-        filePath: fullPath,
+      const media = await createLocalizedMedia(payload, fullPath, {
+        en: en.name,
+        'zh-CN': testimony.translations['zh-CN'].name,
+        'zh-TW': testimony.translations['zh-TW'].name,
       })
       photoIds.push(media.id)
       console.log(`Created media for testimony photo: ${photoPath}`)
@@ -463,17 +483,10 @@ async function seedInstallations(payload: import('payload').Payload) {
         continue
       }
 
-      const media = await payload.create({
-        collection: 'media',
-        data: {
-          alt: {
-            en: en.title,
-            'zh-CN': installation.translations['zh-CN'].title,
-            'zh-TW': installation.translations['zh-TW'].title,
-          },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-        filePath: fullPath,
+      const media = await createLocalizedMedia(payload, fullPath, {
+        en: en.title,
+        'zh-CN': installation.translations['zh-CN'].title,
+        'zh-TW': installation.translations['zh-TW'].title,
       })
       photoIds.push(media.id)
       console.log(`Created media for installation photo: ${photoPath}`)
@@ -579,21 +592,20 @@ async function seedGallery(payload: import('payload').Payload) {
         continue
       }
 
-      await payload.create({
-        collection: 'media',
-        data: {
-          alt: {
-            en: `Gallery image: ${section.category}`,
-            'zh-CN': `图库图片：${section.category}`,
-            'zh-TW': `圖庫圖片：${section.category}`,
-          },
+      await createLocalizedMedia(
+        payload,
+        fullPath,
+        {
+          en: `Gallery image: ${section.category}`,
+          'zh-CN': `图库图片：${section.category}`,
+          'zh-TW': `圖庫圖片：${section.category}`,
+        },
+        {
           category: section.category as GalleryCategory,
           sortOrder: i,
           hidden: false,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-        filePath: fullPath,
-      })
+        },
+      )
       console.log(`Created media for gallery: ${imagePath}`)
       created++
     }

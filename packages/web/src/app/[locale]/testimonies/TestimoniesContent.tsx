@@ -113,7 +113,7 @@ export default function TestimoniesContent({ testimonies }: TestimoniesContentPr
                           src={firstPhoto?.url}
                           alt={testimony.name}
                           fill
-                          transformWidth={600}
+                          size="md"
                           transformFit="cover"
                           transformFormat="auto"
                           transformQuality={85}
@@ -200,7 +200,7 @@ export default function TestimoniesContent({ testimonies }: TestimoniesContentPr
                     src={activeTestimony.photos[0]?.url}
                     alt={activeTestimony.name}
                     fill
-                    transformWidth={800}
+                    size="lg"
                     transformFit="cover"
                     transformFormat="auto"
                     transformQuality={85}

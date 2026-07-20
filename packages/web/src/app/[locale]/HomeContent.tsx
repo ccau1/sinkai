@@ -555,7 +555,7 @@ export default function HomeContent({ testimonies }: HomeContentProps) {
                             src={photo?.url}
                             alt={testimony.name}
                             fill
-                            transformWidth={600}
+                            size="md"
                             transformFit="cover"
                             transformFormat="auto"
                             transformQuality={85}

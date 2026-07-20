@@ -58,7 +58,7 @@ export default function BlogContent({ posts }: BlogContentProps) {
                           src={coverUrl}
                           alt={title}
                           fill
-                          transformWidth={600}
+                          size="md"
                           transformFit="cover"
                           transformFormat="auto"
                           transformQuality={85}

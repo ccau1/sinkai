@@ -303,6 +303,7 @@ async function createReplacementMedia(
 
   return (await payload.create({
     collection: 'media',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: data as any,
     filePath,
     depth: 0,
