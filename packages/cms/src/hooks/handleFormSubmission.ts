@@ -176,9 +176,13 @@ function getUploadIds(
 
   return entry.value
     .map((item) => {
-      const raw = item.value
+      // The declared type is `number | string`, but with depth > 0 Payload may
+      // return the populated document object instead of a bare ID.
+      const raw: unknown = item.value
       if (typeof raw === 'number' || typeof raw === 'string') return raw
-      if (raw && typeof raw === 'object' && 'id' in raw) return raw.id as number | string
+      if (raw && typeof raw === 'object' && 'id' in raw) {
+        return (raw as { id: number | string }).id
+      }
       return undefined
     })
     .filter((id): id is number | string => id !== undefined && id !== '')
