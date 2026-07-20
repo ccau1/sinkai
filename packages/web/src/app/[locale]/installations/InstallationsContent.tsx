@@ -1,7 +1,7 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import type { CMSInstallation } from '@/lib/cms';
@@ -17,6 +17,7 @@ interface Props {
 export default function InstallationsContent({ schools, bridges, waterTanks }: Props) {
   const t = useTranslations('installations');
   const locale = useLocale();
+  const formatter = useFormatter();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -87,7 +88,11 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
                   </h3>
                   {item.completionDate && (
                     <p className="text-label mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {item.completionDate}
+                      {formatter.dateTime(new Date(item.completionDate), {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </p>
                   )}
                   <p className="text-body-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>

@@ -191,11 +191,12 @@ async function seed() {
         collection: 'users',
         data: {
           email: 'admin@sinkai.org',
+          username: 'admin',
           password: 'admin123',
           roles: ['admin'],
         },
       })
-      console.log('Created default admin user: admin@sinkai.org / admin123')
+      console.log('Created default admin user: admin@sinkai.org / admin123 (username: admin)')
     } else {
       // Ensure the first user has admin privileges for local development.
       const firstUser = existingUsers.docs[0]

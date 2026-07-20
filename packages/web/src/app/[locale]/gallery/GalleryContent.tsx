@@ -177,6 +177,7 @@ export default function GalleryContent({ sections }: GalleryContentProps) {
             </button>
           )}
           <CmsImage
+            key={`lightbox-${lightbox.index}`}
             src={lightbox.images[lightbox.index].url}
             alt={getMediaAlt(lightbox.images[lightbox.index], locale)}
             size="full"
