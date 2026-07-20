@@ -1,18 +1,23 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import FormRenderer from '@/components/FormRenderer';
+import type { CMSForm } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function DonatePage() {
+interface DonateContentProps {
+  donationForm?: CMSForm | null;
+}
+
+export default function DonateContent({ donationForm }: DonateContentProps) {
   const t = useTranslations('donate');
   const pageRef = useRef<HTMLDivElement>(null);
   const shimmerRef = useRef<HTMLDivElement>(null);
-  const [formVisible, setFormVisible] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -139,6 +144,21 @@ export default function DonatePage() {
           </div>
         </div>
       </section>
+
+      {/* Donation Form */}
+      {donationForm && (
+        <section className="section" style={{ backgroundColor: 'var(--color-bg-base)' }}>
+          <div className="container-main max-w-2xl">
+            <h2 className="reveal text-title font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+              {t('formTitle')}
+            </h2>
+            <p className="reveal text-body mb-8" style={{ color: 'var(--color-text-secondary)' }}>
+              {t('formSubtitle')}
+            </p>
+            <FormRenderer form={donationForm} />
+          </div>
+        </section>
+      )}
 
       {/* Account Info */}
       <section className="section text-center" style={{ backgroundColor: 'var(--color-bg-surface)' }}>

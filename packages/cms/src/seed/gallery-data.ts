@@ -1,6 +1,6 @@
 import type { Locale } from '../locales'
 
-export interface GalleryCategorySeed {
+export interface MediaCategorySeed {
   slug: string
   label: Record<Locale, string>
   title: Record<Locale, string>
@@ -11,17 +11,17 @@ export interface GalleryCategorySeed {
 }
 
 /**
- * Gallery categories and their images. Categories are rendered on the public
+ * Media categories and their images. Categories are rendered on the public
  * gallery page ordered by sortOrder. Text is seeded into the CMS so editors can
  * manage categories and their localized headings without code changes.
  */
-export const galleryCategories: GalleryCategorySeed[] = [
+export const mediaCategories: MediaCategorySeed[] = [
   {
     slug: 'snow-disaster',
     label: {
       en: 'SNOW DISASTER RELIEF',
-      'zh-CN': 'SNOW DISASTER RELIEF',
-      'zh-TW': 'SNOW DISASTER RELIEF',
+      'zh-CN': '雪灾救援',
+      'zh-TW': '雪災救援',
     },
     title: {
       en: 'Snow Disaster Relief',
@@ -76,8 +76,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'old-schools',
     label: {
       en: 'OLD SCHOOL BUILDINGS',
-      'zh-CN': 'OLD SCHOOL BUILDINGS',
-      'zh-TW': 'OLD SCHOOL BUILDINGS',
+      'zh-CN': '旧校舍面貌',
+      'zh-TW': '舊校舍面貌',
     },
     title: {
       en: 'Old School Buildings',
@@ -125,8 +125,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'new-schools',
     label: {
       en: 'NEW SCHOOL BUILDINGS',
-      'zh-CN': 'NEW SCHOOL BUILDINGS',
-      'zh-TW': 'NEW SCHOOL BUILDINGS',
+      'zh-CN': '新校舍面貌',
+      'zh-TW': '新校舍面貌',
     },
     title: {
       en: 'New School Buildings',
@@ -169,8 +169,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'field-trip',
     label: {
       en: 'FIELD TRIP HIGHLIGHTS',
-      'zh-CN': 'FIELD TRIP HIGHLIGHTS',
-      'zh-TW': 'FIELD TRIP HIGHLIGHTS',
+      'zh-CN': '实地考察剪影',
+      'zh-TW': '實地考察剪影',
     },
     title: {
       en: 'Field Trip Highlights',
@@ -215,8 +215,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'hk-charity',
     label: {
       en: 'CHARITY IN HONG KONG',
-      'zh-CN': 'CHARITY IN HONG KONG',
-      'zh-TW': 'CHARITY IN HONG KONG',
+      'zh-CN': '在港慈善活动',
+      'zh-TW': '在港慈善活動',
     },
     title: {
       en: 'Charity in Hong Kong',
@@ -260,8 +260,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'mountain',
     label: {
       en: 'GUIZHOU MOUNTAIN REALITY',
-      'zh-CN': 'GUIZHOU MOUNTAIN REALITY',
-      'zh-TW': 'GUIZHOU MOUNTAIN REALITY',
+      'zh-CN': '贵州山区实景',
+      'zh-TW': '貴州山區實景',
     },
     title: {
       en: 'Guizhou Mountain Reality',
@@ -310,8 +310,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'activities',
     label: {
       en: 'ANNUAL ACTIVITIES',
-      'zh-CN': 'ANNUAL ACTIVITIES',
-      'zh-TW': 'ANNUAL ACTIVITIES',
+      'zh-CN': '全年周期活动',
+      'zh-TW': '全年週期活動',
     },
     title: {
       en: 'Annual Activities',
@@ -345,8 +345,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'news',
     label: {
       en: 'NEWS & MOONCAKE',
-      'zh-CN': 'NEWS & MOONCAKE',
-      'zh-TW': 'NEWS & MOONCAKE',
+      'zh-CN': '最新资讯与月饼',
+      'zh-TW': '最新資訊與月餅',
     },
     title: {
       en: 'Latest News & Mid-Autumn Mooncake',
@@ -377,8 +377,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
     slug: 'others',
     label: {
       en: 'THANK YOU LETTERS & POSTERS',
-      'zh-CN': 'THANK YOU LETTERS & POSTERS',
-      'zh-TW': 'THANK YOU LETTERS & POSTERS',
+      'zh-CN': '感谢信与活动海报',
+      'zh-TW': '感謝信與活動海報',
     },
     title: {
       en: 'Thank You Letters & Event Posters',
@@ -412,8 +412,8 @@ export const galleryCategories: GalleryCategorySeed[] = [
   },
 ]
 
-/** @deprecated Use galleryCategories directly. */
+/** @deprecated Use mediaCategories directly. */
 export type GalleryCategory = string
 
-/** @deprecated Use galleryCategories directly. */
-export const gallerySections = galleryCategories
+/** @deprecated Use mediaCategories directly. */
+export const gallerySections = mediaCategories

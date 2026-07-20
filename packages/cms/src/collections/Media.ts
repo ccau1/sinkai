@@ -69,10 +69,10 @@ export const Media: CollectionConfig = {
     {
       name: 'category',
       type: 'relationship',
-      relationTo: 'gallery-categories',
-      label: 'Gallery Category',
+      relationTo: 'media-categories',
+      label: 'Media Category',
       admin: {
-        description: 'Used to group images on the gallery page.',
+        description: 'Used to organize media files. Media in this category can be shown on the gallery page.',
       },
     },
     {
@@ -90,7 +90,7 @@ export const Media: CollectionConfig = {
       label: 'Sort Order',
       defaultValue: 0,
       admin: {
-        description: 'Position within the gallery category. Lower numbers appear first.',
+        description: 'Position within the media category. Lower numbers appear first.',
       },
     },
     {

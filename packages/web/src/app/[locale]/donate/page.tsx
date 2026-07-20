@@ -1,5 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
-import { fetchPageBySlug } from '@/lib/cms';
+import { fetchPageBySlug, fetchFormByTitle } from '@/lib/cms';
 import { type Locale } from '@/i18n/config';
 import CMSPageContent from '@/components/CMSPageContent';
 import DonateContent from './DonateContent';
@@ -12,10 +12,14 @@ export default async function Page({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const page = await fetchPageBySlug('donate', locale as Locale);
+  const [page, donationForm] = await Promise.all([
+    fetchPageBySlug('donate', locale as Locale),
+    fetchFormByTitle('Donation', locale as Locale),
+  ]);
+
   if (page) {
     return <CMSPageContent page={page} />;
   }
 
-  return <DonateContent />;
+  return <DonateContent donationForm={donationForm} />;
 }

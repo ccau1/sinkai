@@ -56,9 +56,9 @@ export default function FormRenderer({ form }: FormRendererProps) {
     }
 
     try {
-      const base = (process.env.CMS_API_URL || '').replace(/\/$/, '');
+      const base = (process.env.NEXT_PUBLIC_CMS_API_URL || '').replace(/\/$/, '');
       if (!base) {
-        throw new Error('CMS_API_URL is not configured');
+        throw new Error('NEXT_PUBLIC_CMS_API_URL is not configured');
       }
 
       const res = await fetch(`${base}/api/form-submissions`, {

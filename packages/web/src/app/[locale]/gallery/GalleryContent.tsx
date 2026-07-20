@@ -5,19 +5,19 @@ import { useTranslations, useLocale } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CmsImage from '@/components/CmsImage';
-import type { CMSGallerySection } from '@/lib/cms';
+import type { CMSMediaSection } from '@/lib/cms';
 import { getMediaAlt } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface GalleryContentProps {
-  sections: CMSGallerySection[];
+  sections: CMSMediaSection[];
 }
 
 export default function GalleryContent({ sections }: GalleryContentProps) {
   const t = useTranslations('gallery');
   const locale = useLocale();
-  const [lightbox, setLightbox] = useState<{ images: CMSGallerySection['images']; index: number } | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: CMSMediaSection['images']; index: number } | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

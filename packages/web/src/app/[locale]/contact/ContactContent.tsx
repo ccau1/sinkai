@@ -1,23 +1,22 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import FormRenderer from '@/components/FormRenderer';
+import type { CMSForm } from '@/lib/cms';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ContactContentProps {
-  formId?: string;
+  form?: CMSForm | null;
 }
 
-export default function ContactContent({ formId }: ContactContentProps) {
+export default function ContactContent({ form }: ContactContentProps) {
   const t = useTranslations('contact');
   const pageRef = useRef<HTMLDivElement>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
 
   useEffect(() => {
@@ -34,55 +33,6 @@ export default function ContactContent({ formId }: ContactContentProps) {
     });
     return () => ctx.revert();
   }, []);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!formId) {
-      setError(t('formError'));
-      return;
-    }
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    // Honeypot: if the hidden field is filled, silently "succeed" without sending.
-    const honeypot = String(formData.get('company') || '').trim();
-    if (honeypot) {
-      setSubmitted(true);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-
-    const submissionData = [
-      { field: 'name', value: String(formData.get('name') || '') },
-      { field: 'email', value: String(formData.get('email') || '') },
-      { field: 'phone', value: String(formData.get('phone') || '') },
-      { field: 'subject', value: String(formData.get('subject') || '') },
-      { field: 'message', value: String(formData.get('message') || '') },
-    ];
-
-    try {
-      const res = await fetch(`${process.env.CMS_API_URL?.replace(/\/$/, '')}/api/form-submissions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ form: formId, submissionData }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Submission failed: ${res.status}`);
-      }
-
-      setSubmitted(true);
-      form.reset();
-    } catch (err) {
-      setError(t('formError'));
-      console.error('Contact form submission failed:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const infoBlocks = [
     { icon: 'map', label: t('addressLabel'), lines: [t('address1'), t('address2'), t('mtr')] },
@@ -160,81 +110,12 @@ export default function ContactContent({ formId }: ContactContentProps) {
               <p className="reveal text-label mb-6" style={{ color: 'var(--color-primary-600)' }}>
                 {t('formLabel')}
               </p>
-              {submitted ? (
-                <div className="reveal flex flex-col items-center justify-center py-16 rounded-xl"
-                  style={{ backgroundColor: 'var(--color-primary-50)' }}>
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.5" strokeLinecap="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                  <h3 className="text-title font-semibold mt-4 mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                    {t('formSuccess')}
-                  </h3>
-                </div>
+              {form ? (
+                <FormRenderer form={form} />
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {[
-                    { name: 'name', label: t('formName'), type: 'text', placeholder: t('formNamePlaceholder'), required: true },
-                    { name: 'email', label: t('formEmail'), type: 'email', placeholder: t('formEmailPlaceholder'), required: true },
-                    { name: 'phone', label: t('formPhone'), type: 'tel', placeholder: t('formPhonePlaceholder'), required: false },
-                    { name: 'subject', label: t('formSubject'), type: 'text', placeholder: t('formSubjectPlaceholder'), required: true },
-                  ].map((field) => (
-                    <div key={field.name} className="reveal">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {field.label}{field.required && <span style={{ color: 'var(--color-primary-500)' }}> *</span>}
-                      </label>
-                      <input
-                        type={field.type}
-                        name={field.name}
-                        placeholder={field.placeholder}
-                        required={field.required}
-                        disabled={isSubmitting}
-                        suppressHydrationWarning
-                        className="w-full text-sm py-3 bg-transparent outline-none transition-colors disabled:opacity-50"
-                        style={{
-                          borderBottom: '1px solid var(--color-border)',
-                          color: 'var(--color-text-primary)',
-                        }}
-                        onFocus={(e) => { e.currentTarget.style.borderBottomColor = 'var(--color-primary-500)'; }}
-                        onBlur={(e) => { e.currentTarget.style.borderBottomColor = 'var(--color-border)'; }}
-                      />
-                    </div>
-                  ))}
-                  <div className="reveal">
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {t('formMessage')} <span style={{ color: 'var(--color-primary-500)' }}>*</span>
-                    </label>
-                    <textarea
-                      name="message"
-                      placeholder={t('formMessagePlaceholder')}
-                      required
-                      rows={4}
-                      disabled={isSubmitting}
-                      suppressHydrationWarning
-                      className="w-full text-sm py-3 bg-transparent outline-none resize-y transition-colors disabled:opacity-50"
-                      style={{
-                        borderBottom: '1px solid var(--color-border)',
-                        color: 'var(--color-text-primary)',
-                        minHeight: '120px',
-                      }}
-                      onFocus={(e) => { e.currentTarget.style.borderBottomColor = 'var(--color-primary-500)'; }}
-                      onBlur={(e) => { e.currentTarget.style.borderBottomColor = 'var(--color-border)'; }}
-                    />
-                  </div>
-                  {/* Honeypot field */}
-                  <div className="absolute opacity-0 -z-10" aria-hidden="true">
-                    <input type="text" name="company" tabIndex={-1} autoComplete="off" />
-                  </div>
-                  {error && (
-                    <p className="reveal text-sm" style={{ color: 'var(--color-error, #dc2626)' }}>
-                      {error}
-                    </p>
-                  )}
-                  <div className="reveal pt-4">
-                    <button type="submit" disabled={isSubmitting || !formId} className="btn-primary disabled:opacity-50">
-                      {isSubmitting ? t('formSending') : t('formSubmit')}
-                    </button>
-                  </div>
-                </form>
+                <p className="reveal text-sm" style={{ color: 'var(--color-error, #dc2626)' }}>
+                  {t('formError')}
+                </p>
               )}
             </div>
           </div>

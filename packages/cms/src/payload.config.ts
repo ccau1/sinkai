@@ -14,7 +14,7 @@ import { defaultLocale, payloadLocales } from './locales'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
-import { GalleryCategories } from './collections/GalleryCategories'
+import { MediaCategories } from './collections/MediaCategories'
 import { Installations } from './collections/Installations'
 import { Blogs } from './collections/Blogs'
 import { Pages } from './collections/Pages'
@@ -22,7 +22,7 @@ import { Testimonies } from './collections/Testimonies'
 import { Donations } from './collections/Donations'
 import { Navigation } from './globals/Navigation'
 import { ContactSettings } from './globals/ContactSettings'
-import { sendContactSubmissionEmail } from './hooks/sendContactSubmissionEmail'
+import { handleFormSubmission } from './hooks/handleFormSubmission'
 import { populateShareableLinks } from './hooks/populateShareableLinks'
 
 const filename = fileURLToPath(import.meta.url)
@@ -91,7 +91,7 @@ export default buildConfig({
       defaultLayout: [{ widgetSlug: 'collection-previews', width: 'full' }],
     },
   },
-  collections: [Blogs, Installations, Testimonies, Donations, Pages, Media, GalleryCategories, Users],
+  collections: [Blogs, Installations, Testimonies, Donations, Pages, Media, MediaCategories, Users],
   globals: [Navigation, ContactSettings],
   graphQL: {
     disable: true,
@@ -116,6 +116,8 @@ export default buildConfig({
     'https://sinkai.tribalorigin.com',
     'https://sinkai.staging.tribalorigin.com',
     'http://localhost:3000',
+    'http://localhost:3200',
+    'http://localhost',
   ],
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
@@ -201,7 +203,7 @@ export default buildConfig({
       },
       formSubmissionOverrides: {
         hooks: {
-          afterChange: [sendContactSubmissionEmail],
+          afterChange: [handleFormSubmission],
         },
       },
     }),

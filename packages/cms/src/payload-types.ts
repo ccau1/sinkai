@@ -73,7 +73,7 @@ export interface Config {
     donations: Donation;
     pages: Page;
     media: Media;
-    'gallery-categories': GalleryCategory;
+    'media-categories': MediaCategory;
     users: User;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -90,7 +90,7 @@ export interface Config {
     donations: DonationsSelect<false> | DonationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'gallery-categories': GalleryCategoriesSelect<false> | GalleryCategoriesSelect<true>;
+    'media-categories': MediaCategoriesSelect<false> | MediaCategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -215,15 +215,15 @@ export interface Media {
   id: number;
   alt: string;
   /**
-   * Used to group images on the gallery page.
+   * Used to organize media files. Media in this category can be shown on the gallery page.
    */
-  category?: (number | null) | GalleryCategory;
+  category?: (number | null) | MediaCategory;
   /**
    * Optional tags for future filtering and grouping.
    */
   tags?: string[] | null;
   /**
-   * Position within the gallery category. Lower numbers appear first.
+   * Position within the media category. Lower numbers appear first.
    */
   sortOrder?: number | null;
   /**
@@ -246,12 +246,12 @@ export interface Media {
   height?: number | null;
 }
 /**
- * Categories used to group images on the public gallery page.
+ * Categories used to organize media files. Categories can be shown on the public gallery page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery-categories".
+ * via the `definition` "media-categories".
  */
-export interface GalleryCategory {
+export interface MediaCategory {
   id: number;
   /**
    * Stable identifier used in code, e.g. snow-disaster.
@@ -267,7 +267,7 @@ export interface GalleryCategory {
    */
   description?: string | null;
   /**
-   * Position of this section on the gallery page. Lower numbers appear first.
+   * Position of this category on the public gallery page. Lower numbers appear first.
    */
   sortOrder?: number | null;
   /**
@@ -724,8 +724,8 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'gallery-categories';
-        value: number | GalleryCategory;
+        relationTo: 'media-categories';
+        value: number | MediaCategory;
       } | null)
     | ({
         relationTo: 'users';
@@ -910,9 +910,9 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "gallery-categories_select".
+ * via the `definition` "media-categories_select".
  */
-export interface GalleryCategoriesSelect<T extends boolean = true> {
+export interface MediaCategoriesSelect<T extends boolean = true> {
   slug?: T;
   label?: T;
   title?: T;

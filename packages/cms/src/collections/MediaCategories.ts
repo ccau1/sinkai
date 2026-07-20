@@ -1,19 +1,19 @@
 import type { CollectionConfig } from 'payload'
 import { isAdmin, isContentEditor } from '../util/access'
 
-export const GalleryCategories: CollectionConfig = {
-  slug: 'gallery-categories',
+export const MediaCategories: CollectionConfig = {
+  slug: 'media-categories',
   labels: {
-    singular: 'Gallery Category',
-    plural: 'Gallery Categories',
+    singular: 'Media Category',
+    plural: 'Media Categories',
   },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['slug', 'label', 'sortOrder', 'showInGallery'],
     description: {
-      en: 'Categories used to group images on the public gallery page.',
-      'zh-CN': '用于在公共图库页面对图片进行分组的分类。',
-      'zh-TW': '用於在公共圖庫頁面對圖片進行分類。',
+      en: 'Categories used to organize media files. Categories can be shown on the public gallery page.',
+      'zh-CN': '用于整理媒体文件的分类。分类可以显示在公共图库页面。',
+      'zh-TW': '用於整理媒體檔案的分類。分類可以顯示在公共圖庫頁面。',
     },
   },
   access: {
@@ -66,7 +66,7 @@ export const GalleryCategories: CollectionConfig = {
       label: 'Sort Order',
       defaultValue: 0,
       admin: {
-        description: 'Position of this section on the gallery page. Lower numbers appear first.',
+        description: 'Position of this category on the public gallery page. Lower numbers appear first.',
       },
     },
     {

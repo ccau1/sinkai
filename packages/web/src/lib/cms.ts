@@ -1,6 +1,6 @@
 import type { Locale } from '@/i18n/config'
 
-export interface CMSGalleryCategory {
+export interface CMSMediaCategory {
   id: number | string
   slug: string
   label?: string
@@ -16,7 +16,7 @@ export interface CMSMedia {
   filename?: string
   /** May be a localized object, a JSON-stringified object, or a plain string. */
   alt?: string | Record<string, string>
-  category?: CMSGalleryCategory | number | string
+  category?: CMSMediaCategory | number | string
   tags?: string[]
   sortOrder?: number
   hidden?: boolean
@@ -86,8 +86,8 @@ export interface CMSNavigation {
   items: CMSNavItem[]
 }
 
-export interface CMSGallerySection {
-  category: CMSGalleryCategory
+export interface CMSMediaSection {
+  category: CMSMediaCategory
   images: CMSMedia[]
 }
 
@@ -127,10 +127,10 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
   return url
 }
 
-function normalizeGalleryCategory(
-  category: CMSGalleryCategory | number | string | undefined,
+function normalizeMediaCategory(
+  category: CMSMediaCategory | number | string | undefined,
   locale?: Locale,
-): CMSGalleryCategory | number | string | undefined {
+): CMSMediaCategory | number | string | undefined {
   if (!category || typeof category !== 'object') return category
   return {
     ...category,
@@ -151,7 +151,7 @@ function normalizeMedia(
     ...media,
     url: resolveMediaUrl(media.url) || media.filename,
     alt: locale ? resolveLocalizedField(media.alt, locale, '') : media.alt,
-    category: normalizeGalleryCategory(media.category, locale),
+    category: normalizeMediaCategory(media.category, locale),
   }
 }
 
@@ -380,7 +380,7 @@ export async function fetchTestimonies(
   }
 }
 
-export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySection[]> {
+export async function fetchGalleryMedia(locale: Locale): Promise<CMSMediaSection[]> {
   const base = getCMSBaseUrl()
   if (!base) return []
 
@@ -396,7 +396,7 @@ export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySecti
     const data = await res.json()
     const docs = (data.docs || []) as CMSMedia[]
 
-    const grouped = new Map<number | string, CMSGallerySection>()
+    const grouped = new Map<number | string, CMSMediaSection>()
     for (const doc of docs) {
       const normalized = normalizeMedia(doc, locale)
       if (!normalized) continue
@@ -707,6 +707,30 @@ export async function fetchFormById(
       return null
     }
     return (await res.json()) as CMSForm
+  } catch (err) {
+    console.warn('CMS form fetch error:', err)
+    return null
+  }
+}
+
+export async function fetchFormByTitle(
+  title: string,
+  locale: Locale,
+): Promise<CMSForm | null> {
+  const base = getCMSBaseUrl()
+  if (!base) return null
+
+  try {
+    const res = await fetch(
+      `${base}/api/forms?where[title][equals]=${encodeURIComponent(title)}&limit=1&depth=0&${localeQuery(locale)}`,
+      { next: { revalidate: 60 } },
+    )
+    if (!res.ok) {
+      console.warn(`CMS form fetch failed: ${res.status}.`)
+      return null
+    }
+    const data = (await res.json()) as { docs?: CMSForm[] }
+    return data.docs?.[0] ?? null
   } catch (err) {
     console.warn('CMS form fetch error:', err)
     return null

@@ -7,7 +7,7 @@ import { imageSize } from 'image-size'
 import { blogPosts } from './blog-data'
 import { testimonies } from './testimonies-data'
 import { installations } from './installations-data'
-import { galleryCategories, type GalleryCategorySeed } from './gallery-data'
+import { mediaCategories, type MediaCategorySeed } from './gallery-data'
 import { generateShortId } from '../util/shortId'
 import { locales, type Locale } from '../locales'
 import { r2ObjectExists, r2UploadFile, getMimeType } from '../lib/r2Upload'
@@ -707,12 +707,12 @@ async function seedInstallations(payload: import('payload').Payload) {
   console.log(`Installations seed complete: ${created} created, ${updated} updated, ${skipped} skipped`)
 }
 
-async function findOrCreateGalleryCategory(
+async function findOrCreateMediaCategory(
   payload: import('payload').Payload,
-  category: GalleryCategorySeed,
+  category: MediaCategorySeed,
 ): Promise<number | string> {
   const existing = await payload.find({
-    collection: 'gallery-categories',
+    collection: 'media-categories',
     where: { slug: { equals: category.slug } },
     limit: 1,
   })
@@ -729,7 +729,7 @@ async function findOrCreateGalleryCategory(
   if (existing.totalDocs > 0) {
     const doc = existing.docs[0]
     await payload.update({
-      collection: 'gallery-categories',
+      collection: 'media-categories',
       id: doc.id,
       locale: 'zh-TW',
       data,
@@ -738,7 +738,7 @@ async function findOrCreateGalleryCategory(
 
     for (const locale of ['en', 'zh-CN'] as const) {
       await payload.update({
-        collection: 'gallery-categories',
+        collection: 'media-categories',
         id: doc.id,
         locale,
         data: {
@@ -754,7 +754,7 @@ async function findOrCreateGalleryCategory(
   }
 
   const created = await payload.create({
-    collection: 'gallery-categories',
+    collection: 'media-categories',
     locale: 'zh-TW',
     data,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -762,7 +762,7 @@ async function findOrCreateGalleryCategory(
 
   for (const locale of ['en', 'zh-CN'] as const) {
     await payload.update({
-      collection: 'gallery-categories',
+      collection: 'media-categories',
       id: created.id,
       locale,
       data: {
@@ -784,11 +784,11 @@ async function seedGallery(payload: import('payload').Payload) {
 
   // Ensure categories exist and collect their IDs.
   const categoryIdsBySlug: Record<string, number | string> = {}
-  for (const category of galleryCategories) {
-    categoryIdsBySlug[category.slug] = await findOrCreateGalleryCategory(payload, category)
+  for (const category of mediaCategories) {
+    categoryIdsBySlug[category.slug] = await findOrCreateMediaCategory(payload, category)
   }
 
-  for (const section of galleryCategories) {
+  for (const section of mediaCategories) {
     const categoryId = categoryIdsBySlug[section.slug]
     for (let i = 0; i < section.images.length; i++) {
       const imagePath = section.images[i]
@@ -856,18 +856,6 @@ async function seedGallery(payload: import('payload').Payload) {
 }
 
 async function seedForms(payload: import('payload').Payload) {
-  const existing = await payload.find({
-    collection: 'forms',
-    where: { title: { equals: 'Contact' } },
-    limit: 1,
-    overrideAccess: true,
-  })
-
-  if (existing.totalDocs > 0) {
-    console.log('Contact form already exists; skipping form seed.')
-    return
-  }
-
   const confirmationMessage = (text: string) => ({
     root: {
       type: 'root',
@@ -884,32 +872,55 @@ async function seedForms(payload: import('payload').Payload) {
     },
   })
 
-  const formFields = (
-    name: string,
-    email: string,
-    phone: string,
-    subject: string,
-    message: string,
-  ) => [
-    { blockType: 'text', name: 'name', label: name, required: true },
-    { blockType: 'email', name: 'email', label: email, required: true },
-    { blockType: 'text', name: 'phone', label: phone, required: false },
-    { blockType: 'text', name: 'subject', label: subject, required: true },
-    { blockType: 'textarea', name: 'message', label: message, required: true },
-  ]
+  async function createFormIfMissing(
+    title: string,
+    buildFields: (locale: Locale) => unknown[],
+    translations: Record<Locale, { submit: string; success: string }>,
+  ) {
+    const existing = await payload.find({
+      collection: 'forms',
+      where: { title: { equals: title } },
+      limit: 1,
+      overrideAccess: true,
+    })
 
-  const translations: Record<
-    Locale,
-    {
-      name: string
-      email: string
-      phone: string
-      subject: string
-      message: string
-      submit: string
-      success: string
+    if (existing.totalDocs > 0) {
+      console.log(`${title} form already exists; skipping.`)
+      return
     }
-  > = {
+
+    const created = await payload.create({
+      collection: 'forms',
+      locale: defaultLocale,
+      data: {
+        title,
+        submitButtonLabel: translations[defaultLocale].submit,
+        confirmationType: 'message',
+        confirmationMessage: confirmationMessage(translations[defaultLocale].success),
+        fields: buildFields(defaultLocale),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      overrideAccess: true,
+    })
+
+    for (const locale of locales.filter((l) => l !== defaultLocale)) {
+      await payload.update({
+        collection: 'forms',
+        id: created.id,
+        locale,
+        data: {
+          submitButtonLabel: translations[locale].submit,
+          confirmationMessage: confirmationMessage(translations[locale].success),
+          fields: buildFields(locale),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      })
+    }
+
+    console.log(`Created default ${title} form`)
+  }
+
+  const contactTranslations: Record<Locale, { name: string; email: string; phone: string; subject: string; message: string; submit: string; success: string }> = {
     en: {
       name: 'Name',
       email: 'Email',
@@ -939,47 +950,130 @@ async function seedForms(payload: import('payload').Payload) {
     },
   }
 
-  const created = await payload.create({
-    collection: 'forms',
-    locale: defaultLocale,
-    data: {
-      title: 'Contact',
-      submitButtonLabel: translations[defaultLocale].submit,
-      confirmationType: 'message',
-      confirmationMessage: confirmationMessage(translations[defaultLocale].success),
-      fields: formFields(
-        translations[defaultLocale].name,
-        translations[defaultLocale].email,
-        translations[defaultLocale].phone,
-        translations[defaultLocale].subject,
-        translations[defaultLocale].message,
-      ),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
-    overrideAccess: true,
-  })
+  await createFormIfMissing(
+    'Contact',
+    (locale) => {
+      const t = contactTranslations[locale]
+      return [
+        { blockType: 'text', name: 'name', label: t.name, required: true },
+        { blockType: 'email', name: 'email', label: t.email, required: true },
+        { blockType: 'text', name: 'phone', label: t.phone, required: false },
+        { blockType: 'text', name: 'subject', label: t.subject, required: true },
+        { blockType: 'textarea', name: 'message', label: t.message, required: true },
+      ]
+    },
+    {
+      en: { submit: contactTranslations.en.submit, success: contactTranslations.en.success },
+      'zh-CN': { submit: contactTranslations['zh-CN'].submit, success: contactTranslations['zh-CN'].success },
+      'zh-TW': { submit: contactTranslations['zh-TW'].submit, success: contactTranslations['zh-TW'].success },
+    },
+  )
 
-  for (const locale of locales.filter((l) => l !== defaultLocale)) {
-    await payload.update({
-      collection: 'forms',
-      id: created.id,
-      locale,
-      data: {
-        submitButtonLabel: translations[locale].submit,
-        confirmationMessage: confirmationMessage(translations[locale].success),
-        fields: formFields(
-          translations[locale].name,
-          translations[locale].email,
-          translations[locale].phone,
-          translations[locale].subject,
-          translations[locale].message,
-        ),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
-    })
+  const donationTranslations: Record<
+    Locale,
+    {
+      name: string
+      email: string
+      phone: string
+      amount: string
+      currency: string
+      transferDate: string
+      paymentMethod: string
+      message: string
+      submit: string
+      success: string
+    }
+  > = {
+    en: {
+      name: 'Donor Name',
+      email: 'Email',
+      phone: 'Phone',
+      amount: 'Donation Amount',
+      currency: 'Currency',
+      transferDate: 'Transfer Date',
+      paymentMethod: 'Payment Method',
+      message: 'Message / Dedication',
+      submit: 'Submit Donation',
+      success: 'Thank you for your donation. We will verify the transfer and send a receipt soon.',
+    },
+    'zh-CN': {
+      name: '捐赠者姓名',
+      email: '电邮',
+      phone: '电话',
+      amount: '捐款金额',
+      currency: '货币',
+      transferDate: '转账日期',
+      paymentMethod: '支付方式',
+      message: '留言 / 纪念',
+      submit: '提交捐款',
+      success: '感谢您的捐款。我们核实转账后将尽快发出收据。',
+    },
+    'zh-TW': {
+      name: '捐贈者姓名',
+      email: '電郵',
+      phone: '電話',
+      amount: '捐款金額',
+      currency: '貨幣',
+      transferDate: '轉賬日期',
+      paymentMethod: '支付方式',
+      message: '留言 / 紀念',
+      submit: '提交捐款',
+      success: '感謝您的捐款。我們核實轉賬後將盡快發出收據。',
+    },
   }
 
-  console.log('Created default Contact form')
+  const currencyOptions = [
+    { label: 'Hong Kong Dollar (HKD)', value: 'HKD' },
+    { label: 'US Dollar (USD)', value: 'USD' },
+    { label: 'Chinese Yuan (CNY)', value: 'CNY' },
+    { label: 'New Taiwan Dollar (TWD)', value: 'TWD' },
+    { label: 'Euro (EUR)', value: 'EUR' },
+    { label: 'British Pound (GBP)', value: 'GBP' },
+  ]
+
+  const paymentMethodOptions = [
+    { label: 'Bank Transfer', value: 'bank-transfer' },
+    { label: 'FPS', value: 'fps' },
+    { label: 'PayMe', value: 'payme' },
+    { label: 'Cheque', value: 'cheque' },
+    { label: 'Cash', value: 'cash' },
+    { label: 'Other', value: 'other' },
+  ]
+
+  await createFormIfMissing(
+    'Donation',
+    (locale) => {
+      const t = donationTranslations[locale]
+      return [
+        { blockType: 'text', name: 'name', label: t.name, required: true },
+        { blockType: 'email', name: 'email', label: t.email, required: true },
+        { blockType: 'text', name: 'phone', label: t.phone, required: false },
+        { blockType: 'number', name: 'amount', label: t.amount, required: true },
+        {
+          blockType: 'select',
+          name: 'currency',
+          label: t.currency,
+          required: true,
+          defaultValue: 'HKD',
+          options: currencyOptions,
+        },
+        { blockType: 'text', name: 'transferDate', label: t.transferDate, required: true },
+        {
+          blockType: 'select',
+          name: 'paymentMethod',
+          label: t.paymentMethod,
+          required: true,
+          options: paymentMethodOptions,
+        },
+        { blockType: 'textarea', name: 'message', label: t.message, required: false },
+      ]
+    },
+    {
+      en: { submit: donationTranslations.en.submit, success: donationTranslations.en.success },
+      'zh-CN': { submit: donationTranslations['zh-CN'].submit, success: donationTranslations['zh-CN'].success },
+      'zh-TW': { submit: donationTranslations['zh-TW'].submit, success: donationTranslations['zh-TW'].success },
+    },
+  )
 }
 
 seed().catch((err) => {

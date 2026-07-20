@@ -38,6 +38,7 @@ jobs:
       - name: Build web (staging)
         env:
           CMS_API_URL: ${{ secrets.CMS_API_URL_STAGING }}
+          NEXT_PUBLIC_CMS_API_URL: ${{ secrets.CMS_API_URL_STAGING }}
           NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS: true
           NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: ${{ secrets.MEDIA_PUBLIC_URL_STAGING || 'https://sinkai-cms-media.staging.tribalorigin.com' }}
         run: npm run build -w packages/web
@@ -80,6 +81,7 @@ jobs:
       - name: Build web (production)
         env:
           CMS_API_URL: ${{ secrets.CMS_API_URL_PROD }}
+          NEXT_PUBLIC_CMS_API_URL: ${{ secrets.CMS_API_URL_PROD }}
           NEXT_PUBLIC_ENABLE_IMAGE_TRANSFORMS: true
           NEXT_PUBLIC_CMS_IMAGE_TRANSFORM_ORIGIN: ${{ secrets.MEDIA_PUBLIC_URL_PROD || 'https://sinkai-cms-media.tribalorigin.com' }}
         run: npm run build -w packages/web
