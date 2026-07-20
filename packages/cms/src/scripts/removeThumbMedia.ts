@@ -235,11 +235,11 @@ async function repairReferences(
 
   for (const [collection, collectionRefs] of grouped) {
     for (const ref of collectionRefs) {
-      const doc = await payload.findByID({
+      const doc = (await payload.findByID({
         collection: collection as 'blogs' | 'installations' | 'testimonies' | 'pages',
         id: ref.id,
         depth: 0,
-      })
+      })) as unknown as Record<string, unknown>
 
       const data: Record<string, unknown> = {}
 
@@ -301,13 +301,13 @@ async function createReplacementMedia(
     visibility: normalizeVisibility(oldDoc.visibility),
   }
 
-  return payload.create({
+  return (await payload.create({
     collection: 'media',
-    data,
+    data: data as any,
     filePath,
     depth: 0,
     overrideAccess: true,
-  }) as Promise<Record<string, unknown>>
+  })) as unknown as Record<string, unknown>
 }
 
 async function main() {
@@ -395,7 +395,7 @@ async function main() {
       }
 
       try {
-        const newDoc = await createReplacementMedia(payload, doc, fullSizePath)
+        const newDoc = await createReplacementMedia(payload, doc as unknown as Record<string, unknown>, fullSizePath)
         await repairReferences(payload, doc.id, newDoc.id as number | string, refs)
         await payload.delete({
           collection: 'media',
@@ -438,7 +438,7 @@ async function main() {
 }
 
 async function cleanupOrphanR2Thumbnails(payload: Payload): Promise<void> {
-  const env = await getCfEnv().catch(() => undefined)
+  const env = await getCfEnv().catch((): undefined => undefined)
   if (!env?.R2) {
     console.log('[remove-thumb-media] R2 binding not available; skipping orphan thumbnail cleanup.')
     return
