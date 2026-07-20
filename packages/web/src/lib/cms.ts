@@ -386,7 +386,7 @@ export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySecti
 
   try {
     const res = await fetch(
-      `${base}/api/media?where[and][0][hidden][equals]=false&where[and][1][category][exists]=true&limit=300&sort=sortOrder&depth=1&${localeQuery(locale)}`,
+      `${base}/api/media?where[and][0][hidden][not_equals]=true&where[and][1][category][exists]=true&limit=300&sort=sortOrder&depth=1&${localeQuery(locale)}`,
       { next: { revalidate: 60 } },
     )
     if (!res.ok) {
@@ -412,9 +412,17 @@ export async function fetchGalleryMedia(locale: Locale): Promise<CMSGallerySecti
       }
     }
 
-    return Array.from(grouped.values()).sort(
+    const sections = Array.from(grouped.values()).sort(
       (a, b) => (a.category.sortOrder ?? 0) - (b.category.sortOrder ?? 0),
     )
+
+    if (sections.length === 0) {
+      console.warn(
+        `fetchGalleryMedia returned 0 sections (${docs.length} media docs fetched, locale=${locale}).`,
+      )
+    }
+
+    return sections
   } catch (err) {
     console.warn('CMS gallery fetch error:', err)
     return []
