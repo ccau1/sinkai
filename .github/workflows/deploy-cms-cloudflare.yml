@@ -71,15 +71,6 @@ jobs:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
         run: npm run migrate:remote
 
-      - name: Seed CMS data (staging, idempotent)
-        working-directory: packages/cms
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-          MEDIA_PUBLIC_URL: https://sinkai-cms-media.staging.tribalorigin.com
-        run: npm run seed:remote
-
   promote-to-prod:
     name: Promote CMS to Production
     needs: deploy-staging
@@ -138,13 +129,3 @@ jobs:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
           CLOUDFLARE_ENV: production
         run: npm run migrate:production
-
-      - name: Seed CMS data (production, idempotent)
-        working-directory: packages/cms
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-          CLOUDFLARE_ENV: production
-          MEDIA_PUBLIC_URL: https://sinkai-cms-media.tribalorigin.com
-        run: npm run seed:production

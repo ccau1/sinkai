@@ -36,7 +36,8 @@
     "deploy": "npm run deploy:database && npm run deploy:app",
     "deploy:app": "opennextjs-cloudflare build && npm run bundle:cleanup && wrangler deploy --minify",
     "deploy:app:production": "opennextjs-cloudflare build && npm run bundle:cleanup && wrangler deploy --env production --minify",
-    "deploy:production": "npm run deploy:app:production && npm run migrate:production && npm run seed:production",
+    "deploy:production": "npm run deploy:app:production && npm run migrate:production",
+    "deploy:production:seed": "npm run deploy:app:production && npm run migrate:production && npm run seed:production",
     "deploy:database": "cross-env NODE_ENV=production PAYLOAD_REMOTE=true PAYLOAD_SECRET=ignore payload migrate",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "wrangler:types": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"

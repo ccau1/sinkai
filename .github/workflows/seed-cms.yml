@@ -1,0 +1,78 @@
+name: Seed CMS (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to seed'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  seed:
+    name: Seed CMS (${{ github.event.inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update wrangler.jsonc with Terraform outputs
+        working-directory: packages/cms
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            DB_NAME="sinkai-cms-prod"
+            PLACEHOLDER="PROD_D1_DATABASE_ID"
+          else
+            DB_NAME="sinkai-cms-staging"
+            PLACEHOLDER="STAGING_D1_DATABASE_ID"
+          fi
+          DB_ID=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" | jq -r ".result[] | select(.name == \"$DB_NAME\") | .uuid")
+          sed -i "s|\"database_id\": \"$PLACEHOLDER\"|\"database_id\": \"$DB_ID\"|" wrangler.jsonc
+
+      - name: Apply remote D1 migrations
+        working-directory: packages/cms
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            npm run migrate:production
+          else
+            npm run migrate:remote
+          fi
+
+      - name: Seed CMS data
+        working-directory: packages/cms
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          MEDIA_PUBLIC_URL: ${{ github.event.inputs.environment == 'production' && 'https://sinkai-cms-media.tribalorigin.com' || 'https://sinkai-cms-media.staging.tribalorigin.com' }}
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            npm run seed:production
+          else
+            npm run seed:remote
+          fi
