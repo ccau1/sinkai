@@ -222,7 +222,19 @@ export async function fetchBlogs(locale: Locale): Promise<CMSBlog[]> {
       `CMS blogs returned ${docs.length - validDocs.length} invalid doc(s) (missing slugName/shortId). Excluding them.`,
     )
   }
-  return validDocs.map((doc) => normalizeBlog(doc, locale))
+  // Defensive deduplication: the CMS may contain multiple docs for the same
+  // logical post (e.g. from earlier seed/hook instability). Duplicates created
+  // by the old shortId logic have different shortIds but the same slugName, so
+  // we dedupe by slugName and keep the first occurrence.
+  const uniqueDocs = Array.from(
+    new Map(validDocs.map((doc) => [doc.slugName, doc])).values(),
+  )
+  if (uniqueDocs.length !== validDocs.length) {
+    console.warn(
+      `CMS blogs contained ${validDocs.length - uniqueDocs.length} duplicate slug(s). Rendering unique posts only.`,
+    )
+  }
+  return uniqueDocs.map((doc) => normalizeBlog(doc, locale))
 }
 
 export async function fetchBlogBySlug(

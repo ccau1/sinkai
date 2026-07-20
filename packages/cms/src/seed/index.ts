@@ -214,63 +214,20 @@ async function seed() {
   }
 
   let created = 0
-  let skipped = 0
+  let updated = 0
 
   try {
     for (const post of blogPosts) {
-      const shortId = generateShortId(post.slug)
+      // Look up by the canonical default-locale slug rather than shortId.
+      // shortId can gain collision suffixes or be mutated by older hooks, so
+      // the slug is the stable natural key for idempotent seeding.
       const existing = await payload.find({
         collection: 'blogs',
         where: {
-          shortId: { equals: shortId },
+          'slugName.zh-TW': { equals: post.slug },
         },
         limit: 1,
       })
-
-      if (existing.totalDocs > 0) {
-        const existingDoc = existing.docs[0]
-        const fullDoc = await payload.findByID({
-          collection: 'blogs',
-          id: existingDoc.id,
-          locale: 'all',
-        })
-        const slugName = (fullDoc.slugName || {}) as Record<string, string>
-        const hasAllLocales = locales.every((locale) => Boolean(slugName[locale]))
-
-        // Ensure the cover image exists in R2 even if the record already exists.
-        let coverImageId: number | string | undefined = (existingDoc.coverImage as number | string) || undefined
-        const coverPath = path.join(webPublicDir, post.coverImage)
-        if (fs.existsSync(coverPath)) {
-          const coverMedia = await findOrCreateMediaFromFile(payload, coverPath, {
-            en: post.translations.en.title,
-            'zh-CN': post.translations['zh-CN'].title,
-            'zh-TW': post.translations['zh-TW'].title,
-          })
-          coverImageId = coverMedia.id
-          if (coverImageId !== (existingDoc.coverImage as number | string)) {
-            await payload.update({
-              collection: 'blogs',
-              id: existingDoc.id,
-              data: { coverImage: coverImageId as number },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any)
-          }
-        }
-
-        if (hasAllLocales) {
-          console.log(`Skipping existing blog: ${post.slug}`)
-          skipped++
-          continue
-        }
-
-        // Localized fields were lost (Payload/D1 serialization bug). Delete and
-        // recreate the doc rather than trying to repair corrupted locale rows.
-        await payload.delete({
-          collection: 'blogs',
-          id: existingDoc.id,
-        })
-        console.log(`Deleted corrupted blog for re-creation: ${post.slug}`)
-      }
 
       // Create or reuse media for cover image.
       let coverImageId: number | string | undefined
@@ -282,15 +239,57 @@ async function seed() {
           'zh-TW': post.translations['zh-TW'].title,
         })
         coverImageId = coverMedia.id
-        console.log(`Prepared cover media: ${post.coverImage}`)
       } else {
         console.warn(`Cover image not found: ${coverPath}`)
+      }
+
+      if (existing.totalDocs > 0) {
+        const existingDoc = existing.docs[0]
+
+        // Ensure the shortId is set (older corrupted docs may be missing one).
+        const updates: Record<string, unknown> = {}
+        if (!existingDoc.shortId) {
+          updates.shortId = generateShortId(post.slug)
+        }
+        if (coverImageId && coverImageId !== (existingDoc.coverImage as number | string)) {
+          updates.coverImage = coverImageId as number
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await payload.update({
+            collection: 'blogs',
+            id: existingDoc.id,
+            data: updates,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any)
+        }
+
+        // Refresh all locales in place instead of deleting and recreating.
+        for (const locale of locales) {
+          await payload.update({
+            collection: 'blogs',
+            id: existingDoc.id,
+            locale,
+            data: {
+              slugName: post.slug,
+              title: post.translations[locale].title,
+              excerpt: post.translations[locale].excerpt,
+              legacyContent: post.translations[locale].content,
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any)
+        }
+
+        console.log(`Updated existing blog: ${post.slug}`)
+        updated++
+        continue
       }
 
       // Work around a Payload/D1 serialization issue when relationships are
       // combined with localized objects in a single create. Create the doc in
       // the default locale with the relationship, then update each remaining
       // locale separately.
+      const shortId = generateShortId(post.slug)
       const createdDoc = await payload.create({
         collection: 'blogs',
         locale: 'zh-TW',
@@ -334,7 +333,7 @@ async function seed() {
   await seedInstallations(payload)
   await seedGallery(payload)
 
-  console.log(`\nSeed complete: ${created} created, ${skipped} skipped`)
+  console.log(`\nBlog seed complete: ${created} created, ${updated} updated`)
   process.exit(0)
 }
 

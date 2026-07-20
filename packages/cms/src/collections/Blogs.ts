@@ -138,9 +138,17 @@ export const Blogs: CollectionConfig = {
           data.slugName = normalizedDefaultSlug
         }
 
-        let shortId = ((data.shortId as string) || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+        // Keep shortId stable: only generate or normalize it when the value is
+        // explicitly supplied. On updates, leaving the field untouched preserves
+        // the existing shortId instead of re-normalizing it (which previously
+        // stripped collision suffixes and caused seed/idempotency issues).
+        let shortId: string | undefined
 
-        if (!shortId && normalizedDefaultSlug) {
+        if (typeof data.shortId === 'string') {
+          shortId = data.shortId.trim().toLowerCase()
+        }
+
+        if (!shortId && operation === 'create' && normalizedDefaultSlug) {
           shortId = generateShortId(normalizedDefaultSlug)
         }
 
@@ -160,12 +168,14 @@ export const Blogs: CollectionConfig = {
             const first = existing.docs[0]
             if (operation === 'create' || String((first as { id?: string | number }).id) !== String(data.id)) {
               // Collision: append a random suffix so the save can succeed.
+              // The suffix is preserved on future updates because we no longer
+              // re-normalize an existing shortId.
               shortId = `${shortId}-${Math.random().toString(36).slice(2, 5)}`
             }
           }
+          data.shortId = shortId
         }
 
-        data.shortId = shortId
         return data
       },
     ],

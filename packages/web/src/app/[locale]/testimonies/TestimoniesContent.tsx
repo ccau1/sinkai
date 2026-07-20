@@ -111,9 +111,10 @@ export default function TestimoniesContent({ testimonies }: TestimoniesContentPr
                       <div className="relative aspect-square overflow-hidden">
                         <CmsImage
                           src={firstPhoto?.url}
+                          filename={firstPhoto?.filename}
                           alt={testimony.name}
                           fill
-                          size="md"
+                          size="thumb"
                           transformFit="cover"
                           transformFormat="auto"
                           transformQuality={85}

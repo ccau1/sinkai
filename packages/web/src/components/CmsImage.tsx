@@ -10,6 +10,11 @@ interface CmsImageProps extends Omit<NextImageProps, 'src'> {
   src?: string
   /** Preset transform size. Preferred over manual `transformWidth`. */
   size?: ImageSize
+  /**
+   * Source filename. Passing this lets `size='thumb'` use the pre-generated
+   * R2 thumbnail instead of an on-the-fly transform.
+   */
+  filename?: string
   transformWidth?: number
   transformHeight?: number
   transformFit?: ImageTransformOptions['fit']
@@ -19,7 +24,8 @@ interface CmsImageProps extends Omit<NextImageProps, 'src'> {
 
 /**
  * Drop-in replacement for `next/image` that automatically serves CMS media
- * through our image proxy or Cloudflare Images transformations when enabled.
+ * through pre-generated thumbnails (`size='thumb'`), our image proxy, or
+ * Cloudflare Images transformations when enabled.
  *
  * Pass `size` to request a standard preset width (`thumb`, `sm`, `md`, `lg`,
  * `xl`, `full`). You can still use `transformWidth` for one-off sizes.
@@ -33,6 +39,7 @@ interface CmsImageProps extends Omit<NextImageProps, 'src'> {
 export default function CmsImage({
   src,
   size,
+  filename,
   transformWidth,
   transformHeight,
   transformFit,
@@ -43,6 +50,7 @@ export default function CmsImage({
 }: CmsImageProps) {
   const transformedSrc = transformMediaUrl(src, {
     size,
+    filename,
     width: transformWidth,
     height: transformHeight,
     fit: transformFit,

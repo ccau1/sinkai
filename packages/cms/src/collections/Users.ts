@@ -5,6 +5,8 @@ import { isAdmin, userIsAdmin } from '../util/access'
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
+    // Keep email as the list title even though username login is enabled,
+    // so existing users without a username still display properly.
     useAsTitle: 'email',
     description: {
       en: 'Administrative users who can access the CMS and their assigned roles.',
@@ -12,7 +14,14 @@ export const Users: CollectionConfig = {
       'zh-TW': '可存取內容管理系統的管理用戶及其分配的角色。',
     },
   },
-  auth: true,
+  auth: {
+    // Allow users to log in with either their username or their email address.
+    loginWithUsername: {
+      allowEmailLogin: true,
+      requireEmail: false,
+      requireUsername: false,
+    },
+  },
   access: {
     read: isAdmin,
     create: isAdmin,

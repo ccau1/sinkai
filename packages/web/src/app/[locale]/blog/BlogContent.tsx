@@ -46,6 +46,7 @@ export default function BlogContent({ posts }: BlogContentProps) {
                 const excerpt = getBlogExcerpt(post);
                 const slugName = getBlogSlugName(post);
                 const coverUrl = post.coverImage?.url || '';
+                const coverFilename = post.coverImage?.filename;
                 return (
                   <Link key={`${post.shortId}-${locale}`} href={`/${locale}/blog/${slugName}/${post.shortId}/`} className="group">
                     <article className="rounded-xl overflow-hidden h-full flex flex-col transition-all duration-300"
@@ -56,9 +57,10 @@ export default function BlogContent({ posts }: BlogContentProps) {
                       <div className="relative aspect-video overflow-hidden">
                         <CmsImage
                           src={coverUrl}
+                          filename={coverFilename}
                           alt={title}
                           fill
-                          size="md"
+                          size="thumb"
                           transformFit="cover"
                           transformFormat="auto"
                           transformQuality={85}

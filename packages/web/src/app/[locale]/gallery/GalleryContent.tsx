@@ -111,8 +111,9 @@ export default function GalleryContent({ sections }: GalleryContentProps) {
                     onClick={() => setLightbox({ images: section.images, index: i })}>
                     <CmsImage
                       src={image.url}
+                      filename={image.filename}
                       alt={getMediaAlt(image, locale)}
-                      size="sm"
+                      size="thumb"
                       transformFit="cover"
                       transformFormat="auto"
                       fill

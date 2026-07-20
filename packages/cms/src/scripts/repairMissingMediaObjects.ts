@@ -87,7 +87,6 @@ async function main() {
       }
 
       const canonicalFilename = stripDedupeSuffix(filename)
-      const objectKey = `public/${canonicalFilename}`
       const sourcePath = fileMap.get(canonicalFilename)
 
       if (!sourcePath) {
@@ -96,6 +95,22 @@ async function main() {
         continue
       }
 
+      // Payload/D1 enforces a unique constraint on media.filename. If another
+      // record already owns the canonical name, keep this record's deduped
+      // filename and upload the source file under that key instead.
+      const conflicting = await payload.find({
+        collection: 'media',
+        where: { filename: { equals: canonicalFilename } },
+        limit: 10,
+        overrideAccess: true,
+      })
+      const otherOwnsCanonical = conflicting.docs.some(
+        (d: unknown) => (d as Record<string, unknown>).id !== doc.id,
+      )
+
+      const targetFilename = otherOwnsCanonical ? filename : canonicalFilename
+      const objectKey = `public/${targetFilename}`
+
       const exists = await r2ObjectExists(objectKey)
       if (!exists) {
         console.log(`[repair] uploading ${objectKey}`)
@@ -103,19 +118,21 @@ async function main() {
         uploaded++
       }
 
-      const needsDocUpdate =
-        doc.prefix !== 'public' || doc.filename !== canonicalFilename
-      if (needsDocUpdate) {
+      const updates: Record<string, unknown> = {}
+      if (doc.prefix !== 'public') {
+        updates.prefix = 'public'
+      }
+      if (!otherOwnsCanonical && doc.filename !== canonicalFilename) {
+        updates.filename = canonicalFilename
+      }
+
+      if (Object.keys(updates).length > 0) {
         await payload.update({
           collection: 'media',
           id: doc.id,
-          data: {
-            prefix: 'public',
-            filename: canonicalFilename,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
-          overrideAccess: true,
-        })
+          data: updates,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any)
         updated++
       }
     }

@@ -17,6 +17,11 @@ export interface ImageTransformOptions {
   fit?: 'scale-down' | 'cover' | 'contain' | 'crop' | 'pad'
   quality?: number
   format?: 'auto' | 'avif' | 'webp' | 'jpeg' | 'png' | 'gif'
+  /**
+   * Optional source filename. When supplied and `size` is `thumb`, the URL is
+   * rewritten to the pre-generated R2 thumbnail (`public/thumbnails/<basename>.webp`).
+   */
+  filename?: string
 }
 
 function getSizeWidth(size?: ImageSize): number | undefined {
@@ -56,15 +61,38 @@ function getCmsOrigin(): string | undefined {
 }
 
 /**
- * Rewrite a CMS media URL to request an on-the-fly transformation.
+ * Extract a filename from a media URL/path when an explicit filename is not
+ * available. Returns undefined for non-file URLs.
+ */
+function extractFilenameFromSrc(src: string): string | undefined {
+  try {
+    const url = new URL(src)
+    const last = url.pathname.split('/').pop()
+    if (last && last.includes('.') && last.length > 2) {
+      return last
+    }
+  } catch {
+    // Not a full URL: treat it as a filename if it has an extension and no path.
+    if (!src.includes('/') && src.includes('.')) {
+      return src
+    }
+  }
+  return undefined
+}
+
+/**
+ * Rewrite a CMS media URL to request an optimized image.
  *
- * If `NEXT_PUBLIC_IMAGE_PROXY_ORIGIN` is configured and a `size` is provided,
- * the URL is rewritten to the proxy worker path
- * (`/img/<size>/<source-path>`), with other transform options passed as query
- * parameters. This is the path the future R2 image proxy worker will handle.
+ * For `size: 'thumb'` the URL points to the pre-generated R2 thumbnail
+ * (`public/thumbnails/<basename>.webp`) when the source filename can be
+ * determined. This is served as a static file and does not require Cloudflare
+ * Image Transformations to be enabled.
  *
- * Otherwise, the URL falls back to Cloudflare Images
- * (`/cdn-cgi/image/<options>/<source-path>`) when image transforms are enabled.
+ * For other sizes:
+ * - If `NEXT_PUBLIC_IMAGE_PROXY_ORIGIN` is configured, the URL is rewritten to
+ *   the proxy worker path (`/img/<size>/<source-path>`).
+ * - Otherwise the URL falls back to Cloudflare Images
+ *   (`/cdn-cgi/image/<options>/<source-path>`) when transforms are enabled.
  *
  * If image transforms are disabled, the origin is unknown, or the source is an
  * external/non-CMS URL, the original URL is returned unchanged.
@@ -80,6 +108,19 @@ export function transformMediaUrl(
   const proxyOrigin = getProxyOrigin()
   const transformOrigin = getTransformOrigin()
   const origin = proxyOrigin ?? transformOrigin
+
+  // Pre-generated thumbnails: static R2 webp files produced by the
+  // sinkai-cms-thumbnails workflow. These are available regardless of whether
+  // on-the-fly Cloudflare Image Transformations are enabled.
+  if (options.size === 'thumb') {
+    const filename = options.filename || extractFilenameFromSrc(src)
+    const thumbBase = transformOrigin || origin
+    if (filename && thumbBase) {
+      const basename = filename.replace(/\.[^.]+$/, '')
+      return `${thumbBase}/public/thumbnails/${basename}.webp`
+    }
+  }
+
   if (!origin) return src
 
   const cmsOrigin = getCmsOrigin() || transformOrigin

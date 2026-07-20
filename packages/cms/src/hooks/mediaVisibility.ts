@@ -39,7 +39,7 @@ async function triggerThumbnail(payload: Payload, doc: MediaDocLike): Promise<vo
       payload.logger.warn('[mediaVisibility] THUMBNAILS binding not available; skipping thumbnail trigger.')
       return
     }
-    await env.THUMBNAILS.fetch('https://thumbnails/trigger', {
+    const res = await env.THUMBNAILS.fetch('https://thumbnails/trigger', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -48,6 +48,13 @@ async function triggerThumbnail(payload: Payload, doc: MediaDocLike): Promise<vo
         updatedAt: doc.updatedAt ?? new Date().toISOString(),
       }),
     })
+    if (!res.ok) {
+      payload.logger.warn(
+        `[mediaVisibility] Thumbnail trigger returned ${res.status} for ${doc.filename}.`,
+      )
+      return
+    }
+    payload.logger.info(`[mediaVisibility] Thumbnail workflow triggered for ${doc.filename}.`)
   } catch (err) {
     payload.logger.error({ err }, '[mediaVisibility] Failed to trigger thumbnail generation.')
   }
@@ -125,10 +132,7 @@ export const triggerThumbnailAfterUpload: CollectionAfterOperationHook = async (
   req,
   result,
 }) => {
-  if (
-    (operation !== 'create' && operation !== 'update' && operation !== 'updateByID') ||
-    !req.file
-  ) {
+  if (operation !== 'create' && operation !== 'update' && operation !== 'updateByID') {
     return result
   }
 
@@ -137,6 +141,10 @@ export const triggerThumbnailAfterUpload: CollectionAfterOperationHook = async (
     return result
   }
 
+  // Trigger for both file uploads and metadata-only changes. The workflow
+  // de-duplicates by source etag, so repeated triggers for unchanged files are
+  // cheap no-ops. This also covers cases where req.file is not exposed in the
+  // afterOperation context while a file was actually uploaded.
   await triggerThumbnail(req.payload, doc)
   return result
 }

@@ -70,9 +70,10 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
                   <div className="relative aspect-video overflow-hidden">
                     <CmsImage
                       src={photo.url || ''}
+                      filename={photo.filename}
                       alt={getMediaAlt(photo, locale)}
                       fill
-                      size="md"
+                      size="thumb"
                       transformFit="cover"
                       transformFormat="auto"
                       transformQuality={85}

@@ -68,6 +68,15 @@ export default buildConfig({
     suppressHydrationWarning: true,
     // Lock the admin panel to light mode for a bright, charity-friendly UI.
     theme: 'light',
+    // Replace the Payload logo with the charity name on the login page.
+    components: {
+      graphics: {
+        Logo: './components/AdminLogo#default',
+      },
+    },
+    meta: {
+      titleSuffix: '- 善啓慈善基金會',
+    },
     dashboard: {
       widgets: [
         {
