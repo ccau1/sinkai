@@ -11,13 +11,24 @@ services:
       - cms-data:/app/packages/cms/.wrangler/state:delegated
     restart: unless-stopped
 
+  # Serves the Next.js standalone build produced on the host by `make up`
+  # (npm run build -w packages/web). Runs as a Node server with ISR; content
+  # revalidates against the CMS service at runtime.
   app:
-    image: nginx:alpine
+    image: node:22-alpine
+    working_dir: /app
+    command: node packages/web/server.js
     ports:
       - "3200:80"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - PORT=80
+      - CMS_API_URL=http://cms:3001
     volumes:
-      - ./packages/web/dist:/usr/share/nginx/html:ro
-      - ./packages/web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./packages/web/.next/standalone:/app:ro
+      - ./packages/web/.next/static:/app/packages/web/.next/static:ro
+      - ./packages/web/public:/app/packages/web/public:ro
     depends_on:
       - cms
     restart: unless-stopped

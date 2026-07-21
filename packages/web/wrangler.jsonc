@@ -1,0 +1,69 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "sinkai-web-staging",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public",
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "routes": [
+    {
+      "pattern": "sinkai.staging.tribalorigin.com",
+      "custom_domain": true,
+    },
+  ],
+  // ISR incremental cache (pages + fetch data). Bucket is provisioned by
+  // cloudflare_deploy/terraform.
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "sinkai-web-cache-staging",
+    },
+  ],
+  // Tag cache for on-demand revalidation (revalidatePath via /api/revalidate).
+  // database_id is injected by the web deploy workflow (resolved by name via
+  // the Cloudflare API), same pattern as the CMS deploy.
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_id": "STAGING_D1_DATABASE_ID",
+      "database_name": "sinkai-web-tags-staging",
+    },
+  ],
+  "vars": {
+    // Read at runtime when ISR regenerates pages inside the worker.
+    "CMS_API_URL": "https://sinkai-cms.staging.tribalorigin.com",
+  },
+  "env": {
+    "production": {
+      "name": "sinkai-web-prod",
+      "routes": [
+        {
+          "pattern": "sinkai.tribalorigin.com",
+          "custom_domain": true,
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "sinkai-web-cache-prod",
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "NEXT_TAG_CACHE_D1",
+          "database_id": "PROD_D1_DATABASE_ID",
+          "database_name": "sinkai-web-tags-prod",
+        },
+      ],
+      "vars": {
+        "CMS_API_URL": "https://sinkai-cms.tribalorigin.com",
+      },
+    },
+  },
+}

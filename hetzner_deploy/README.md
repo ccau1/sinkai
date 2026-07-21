@@ -1,5 +1,13 @@
 # Deploy
 
+> **Deprecated for the public website.** The web app (`packages/web`) is no
+> longer deployed to Hetzner — it runs as a Cloudflare Worker with ISR (see
+> `cloudflare_deploy/README.md`). The web Hetzner workflows were disabled
+> (`.github/workflows/*.yml.disabled`). This folder is kept for reference and
+> for any future non-web services; the compose/nginx web setup here no longer
+> works because `packages/web` does not produce a static `dist/` export
+> anymore.
+
 This folder contains everything you need to deploy this app to a remote server via Docker Compose. It is designed to be **copy-pasteable into another repo** — just grab the `hetzner_deploy/` folder, update `.env`, and run the scripts.
 
 ## What's Inside

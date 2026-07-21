@@ -8,6 +8,11 @@ import Footer from '@/components/Footer';
 import { fetchNavigation, resolveNavItemHref, type CMSNavigation } from '@/lib/cms';
 import '../globals.css';
 
+// Time-based ISR fallback: pages are prerendered at build time and regenerated
+// at most every 60s. The CMS also revalidates on-demand via /api/revalidate,
+// so published changes normally appear within seconds.
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }

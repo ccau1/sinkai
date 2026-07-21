@@ -5,6 +5,10 @@ import {
   publishedOrAuthenticated,
 } from '../util/access'
 import { generateShortId } from '../util/shortId'
+import {
+  revalidateWebAfterChange,
+  revalidateWebAfterDelete,
+} from '../hooks/triggerWebRevalidate'
 
 export const Blogs: CollectionConfig = {
   slug: 'blogs',
@@ -104,6 +108,8 @@ export const Blogs: CollectionConfig = {
     },
   ],
   hooks: {
+    afterChange: [revalidateWebAfterChange],
+    afterDelete: [revalidateWebAfterDelete],
     beforeValidate: [
       async ({ data, req, operation }) => {
         if (!data) return data

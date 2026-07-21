@@ -44,6 +44,8 @@ next-env.d.ts
 
 # Workspace packages
 packages/web/.next/
+packages/web/.open-next/
+packages/web/.wrangler/
 packages/web/out/
 packages/web/dist/
 packages/web/node_modules/

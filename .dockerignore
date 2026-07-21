@@ -1,6 +1,7 @@
-.next
-dist
+**/.next
+**/.open-next
+**/dist
 node_modules
+**/.wrangler
 .git
 .env*.local
-**/.wrangler

@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { isContentEditor } from '../util/access'
+import { revalidateWebGlobalAfterChange } from '../hooks/triggerWebRevalidate'
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
@@ -7,6 +8,9 @@ export const Navigation: GlobalConfig = {
   access: {
     read: () => true,
     update: isContentEditor,
+  },
+  hooks: {
+    afterChange: [revalidateWebGlobalAfterChange],
   },
   fields: [
     {

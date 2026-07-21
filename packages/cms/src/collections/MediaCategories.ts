@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
 import { isAdmin, isContentEditor } from '../util/access'
+import {
+  revalidateWebAfterChange,
+  revalidateWebAfterDelete,
+} from '../hooks/triggerWebRevalidate'
 
 export const MediaCategories: CollectionConfig = {
   slug: 'media-categories',
@@ -22,6 +26,10 @@ export const MediaCategories: CollectionConfig = {
     update: isContentEditor,
     delete: isAdmin,
     admin: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    afterChange: [revalidateWebAfterChange],
+    afterDelete: [revalidateWebAfterDelete],
   },
   fields: [
     {

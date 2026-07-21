@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
 import { isAdmin, isContentEditor, publishedOrAuthenticated } from '../util/access'
+import {
+  revalidateWebAfterChange,
+  revalidateWebAfterDelete,
+} from '../hooks/triggerWebRevalidate'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -21,6 +25,10 @@ export const Pages: CollectionConfig = {
   },
   versions: {
     drafts: true,
+  },
+  hooks: {
+    afterChange: [revalidateWebAfterChange],
+    afterDelete: [revalidateWebAfterDelete],
   },
   fields: [
     {

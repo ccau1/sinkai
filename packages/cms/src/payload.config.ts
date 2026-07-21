@@ -24,6 +24,10 @@ import { Navigation } from './globals/Navigation'
 import { ContactSettings } from './globals/ContactSettings'
 import { handleFormSubmission } from './hooks/handleFormSubmission'
 import { populateShareableLinks } from './hooks/populateShareableLinks'
+import {
+  revalidateWebAfterChange,
+  revalidateWebAfterDelete,
+} from './hooks/triggerWebRevalidate'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -200,6 +204,8 @@ export default buildConfig({
         ],
         hooks: {
           afterRead: [populateShareableLinks],
+          afterChange: [revalidateWebAfterChange],
+          afterDelete: [revalidateWebAfterDelete],
         },
       },
       formSubmissionOverrides: {

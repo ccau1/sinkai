@@ -2,7 +2,7 @@
 
 This folder contains Terraform configuration and deployment helpers for running the Sin Kai stack on Cloudflare:
 
-- **Public website** (`packages/web`) → Cloudflare Pages
+- **Public website** (`packages/web`) → Cloudflare Worker (OpenNext, with ISR)
 - **Payload CMS** (`packages/cms`) → Cloudflare Worker
 - **Database** → Cloudflare D1
 - **Media uploads** → Cloudflare R2
@@ -16,12 +16,12 @@ The pipeline follows the same promote-to-prod pattern as the Hetzner workflows:
 
 Terraform provisions:
 
-- D1 databases: `sinkai-cms-prod`, `sinkai-cms-staging`
-- R2 buckets: `sinkai-cms-media-prod`, `sinkai-cms-media-staging`, each attached to a public custom domain (`sinkai-cms-media[.staging].tribalorigin.com`)
+- D1 databases: `sinkai-cms-prod`, `sinkai-cms-staging` (CMS) and `sinkai-web-tags-prod`, `sinkai-web-tags-staging` (web ISR tag cache)
+- R2 buckets: `sinkai-cms-media-prod`, `sinkai-cms-media-staging`, each attached to a public custom domain (`sinkai-cms-media[.staging].tribalorigin.com`), plus `sinkai-web-cache-prod`, `sinkai-web-cache-staging` (web ISR incremental cache)
 - A WAF custom rule (`waf.tf`) blocking public access to the `/private/` prefix on the media domains
-- Pages projects:
-  - `sinkai-web` (production) → `sinkai.tribalorigin.com`
-  - `sinkai-web-staging` (staging) → `sinkai.staging.tribalorigin.com`
+- Pages projects `sinkai-web` / `sinkai-web-staging` are kept for rollback only —
+  the custom domains moved to the web worker (`sinkai-web-prod` /
+  `sinkai-web-staging`, deployed by Wrangler via `packages/web/wrangler.jsonc`)
 - CMS subdomains (`sinkai-cms.tribalorigin.com`, `sinkai-cms.staging.tribalorigin.com`) are managed by Wrangler via `packages/cms/wrangler.jsonc`
 
 Planned URLs:
@@ -68,12 +68,11 @@ Planned URLs:
 
 4. Update `packages/cms/wrangler.jsonc` with the Terraform outputs (only the D1 IDs need to change; R2 bucket names are already hard-coded).
 
-5. Ensure Terraform manages the DNS records for the web domains:
-
-   `cloudflare_deploy/terraform/dns.tf` creates CNAME records that point
-   `sinkai.tribalorigin.com` and `sinkai.staging.tribalorigin.com` to the
-   Cloudflare Pages projects. If a stale A record exists (for example pointing
-   to a previous Hetzner server), it will be overwritten.
+5. Web and CMS custom domains are attached by Wrangler on deploy (`routes`
+   with `custom_domain: true` in `packages/web/wrangler.jsonc` and
+   `packages/cms/wrangler.jsonc`); Cloudflare creates the DNS records
+   automatically. Make sure no stale DNS records (e.g. old CNAMEs to
+   `*.pages.dev`) remain for the web domains.
 
 6. Set GitHub secrets:
 
@@ -83,6 +82,10 @@ Planned URLs:
    - `PAYLOAD_SECRET` (used for both staging and prod Workers)
    - `CMS_API_URL_PROD` → `https://sinkai-cms.tribalorigin.com`
    - `CMS_API_URL_STAGING` → `https://sinkai-cms.staging.tribalorigin.com`
+   - `REVALIDATE_SECRET_STAGING` / `REVALIDATE_SECRET_PROD` — shared secrets
+     (generate with `openssl rand -hex 32`) used by the CMS to call the web
+     worker's `/api/revalidate` endpoint. Each is synced to BOTH the CMS and
+     web workers of that environment by the deploy workflows.
 
 7. Enable **Image Transformations** for `tribalorigin.com` in the Cloudflare dashboard:
 
@@ -101,8 +104,26 @@ Planned URLs:
 - `PAYLOAD_REMOTE=true` is required when running Payload CLI commands (migrate,
   seed) against the remote D1/R2 bindings.
 - The web workflow is triggered both by web-code changes and by successful
-  completions of the CMS workflow. This prevents the static site from being
+  completions of the CMS workflow. This prevents the web worker from being
   built before the CMS has finished migrating/seeding.
+
+## Content updates (ISR + on-demand revalidation)
+
+The web worker renders pages with ISR (`revalidate = 60` in
+`packages/web/src/app/[locale]/layout.tsx`), so:
+
+- **On-demand (seconds):** Payload `afterChange`/`afterDelete` hooks
+  (`packages/cms/src/hooks/triggerWebRevalidate.ts`) on all site-rendered
+  collections POST to `{WEB_APP_URL}/api/revalidate` with the shared
+  `REVALIDATE_SECRET`, which calls `revalidatePath('/', 'layout')`. Publishing
+  a blog post is live within seconds — no redeploy needed. New content URLs
+  render on first visit (no build-time enumeration required).
+- **Fallback (60s):** if the hook is disabled or fails, time-based ISR
+  regenerates pages at most 60 seconds after they go stale.
+- The hook no-ops when `REVALIDATE_SECRET`/`WEB_APP_URL` are unset (local dev).
+- Rollback to the old static Pages site: re-attach the custom domain to the
+  Pages project (the projects are kept, see `pages.tf`) and remove the
+  worker route.
 - CMS media is served from a public R2 custom domain
   (`sinkai-cms-media[.staging].tribalorigin.com`). Originals under `public/`
   and generated thumbnails under `public/thumbnails/` are publicly accessible.

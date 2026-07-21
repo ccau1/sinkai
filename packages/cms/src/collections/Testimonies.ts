@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
 import { isAdmin, isContentEditor, publishedOrAuthenticated } from '../util/access'
+import {
+  revalidateWebAfterChange,
+  revalidateWebAfterDelete,
+} from '../hooks/triggerWebRevalidate'
 
 export const Testimonies: CollectionConfig = {
   slug: 'testimonies',
@@ -22,6 +26,10 @@ export const Testimonies: CollectionConfig = {
     update: isContentEditor,
     delete: isAdmin,
     admin: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    afterChange: [revalidateWebAfterChange],
+    afterDelete: [revalidateWebAfterDelete],
   },
   fields: [
     {

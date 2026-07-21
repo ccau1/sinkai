@@ -4,6 +4,10 @@ import {
   isInstallationEditor,
   publishedOrAuthenticated,
 } from '../util/access'
+import {
+  revalidateWebAfterChange,
+  revalidateWebAfterDelete,
+} from '../hooks/triggerWebRevalidate'
 
 export const Installations: CollectionConfig = {
   slug: 'installations',
@@ -22,6 +26,10 @@ export const Installations: CollectionConfig = {
     update: isInstallationEditor,
     delete: isAdmin,
     admin: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    afterChange: [revalidateWebAfterChange],
+    afterDelete: [revalidateWebAfterDelete],
   },
   fields: [
     {

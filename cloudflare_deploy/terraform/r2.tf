@@ -10,6 +10,20 @@ resource "cloudflare_r2_bucket" "cms_media_staging" {
   location   = "APAC"
 }
 
+# ISR incremental cache for the web worker (prerendered pages + fetch data).
+# Bound as NEXT_INC_CACHE_R2_BUCKET in packages/web/wrangler.jsonc.
+resource "cloudflare_r2_bucket" "web_cache_prod" {
+  account_id = var.cloudflare_account_id
+  name       = "sinkai-web-cache-prod"
+  location   = "APAC"
+}
+
+resource "cloudflare_r2_bucket" "web_cache_staging" {
+  account_id = var.cloudflare_account_id
+  name       = "sinkai-web-cache-staging"
+  location   = "APAC"
+}
+
 # NOTE: `cloudflare_r2_custom_domain` does not exist in Cloudflare provider v4
 # (it was introduced in provider v5). Until the provider is upgraded, the
 # custom domains are attached via the Cloudflare API using local-exec

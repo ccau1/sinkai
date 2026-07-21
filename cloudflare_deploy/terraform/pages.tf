@@ -1,3 +1,10 @@
+# NOTE: The web site no longer deploys to Cloudflare Pages — it runs as a
+# Cloudflare Worker (OpenNext, packages/web/wrangler.jsonc) with ISR. The
+# `cloudflare_pages_domain` bindings that used to attach web/web-staging
+# custom domains to these projects were removed so the worker can attach the
+# same domains via its `routes` (custom_domain: true) on `wrangler deploy`.
+# The Pages projects are kept for instant rollback: to roll back, re-add the
+# pages domain + DNS record and remove the worker route.
 resource "cloudflare_pages_project" "web" {
   account_id        = var.cloudflare_account_id
   name              = var.pages_project_name
@@ -20,12 +27,6 @@ resource "cloudflare_pages_project" "web" {
   }
 }
 
-resource "cloudflare_pages_domain" "web" {
-  account_id   = var.cloudflare_account_id
-  project_name = cloudflare_pages_project.web.name
-  domain       = local.web_domain
-}
-
 resource "cloudflare_pages_project" "web_staging" {
   account_id        = var.cloudflare_account_id
   name              = var.pages_staging_project_name
@@ -46,10 +47,4 @@ resource "cloudflare_pages_project" "web_staging" {
       }
     }
   }
-}
-
-resource "cloudflare_pages_domain" "web_staging" {
-  account_id   = var.cloudflare_account_id
-  project_name = cloudflare_pages_project.web_staging.name
-  domain       = local.web_staging_domain
 }

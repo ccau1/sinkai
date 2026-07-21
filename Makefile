@@ -21,9 +21,9 @@ up:
 		docker compose logs cms --tail 50; \
 		exit 1; \
 	fi
-	# Build the static web site against the local CMS.
+	# Build the web app (standalone Node server with ISR) against the local CMS.
 	CMS_API_URL=http://localhost:3001 NEXT_PUBLIC_CMS_API_URL=http://localhost:3001 npm run build -w packages/web
-	# Start/recreate nginx so the bind mount picks up the freshly exported dist directory.
+	# Start/recreate the web container so it picks up the freshly built output.
 	docker compose up -d --force-recreate app
 
 down:
@@ -44,3 +44,5 @@ secrets:
 	@echo "  - CMS_API_URL_PROD"
 	@echo "  - CMS_API_URL_STAGING"
 	@echo "  - RESEND_API_KEY"
+	@echo "  - REVALIDATE_SECRET_STAGING"
+	@echo "  - REVALIDATE_SECRET_PROD"
