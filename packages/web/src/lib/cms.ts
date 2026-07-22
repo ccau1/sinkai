@@ -61,6 +61,7 @@ export interface CMSPage {
   title: string
   excerpt?: string
   content?: unknown
+  puckData?: unknown
   coverImage?: CMSMedia
   published: boolean
 }

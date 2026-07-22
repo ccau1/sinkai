@@ -79,6 +79,7 @@ export interface Config {
     users: User;
     forms: Form;
     'form-submissions': FormSubmission;
+    'puck-templates': PuckTemplate;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
+    'puck-templates': PuckTemplatesSelect<false> | PuckTemplatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -532,6 +534,18 @@ export interface Page {
     [k: string]: unknown;
   } | null;
   coverImage?: (number | null) | Media;
+  /**
+   * Puck visual editor data - managed via the Visual Editor button
+   */
+  puckData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   published?: boolean | null;
   meta?: {
     title?: string | null;
@@ -540,6 +554,35 @@ export interface Page {
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (number | null) | Media;
+  };
+  /**
+   * Which editor was used to create this page
+   */
+  editorVersion?: ('legacy' | 'puck') | null;
+  /**
+   * Overall page structure and layout style
+   */
+  pageLayout: 'default' | 'landing' | 'full-width';
+  /**
+   * Mark this page as the homepage
+   */
+  isHomepage?: boolean | null;
+  /**
+   * Configure conversion tracking for analytics
+   */
+  conversionTracking?: {
+    /**
+     * Check this if this page represents a completed conversion (e.g., thank you page)
+     */
+    isConversionPage?: boolean | null;
+    /**
+     * Type of conversion this page represents
+     */
+    conversionType?: ('lead' | 'registration' | 'purchase' | 'donation' | 'newsletter' | 'contact' | 'custom') | null;
+    /**
+     * Monetary value of this conversion (0 for non-monetary conversions)
+     */
+    conversionValue?: number | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -800,6 +843,45 @@ export interface FormSubmission {
   createdAt: string;
 }
 /**
+ * Reusable component templates for the visual editor
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "puck-templates".
+ */
+export interface PuckTemplate {
+  id: number;
+  /**
+   * A descriptive name for this template
+   */
+  name: string;
+  /**
+   * Optional description of what this template contains
+   */
+  description?: string | null;
+  /**
+   * Category for organizing templates (e.g., "Hero", "Footer", "CTA")
+   */
+  category?: string | null;
+  /**
+   * Serialized Puck component data
+   */
+  content:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Optional thumbnail URL for template preview
+   */
+  thumbnail?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -870,6 +952,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'form-submissions';
         value: number | FormSubmission;
+      } | null)
+    | ({
+        relationTo: 'puck-templates';
+        value: number | PuckTemplate;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1043,6 +1129,7 @@ export interface PagesSelect<T extends boolean = true> {
   excerpt?: T;
   content?: T;
   coverImage?: T;
+  puckData?: T;
   published?: T;
   meta?:
     | T
@@ -1050,6 +1137,16 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+      };
+  editorVersion?: T;
+  pageLayout?: T;
+  isHomepage?: T;
+  conversionTracking?:
+    | T
+    | {
+        isConversionPage?: T;
+        conversionType?: T;
+        conversionValue?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1298,6 +1395,19 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "puck-templates_select".
+ */
+export interface PuckTemplatesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  category?: T;
+  content?: T;
+  thumbnail?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -9,6 +9,8 @@ import type { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { aiLocalization } from 'payload-plugin-ai-localization'
+import { createPuckPlugin } from '@delmaredigital/payload-puck/plugin'
 import { defaultLocale, payloadLocales } from './locales'
 import { defaultAdminLanguage, supportedAdminLanguages } from './adminLanguages'
 
@@ -88,6 +90,7 @@ export default buildConfig({
       graphics: {
         Logo: './components/AdminLogo#default',
       },
+      providers: ['./components/PuckAdminProvider#PuckAdminProvider'],
     },
     meta: {
       titleSuffix: '- 善啓慈善基金會',
@@ -248,6 +251,46 @@ export default buildConfig({
           afterChange: [handleFormSubmission],
         },
       },
+    }),
+    ...(process.env.OPENAI_API_KEY
+      ? [
+          aiLocalization({
+            openai: {
+              apiKey: process.env.OPENAI_API_KEY,
+              model: 'gpt-4.1-nano',
+            },
+            collections: {
+              blogs: {
+                fields: ['slugName', 'title', 'excerpt', 'content'],
+              },
+              installations: {
+                fields: ['title', 'location', 'description'],
+              },
+              pages: {
+                fields: ['title', 'excerpt', 'content'],
+              },
+              media: {
+                fields: ['alt'],
+              },
+              testimonies: {
+                fields: ['name', 'role', 'synopsis', 'content'],
+              },
+            },
+          }),
+        ]
+      : []),
+    createPuckPlugin({
+      pagesCollection: 'pages',
+      autoGenerateCollection: true,
+      enableAdminView: true,
+      adminViewPath: '/puck-editor',
+      enableEndpoints: true,
+      editorStylesheet: 'src/puck-editor.css',
+      admin: {
+        buttonLabel: 'Visual Editor',
+        buttonPosition: 'sidebar',
+      },
+      previewUrl: '/',
     }),
   ],
 })

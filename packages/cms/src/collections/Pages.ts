@@ -69,6 +69,15 @@ export const Pages: CollectionConfig = {
       displayPreview: true,
     },
     {
+      name: 'puckData',
+      type: 'json',
+      localized: true,
+      admin: {
+        hidden: true,
+        description: 'Puck visual editor data - managed via the Visual Editor button',
+      },
+    },
+    {
       name: 'published',
       type: 'checkbox',
       label: '已發布',

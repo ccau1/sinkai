@@ -31,10 +31,14 @@ import { default as default_4ce8058277229447a496aba268739b05 } from '../../../co
 import { default as default_315a986b0a3d6fc335501953219ed625 } from '../../../components/CurrencyAmountCell'
 import { default as default_6944f47f37738ce070de544397292a93 } from '../../../components/EventsCalendar/RaisedSummary'
 import { default as default_f30da5631108bd7a8d0c0e009c1fd221 } from '../../../components/EventsCalendar'
+import { EditWithPuckButton as EditWithPuckButton_d72027e0f0541e23dd1e340e47e71267 } from '@delmaredigital/payload-puck/admin/client'
+import { EditWithPuckCell as EditWithPuckCell_d72027e0f0541e23dd1e340e47e71267 } from '@delmaredigital/payload-puck/admin/client'
 import { default as default_f0aa037c5a87f7e694b83a0dfa4aa296 } from '../../../components/MediaUsage'
 import { default as default_b0b2bdd4b42aa03c8eed8050dba2ee22 } from '../../../components/VideoThumbnail'
 import { default as default_a61f4011432dd182d230f12ec130ccf3 } from '../../../components/AdminLogo'
+import { PuckAdminProvider as PuckAdminProvider_23a44819d190ff71ca6fdf72624f1604 } from '../../../components/PuckAdminProvider'
 import { R2ClientUploadHandler as R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d } from '@payloadcms/storage-r2/client'
+import { PuckEditorView as PuckEditorView_3b27b37268b8e78cccc06ea6de889aa6 } from '@delmaredigital/payload-puck/rsc'
 import { default as default_393501ca467d3629e0d4c6725069402c } from '../../../components/Dashboard/CollectionPreviews'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -73,10 +77,14 @@ export const importMap = {
   "./components/CurrencyAmountCell#default": default_315a986b0a3d6fc335501953219ed625,
   "./components/EventsCalendar/RaisedSummary#default": default_6944f47f37738ce070de544397292a93,
   "./components/EventsCalendar#default": default_f30da5631108bd7a8d0c0e009c1fd221,
+  "@delmaredigital/payload-puck/admin/client#EditWithPuckButton": EditWithPuckButton_d72027e0f0541e23dd1e340e47e71267,
+  "@delmaredigital/payload-puck/admin/client#EditWithPuckCell": EditWithPuckCell_d72027e0f0541e23dd1e340e47e71267,
   "./components/MediaUsage#default": default_f0aa037c5a87f7e694b83a0dfa4aa296,
   "./components/VideoThumbnail#default": default_b0b2bdd4b42aa03c8eed8050dba2ee22,
   "./components/AdminLogo#default": default_a61f4011432dd182d230f12ec130ccf3,
+  "./components/PuckAdminProvider#PuckAdminProvider": PuckAdminProvider_23a44819d190ff71ca6fdf72624f1604,
   "@payloadcms/storage-r2/client#R2ClientUploadHandler": R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d,
+  "@delmaredigital/payload-puck/rsc#PuckEditorView": PuckEditorView_3b27b37268b8e78cccc06ea6de889aa6,
   "./components/Dashboard/CollectionPreviews#default": default_393501ca467d3629e0d4c6725069402c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
