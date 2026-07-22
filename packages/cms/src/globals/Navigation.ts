@@ -5,6 +5,13 @@ import { revalidateWebGlobalAfterChange } from '../hooks/triggerWebRevalidate'
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
   label: 'Navigation',
+  admin: {
+    group: {
+      en: 'Settings',
+      'zh-CN': '设置',
+      'zh-TW': '設定',
+    },
+  },
   access: {
     read: () => true,
     update: isContentEditor,

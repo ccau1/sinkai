@@ -98,6 +98,10 @@ async function main() {
   const { default: config } = await import('@payload-config')
   const payload = await getPayload({ config })
 
+  console.log(
+    `[remove-duplicate-blogs] mode=${process.env.PAYLOAD_REMOTE === 'true' ? 'REMOTE D1' : 'local D1'}`,
+  )
+
   let page = 1
   const docs: BlogDoc[] = []
 
@@ -129,6 +133,15 @@ async function main() {
       grouped.set(slug, group)
     }
   }
+
+  // Orphaned docs created by the old shortId bug have no slug in any locale
+  // and a runaway shortId with multiple collision suffixes. They cannot be
+  // matched to a canonical post and are safe to remove.
+  const orphaned = docs.filter((doc) => {
+    const slugs = getAllSlugs(doc)
+    const shortId = typeof doc.shortId === 'string' ? doc.shortId : ''
+    return slugs.length === 0 && shortId.length > 10
+  })
 
   const scanned = docs.length
   let groups = 0
@@ -175,6 +188,31 @@ async function main() {
     }
 
     kept++
+  }
+
+  for (const orphan of orphaned) {
+    if (DRY_RUN) {
+      console.log(
+        `[remove-duplicate-blogs] would delete orphaned id=${orphan.id} shortId=${orphan.shortId}`,
+      )
+      deleted++
+      continue
+    }
+
+    try {
+      await payload.delete({
+        collection: 'blogs',
+        id: orphan.id,
+        overrideAccess: true,
+      })
+      deleted++
+      console.log(
+        `[remove-duplicate-blogs] deleted orphaned id=${orphan.id} shortId=${orphan.shortId}`,
+      )
+    } catch (err) {
+      failed++
+      console.error(`[remove-duplicate-blogs] failed to delete orphaned id=${orphan.id}:`, err)
+    }
   }
 
   console.log(

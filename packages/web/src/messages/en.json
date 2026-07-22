@@ -181,7 +181,9 @@
     "schools": "Schools",
     "bridges": "Bridges",
     "waterTanks": "Water Tanks",
-    "empty": "No installations have been published yet."
+    "empty": "No installations have been published yet.",
+    "upcoming": "Upcoming",
+    "planning": "Planning"
   },
   "testimonies": {
     "pageLabel": "TESTIMONIES",

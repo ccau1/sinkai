@@ -181,7 +181,9 @@
     "schools": "学校",
     "bridges": "桥梁",
     "waterTanks": "水窖",
-    "empty": "尚未发布任何援建项目。"
+    "empty": "尚未发布任何援建项目。",
+    "upcoming": "即将开展",
+    "planning": "规划中"
   },
   "testimonies": {
     "pageLabel": "见证分享",

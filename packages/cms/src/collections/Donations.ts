@@ -112,6 +112,16 @@ export const Donations: CollectionConfig = {
       },
     },
     {
+      name: 'events',
+      type: 'relationship',
+      label: 'For Events',
+      relationTo: 'events',
+      hasMany: true,
+      admin: {
+        description: 'Events that this donation is allocated to.',
+      },
+    },
+    {
       name: 'message',
       type: 'textarea',
       label: 'Donor Message',

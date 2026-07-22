@@ -69,7 +69,9 @@ export interface Config {
   collections: {
     blogs: Blog;
     installations: Installation;
+    'installation-types': InstallationType;
     testimonies: Testimony;
+    events: Event;
     donations: Donation;
     pages: Page;
     media: Media;
@@ -82,11 +84,17 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    events: {
+      donations: 'donations';
+    };
+  };
   collectionsSelect: {
     blogs: BlogsSelect<false> | BlogsSelect<true>;
     installations: InstallationsSelect<false> | InstallationsSelect<true>;
+    'installation-types': InstallationTypesSelect<false> | InstallationTypesSelect<true>;
     testimonies: TestimoniesSelect<false> | TestimoniesSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     donations: DonationsSelect<false> | DonationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -162,7 +170,7 @@ export interface UserAuthOperations {
 export interface Blog {
   id: number;
   /**
-   * URL-safe slug, e.g. "mountain-area-reality". Can be translated per locale.
+   * URL-safe slug, e.g. "mountain-area-reality". Must be unique across all blogs. Can be translated per locale (optional).
    */
   slugName: string;
   title: string;
@@ -184,10 +192,13 @@ export interface Blog {
   } | null;
   legacyContent?: string | null;
   /**
-   * Short URL token shared across all locales. Auto-generated from the English slug if left blank.
+   * Short URL token shared across all locales. Auto-generated from the slug; managed by the system, not editable.
    */
   shortId?: string | null;
   coverImage: number | Media;
+  /**
+   * Display date shown on the site. Auto-set to the publish time when a post is published; edit to backdate.
+   */
   date: string;
   /**
    * Installations mentioned in this blog post
@@ -306,7 +317,7 @@ export interface Installation {
    * URL-safe identifier, e.g. "hope-primary-school-guizhou"
    */
   slug: string;
-  type: 'school' | 'bridge' | 'water-tank';
+  type: number | InstallationType;
   completionDate?: string | null;
   photos?: (number | Media)[] | null;
   published?: boolean | null;
@@ -318,6 +329,26 @@ export interface Installation {
      */
     image?: (number | null) | Media;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Types of installations (e.g. schools, bridges, water tanks). Types drive the groups shown on the public installations page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "installation-types".
+ */
+export interface InstallationType {
+  id: number;
+  /**
+   * Stable identifier used by code and seeds, e.g. "school".
+   */
+  key: string;
+  label: string;
+  /**
+   * Controls the order of groups on the installations page (lower first).
+   */
+  sortOrder?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -366,6 +397,63 @@ export interface Testimony {
   createdAt: string;
 }
 /**
+ * Charity events such as school building trips and fundraising campaigns. Events can be linked to donations (funding sources) and installations (what the event built).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  startDate: string;
+  /**
+   * Leave empty for single-day events.
+   */
+  endDate?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  coverImage?: (number | null) | Media;
+  addresses?:
+    | {
+        address: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Donation amount required to fund this event.
+   */
+  targetAmount?: number | null;
+  targetCurrency?: ('HKD' | 'USD' | 'CNY' | 'TWD' | 'EUR' | 'GBP') | null;
+  /**
+   * Installations funded or created by this event.
+   */
+  installations?: (number | Installation)[] | null;
+  /**
+   * Donations allocated to this event.
+   */
+  donations?: {
+    docs?: (number | Donation)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  published?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Track donations received by the charity, including donor details, amount, transfer date and the installations they support.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -390,6 +478,10 @@ export interface Donation {
    * Installations that this donation supports.
    */
   installations?: (number | Installation)[] | null;
+  /**
+   * Events that this donation is allocated to.
+   */
+  events?: (number | Event)[] | null;
   /**
    * Optional note or dedication from the donor.
    */
@@ -740,8 +832,16 @@ export interface PayloadLockedDocument {
         value: number | Installation;
       } | null)
     | ({
+        relationTo: 'installation-types';
+        value: number | InstallationType;
+      } | null)
+    | ({
         relationTo: 'testimonies';
         value: number | Testimony;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
       } | null)
     | ({
         relationTo: 'donations';
@@ -863,6 +963,17 @@ export interface InstallationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "installation-types_select".
+ */
+export interface InstallationTypesSelect<T extends boolean = true> {
+  key?: T;
+  label?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonies_select".
  */
 export interface TestimoniesSelect<T extends boolean = true> {
@@ -872,6 +983,30 @@ export interface TestimoniesSelect<T extends boolean = true> {
   photos?: T;
   synopsis?: T;
   content?: T;
+  published?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  startDate?: T;
+  endDate?: T;
+  description?: T;
+  coverImage?: T;
+  addresses?:
+    | T
+    | {
+        address?: T;
+        id?: T;
+      };
+  targetAmount?: T;
+  targetCurrency?: T;
+  installations?: T;
+  donations?: T;
   published?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -889,6 +1024,7 @@ export interface DonationsSelect<T extends boolean = true> {
   transferDate?: T;
   paymentMethod?: T;
   installations?: T;
+  events?: T;
   message?: T;
   receipts?: T;
   notes?: T;

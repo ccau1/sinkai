@@ -20,6 +20,11 @@ import { checkVideoThumb, postVideoThumb } from '../endpoints/videoThumb'
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
+    group: {
+      en: 'Website',
+      'zh-CN': '网站',
+      'zh-TW': '網站',
+    },
     description: {
       en: 'Images and files uploaded for use across the website.',
       'zh-CN': '上传至网站使用的图片与文件。',

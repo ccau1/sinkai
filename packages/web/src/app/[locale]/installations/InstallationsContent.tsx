@@ -4,17 +4,20 @@ import CmsImage from '@/components/CmsImage';
 import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import type { CMSInstallation } from '@/lib/cms';
-import { getInstallationTitle, getInstallationLocation, getInstallationDescription, getMediaAlt } from '@/lib/cms';
+import type { CMSInstallation, CMSInstallationType } from '@/lib/cms';
+import { getInstallationTitle, getInstallationLocation, getInstallationDescription, getInstallationStatus, getMediaAlt } from '@/lib/cms';
 
 
-interface Props {
-  schools: CMSInstallation[];
-  bridges: CMSInstallation[];
-  waterTanks: CMSInstallation[];
+interface InstallationGroup {
+  type: CMSInstallationType;
+  items: CMSInstallation[];
 }
 
-export default function InstallationsContent({ schools, bridges, waterTanks }: Props) {
+interface Props {
+  groups: InstallationGroup[];
+}
+
+export default function InstallationsContent({ groups }: Props) {
   const t = useTranslations('installations');
   const locale = useLocale();
   const formatter = useFormatter();
@@ -38,21 +41,15 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
     return () => ctx.revert();
   }, []);
 
-  const typeLabels: Record<CMSInstallation['type'], string> = {
-    school: t('schools'),
-    bridge: t('bridges'),
-    'water-tank': t('waterTanks'),
-  };
-
-  const renderGroup = (items: CMSInstallation[], type: CMSInstallation['type']) => {
-    if (items.length === 0) return null;
+  const renderGroup = (group: InstallationGroup) => {
+    if (group.items.length === 0) return null;
     return (
-      <div key={type} className="mb-16">
+      <div key={String(group.type.id)} className="mb-16">
         <h2 className="reveal text-title font-bold mb-8" style={{ color: 'var(--color-primary-700)' }}>
-          {typeLabels[type]}
+          {group.type.label}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => {
+          {group.items.map((item) => {
             const title = getInstallationTitle(item);
             const location = getInstallationLocation(item);
             const description = getInstallationDescription(item);
@@ -83,6 +80,22 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
                   </div>
                 )}
                 <div className="p-5 flex-1 flex flex-col">
+                  {(() => {
+                    const status = getInstallationStatus(item);
+                    if (!status) return null;
+                    return (
+                      <span
+                        className="inline-block self-start text-label font-semibold mb-2 px-2.5 py-0.5 rounded-full"
+                        style={
+                          status === 'upcoming'
+                            ? { backgroundColor: 'var(--color-primary-600)', color: '#fff' }
+                            : { backgroundColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }
+                        }
+                      >
+                        {t(status)}
+                      </span>
+                    );
+                  })()}
                   <h3 className="font-semibold text-base mb-2" style={{ color: 'var(--color-text-primary)' }}>
                     {title}
                   </h3>
@@ -132,16 +145,12 @@ export default function InstallationsContent({ schools, bridges, waterTanks }: P
       {/* Content */}
       <section ref={sectionRef} className="section" style={{ backgroundColor: 'var(--color-bg-base)' }}>
         <div className="container-main">
-          {[schools, bridges, waterTanks].every((g) => g.length === 0) ? (
+          {groups.every((g) => g.items.length === 0) ? (
             <p className="text-center text-body" style={{ color: 'var(--color-text-secondary)' }}>
               {t('empty')}
             </p>
           ) : (
-            <>
-              {renderGroup(schools, 'school')}
-              {renderGroup(bridges, 'bridge')}
-              {renderGroup(waterTanks, 'water-tank')}
-            </>
+            groups.map(renderGroup)
           )}
         </div>
       </section>

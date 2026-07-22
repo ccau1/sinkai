@@ -1,0 +1,1 @@
+npm run repair:installation-descriptions:remote

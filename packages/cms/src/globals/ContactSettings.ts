@@ -4,6 +4,13 @@ import { isContentEditor } from '../util/access'
 export const ContactSettings: GlobalConfig = {
   slug: 'contact-settings',
   label: 'Contact Settings',
+  admin: {
+    group: {
+      en: 'Settings',
+      'zh-CN': '设置',
+      'zh-TW': '設定',
+    },
+  },
   access: {
     read: () => true,
     update: isContentEditor,

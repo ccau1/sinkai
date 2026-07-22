@@ -7,6 +7,7 @@ import { imageSize } from 'image-size'
 import { blogPosts } from './blog-data'
 import { testimonies } from './testimonies-data'
 import { installations } from './installations-data'
+import { installationTypes } from './installation-types-data'
 import { mediaCategories, type MediaCategorySeed } from './gallery-data'
 import { generateShortId } from '../util/shortId'
 import { locales, type Locale } from '../locales'
@@ -179,6 +180,10 @@ async function seed() {
   const { default: config } = await import('@payload-config')
   const payload = await getPayload({ config })
 
+  console.log(
+    `[seed] mode=${process.env.PAYLOAD_REMOTE === 'true' ? 'REMOTE D1' : 'local D1'}`,
+  )
+
   // Ensure an admin user exists for local dev only
   if (process.env.NODE_ENV !== 'production') {
     const existingUsers = await payload.find({
@@ -218,6 +223,42 @@ async function seed() {
   let updated = 0
 
   try {
+    // Clean up artifacts left by the old runaway shortId hook: docs with no
+    // slug in any locale and a very long shortId. These cannot be matched to
+    // a canonical post and would otherwise linger in the CMS/admin UI.
+    const allBlogs = await payload.find({
+      collection: 'blogs',
+      depth: 0,
+      limit: 1000,
+      locale: 'all',
+      overrideAccess: true,
+    })
+    const orphanedBlogs = allBlogs.docs.filter((doc) => {
+      const slugs =
+        doc.slugName && typeof doc.slugName === 'object' && !Array.isArray(doc.slugName)
+          ? Object.values(doc.slugName as Record<string, string>).filter(Boolean)
+          : typeof doc.slugName === 'string'
+            ? [doc.slugName]
+            : []
+      const shortId = typeof doc.shortId === 'string' ? doc.shortId : ''
+      return slugs.length === 0 && shortId.length > 10
+    })
+    for (const orphan of orphanedBlogs) {
+      try {
+        await payload.delete({
+          collection: 'blogs',
+          id: (orphan as { id: number | string }).id,
+          overrideAccess: true,
+        })
+        console.log(`Seeder removed orphaned blog id=${(orphan as { id: number | string }).id}`)
+      } catch (err) {
+        console.warn(
+          `Failed to remove orphaned blog id=${(orphan as { id: number | string }).id}:`,
+          err,
+        )
+      }
+    }
+
     for (const post of blogPosts) {
       // Look up by the canonical default-locale slug rather than shortId.
       // shortId can gain collision suffixes or be mutated by older hooks, so
@@ -256,8 +297,12 @@ async function seed() {
         const existingDoc = existing.docs[0]
 
         // Ensure the shortId is set (older corrupted docs may be missing one).
+        // A runaway collision-suffix bug previously produced shortIds with
+        // hundreds of characters; re-seeding trims them back to the canonical
+        // 6-character value.
         const updates: Record<string, unknown> = {}
-        if (!existingDoc.shortId) {
+        const existingShortId = typeof existingDoc.shortId === 'string' ? existingDoc.shortId : ''
+        if (!existingShortId || existingShortId.length > 10) {
           updates.shortId = generateShortId(post.slug)
         }
         if (coverImageId && coverImageId !== (existingDoc.coverImage as number | string)) {
@@ -339,6 +384,7 @@ async function seed() {
 
   await seedNavigation(payload)
   await seedTestimonies(payload)
+  await seedInstallationTypes(payload)
   await seedInstallations(payload)
   await seedGallery(payload)
   await seedForms(payload)
@@ -620,10 +666,82 @@ async function seedTestimonies(payload: import('payload').Payload) {
   console.log(`Testimonies seed complete: ${created} created, ${updated} updated, ${skipped} skipped`)
 }
 
+async function seedInstallationTypes(payload: import('payload').Payload) {
+  let created = 0
+  let updated = 0
+
+  for (const type of installationTypes) {
+    const existing = await payload.find({
+      collection: 'installation-types',
+      where: {
+        key: { equals: type.key },
+      },
+      limit: 1,
+    })
+
+    if (existing.totalDocs > 0) {
+      const existingDoc = existing.docs[0]
+      await payload.update({
+        collection: 'installation-types',
+        id: existingDoc.id,
+        data: {
+          key: type.key,
+          sortOrder: type.sortOrder,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      })
+      for (const locale of locales) {
+        await payload.update({
+          collection: 'installation-types',
+          id: existingDoc.id,
+          locale,
+          data: {
+            label: type.label[locale],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        })
+      }
+      console.log(`Updated installation type: ${type.key}`)
+      updated++
+      continue
+    }
+
+    const createdDoc = await payload.create({
+      collection: 'installation-types',
+      locale: defaultLocale,
+      data: {
+        key: type.key,
+        sortOrder: type.sortOrder,
+        label: type.label[defaultLocale],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+    })
+
+    for (const locale of locales.filter((l) => l !== defaultLocale)) {
+      await payload.update({
+        collection: 'installation-types',
+        id: createdDoc.id,
+        locale,
+        data: {
+          label: type.label[locale],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      })
+    }
+
+    console.log(`Created installation type: ${type.key}`)
+    created++
+  }
+
+  console.log(
+    `Installation types seed complete: ${created} created, ${updated} updated`,
+  )
+}
+
 async function seedInstallations(payload: import('payload').Payload) {
   let created = 0
   let updated = 0
-  const skipped = 0
+  let skipped = 0
 
   for (const installation of installations) {
     const en = installation.translations.en
@@ -657,6 +775,22 @@ async function seedInstallations(payload: import('payload').Payload) {
       continue
     }
 
+    const typeLookup = await payload.find({
+      collection: 'installation-types',
+      where: {
+        key: { equals: installation.type },
+      },
+      limit: 1,
+    })
+    if (typeLookup.totalDocs === 0) {
+      console.warn(
+        `Installation type "${installation.type}" not found for "${en.title}". Skipping.`,
+      )
+      skipped++
+      continue
+    }
+    const typeId = typeLookup.docs[0].id
+
     if (existing.totalDocs > 0) {
       const existingDoc = existing.docs[0]
       await payload.update({
@@ -666,7 +800,8 @@ async function seedInstallations(payload: import('payload').Payload) {
         data: {
           title: en.title,
           location: en.location,
-          description: en.description,
+          description: textToLexical(en.description),
+          type: typeId,
           photos: photoIds as number[],
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
@@ -680,7 +815,7 @@ async function seedInstallations(payload: import('payload').Payload) {
           data: {
             title: t.title,
             location: t.location,
-            description: t.description,
+            description: textToLexical(t.description),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
         })
@@ -699,9 +834,9 @@ async function seedInstallations(payload: import('payload').Payload) {
       data: {
         title: en.title,
         location: en.location,
-        description: en.description,
+        description: textToLexical(en.description),
         slug: installation.slug,
-        type: installation.type,
+        type: typeId,
         completionDate: installation.completionDate,
         photos: photoIds as number[],
         published: true,
@@ -718,7 +853,7 @@ async function seedInstallations(payload: import('payload').Payload) {
         data: {
           title: t.title,
           location: t.location,
-          description: t.description,
+          description: textToLexical(t.description),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
       })

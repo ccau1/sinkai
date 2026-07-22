@@ -153,7 +153,11 @@ CMS_API_URL=http://localhost:3001 npm run dev -w packages/web
 Or run both via Docker:
 
 ```bash
+# Fast start (no seeding)
 make up
+
+# First-time / fresh local data (migrate + seed + start)
+make up-seed
 ```
 
 - Web: http://localhost:3200

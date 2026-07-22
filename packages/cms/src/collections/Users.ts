@@ -5,6 +5,11 @@ import { isAdmin, userIsAdmin } from '../util/access'
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
+    group: {
+      en: 'Settings',
+      'zh-CN': '设置',
+      'zh-TW': '設定',
+    },
     // Keep email as the list title even though username login is enabled,
     // so existing users without a username still display properly.
     useAsTitle: 'email',

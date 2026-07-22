@@ -8,6 +8,11 @@ import {
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
+    group: {
+      en: 'Website',
+      'zh-CN': '网站',
+      'zh-TW': '網站',
+    },
     useAsTitle: 'title',
     defaultColumns: ['slug', 'title', 'updatedAt'],
     description: {

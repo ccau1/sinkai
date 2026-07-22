@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { ValidationError } from 'payload'
 import {
   isAdmin,
   isBlogEditor,
@@ -40,7 +41,7 @@ export const Blogs: CollectionConfig = {
       unique: true,
       admin: {
         description:
-          'URL-safe slug, e.g. "mountain-area-reality". Can be translated per locale.',
+          'URL-safe slug, e.g. "mountain-area-reality". Must be unique across all blogs. Can be translated per locale (optional).',
       },
     },
     {
@@ -93,6 +94,11 @@ export const Blogs: CollectionConfig = {
       name: 'date',
       type: 'date',
       required: true,
+      defaultValue: () => new Date().toISOString(),
+      admin: {
+        description:
+          'Display date shown on the site. Auto-set to the publish time when a post is published; edit to backdate.',
+      },
     },
     {
       name: 'installations',
@@ -115,8 +121,19 @@ export const Blogs: CollectionConfig = {
   hooks: {
     afterChange: [revalidateWebAfterChange],
     afterDelete: [revalidateWebAfterDelete],
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        // Stamp the display date when a post transitions to published, so a
+        // draft published days later shows the publish date, not the date it
+        // was first drafted. Editors can still backdate afterwards.
+        if (data?.published === true && originalDoc?.published !== true) {
+          data.date = new Date().toISOString()
+        }
+        return data
+      },
+    ],
     beforeValidate: [
-      async ({ data, req, operation }) => {
+      async ({ data, req, operation, originalDoc }) => {
         if (!data) return data
 
         // Normalize localized slugs: trim, lowercase, replace spaces with dashes,
@@ -163,28 +180,77 @@ export const Blogs: CollectionConfig = {
           shortId = generateShortId(normalizedDefaultSlug)
         }
 
+        const currentId = originalDoc?.id
+
         // Only enforce uniqueness when we actually have a shortId.
         // Missing required fields are left to Payload's built-in validation so the
         // admin UI can show per-field error messages instead of a generic 500.
         if (shortId) {
-          const existing = await req.payload.find({
+          const shortIdUnchanged =
+            operation === 'update' &&
+            typeof originalDoc?.shortId === 'string' &&
+            originalDoc.shortId.toLowerCase().trim() === shortId
+
+          // Only check uniqueness when the shortId has actually changed or we
+          // are creating a new doc. This stops the old bug where every save
+          // appended another collision suffix and the shortId grew to hundreds
+          // of characters.
+          if (!shortIdUnchanged) {
+            const existing = await req.payload.find({
+              collection: 'blogs',
+              where: {
+                shortId: { equals: shortId },
+              },
+              limit: 1,
+              depth: 0,
+            })
+            if (existing.totalDocs > 0) {
+              const first = existing.docs[0]
+              if (operation === 'create' || String((first as { id?: string | number }).id) !== String(currentId)) {
+                // Collision: append a short random suffix so the save can succeed.
+                shortId = `${shortId}-${Math.random().toString(36).slice(2, 5)}`
+              }
+            }
+          }
+          data.shortId = shortId
+        }
+
+        // App-level slug uniqueness check across ALL locales: a slug value
+        // belongs to one blog post — another post must not reuse it in any
+        // locale (localizing a post's own slug is fine). The DB unique index
+        // is only a within-locale backstop; this enforces the real rule and
+        // gives a clear field error instead of a generic toast.
+        const slugChecks: [string, string][] = isLocalizedObject
+          ? Object.entries(data.slugName as Record<string, string>)
+          : [[req.locale || 'en', normalizedDefaultSlug]]
+
+        for (const [slugLocale, slug] of slugChecks) {
+          if (!slug) continue
+          const duplicate = await req.payload.find({
             collection: 'blogs',
             where: {
-              shortId: { equals: shortId },
+              or: [
+                { 'slugName.en': { equals: slug } },
+                { 'slugName.zh-CN': { equals: slug } },
+                { 'slugName.zh-TW': { equals: slug } },
+              ],
+              ...(currentId ? { id: { not_equals: currentId } } : {}),
             },
             limit: 1,
             depth: 0,
           })
-          if (existing.totalDocs > 0) {
-            const first = existing.docs[0]
-            if (operation === 'create' || String((first as { id?: string | number }).id) !== String(data.id)) {
-              // Collision: append a random suffix so the save can succeed.
-              // The suffix is preserved on future updates because we no longer
-              // re-normalize an existing shortId.
-              shortId = `${shortId}-${Math.random().toString(36).slice(2, 5)}`
-            }
+          if (duplicate.totalDocs > 0) {
+            throw new ValidationError({
+              collection: 'blogs',
+              errors: [
+                {
+                  message: `Slug "${slug}" (${slugLocale}) is already used by another blog post. Slugs must be unique across all blogs.`,
+                  path: 'slugName',
+                },
+              ],
+              req,
+            })
           }
-          data.shortId = shortId
         }
 
         return data

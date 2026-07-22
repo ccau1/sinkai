@@ -63,17 +63,27 @@ export const Installations: CollectionConfig = {
     },
     {
       name: 'type',
-      type: 'select',
+      type: 'relationship',
+      relationTo: 'installation-types',
       required: true,
-      options: [
-        { label: 'School', value: 'school' },
-        { label: 'Bridge', value: 'bridge' },
-        { label: 'Water Tank', value: 'water-tank' },
-      ],
+    },
+    {
+      name: 'completionDateNote',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './components/InstallationCompletionNote#default',
+        },
+      },
     },
     {
       name: 'completionDate',
       type: 'date',
+      admin: {
+        components: {
+          Cell: './components/InstallationCompletionCell#default',
+        },
+      },
     },
     {
       name: 'photos',

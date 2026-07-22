@@ -16,10 +16,12 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { MediaCategories } from './collections/MediaCategories'
 import { Installations } from './collections/Installations'
+import { InstallationTypes } from './collections/InstallationTypes'
 import { Blogs } from './collections/Blogs'
 import { Pages } from './collections/Pages'
 import { Testimonies } from './collections/Testimonies'
 import { Donations } from './collections/Donations'
+import { Events } from './collections/Events'
 import { Navigation } from './globals/Navigation'
 import { ContactSettings } from './globals/ContactSettings'
 import { handleFormSubmission } from './hooks/handleFormSubmission'
@@ -95,7 +97,18 @@ export default buildConfig({
       defaultLayout: [{ widgetSlug: 'collection-previews', width: 'full' }],
     },
   },
-  collections: [Blogs, Installations, Testimonies, Donations, Pages, Media, MediaCategories, Users],
+  collections: [
+    Blogs,
+    Installations,
+    InstallationTypes,
+    Testimonies,
+    Events,
+    Donations,
+    Pages,
+    Media,
+    MediaCategories,
+    Users,
+  ],
   globals: [Navigation, ContactSettings],
   graphQL: {
     disable: true,
@@ -116,6 +129,12 @@ export default buildConfig({
     // Disable Drizzle's interactive dev schema push; rely on explicit migrations instead.
     push: false,
   }),
+  onInit: async () => {
+    // Make it obvious in the console which D1 database the CMS is using.
+    console.log(
+      `[payload] CMS using ${process.env.PAYLOAD_REMOTE === 'true' ? 'REMOTE D1' : 'local D1'}`,
+    )
+  },
   cors: [
     'https://sinkai.tribalorigin.com',
     'https://sinkai.staging.tribalorigin.com',
@@ -186,6 +205,13 @@ export default buildConfig({
       },
       uploadCollections: ['media'],
       formOverrides: {
+        admin: {
+          group: {
+            en: 'Website',
+            'zh-CN': '网站',
+            'zh-TW': '網站',
+          },
+        },
         fields: ({ defaultFields }) => [
           ...defaultFields,
           {
@@ -209,6 +235,13 @@ export default buildConfig({
         },
       },
       formSubmissionOverrides: {
+        admin: {
+          group: {
+            en: 'Website',
+            'zh-CN': '网站',
+            'zh-TW': '網站',
+          },
+        },
         hooks: {
           afterChange: [handleFormSubmission],
         },
@@ -228,6 +261,9 @@ export default buildConfig({
               installations: {
                 fields: ['title', 'location', 'description'],
               },
+              'installation-types': {
+                fields: ['label'],
+              },
               pages: {
                 fields: ['title', 'excerpt', 'content'],
               },
@@ -236,6 +272,9 @@ export default buildConfig({
               },
               testimonies: {
                 fields: ['name', 'role', 'synopsis', 'content'],
+              },
+              events: {
+                fields: ['title', 'description'],
               },
             },
           }),

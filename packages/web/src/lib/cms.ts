@@ -22,14 +22,21 @@ export interface CMSMedia {
   hidden?: boolean
 }
 
+export interface CMSInstallationType {
+  id: number | string
+  key: string
+  label: string
+  sortOrder?: number
+}
+
 export interface CMSInstallation {
   id: number | string
   slug: string
-  type: 'school' | 'bridge' | 'water-tank'
+  type: number | CMSInstallationType
   title: string
   location: string
   completionDate?: string
-  description?: string
+  description?: string | Record<string, unknown>
   photos?: CMSMedia[]
   published: boolean
 }
@@ -205,8 +212,43 @@ export function getInstallationLocation(doc: CMSInstallation): string {
   return doc.location || ''
 }
 
+/** Collect all text nodes from a Lexical document tree. */
+function collectLexicalText(node: unknown, out: string[]): void {
+  if (!node || typeof node !== 'object') return
+  const n = node as Record<string, unknown>
+  if (typeof n.text === 'string') {
+    out.push(n.text)
+    return
+  }
+  if (Array.isArray(n.children)) {
+    for (const child of n.children) collectLexicalText(child, out)
+  }
+}
+
+/**
+ * Installation descriptions are richText (Lexical) in the CMS. Older rows may
+ * still hold a plain string — handle both and always return plain text.
+ */
 export function getInstallationDescription(doc: CMSInstallation): string | undefined {
-  return doc.description
+  const description = doc.description
+  if (!description) return undefined
+  if (typeof description === 'string') return description
+
+  const root = (description as Record<string, unknown>).root ?? description
+  const parts: string[] = []
+  collectLexicalText(root, parts)
+  return parts.join(' ').trim() || undefined
+}
+
+/**
+ * Derive the installation's progress status from its completion date:
+ * - no completion date  -> 'planning'
+ * - completion date in the future -> 'upcoming'
+ * - otherwise (past date) -> null (completed, no badge)
+ */
+export function getInstallationStatus(doc: CMSInstallation): 'planning' | 'upcoming' | null {
+  if (!doc.completionDate) return 'planning'
+  return new Date(doc.completionDate) > new Date() ? 'upcoming' : null
 }
 
 export function getMediaAlt(media: CMSMedia, locale?: Locale | string): string {
@@ -278,16 +320,37 @@ export async function fetchBlogForRedirect(
   return doc ? { slugName: doc.slugName, shortId: doc.shortId } : null
 }
 
+export async function fetchInstallationTypes(locale: Locale): Promise<CMSInstallationType[]> {
+  const base = getCMSBaseUrl()
+  if (!base) return []
+
+  try {
+    const res = await fetch(
+      `${base}/api/installation-types?limit=100&sort=sortOrder&${localeQuery(locale)}`,
+      { next: { revalidate: 60 } },
+    )
+    if (!res.ok) {
+      console.warn(`CMS installation types fetch failed: ${res.status}. Returning empty list.`)
+      return []
+    }
+    const data = (await res.json()) as { docs?: CMSInstallationType[] }
+    return data.docs || []
+  } catch (err) {
+    console.warn('CMS installation types fetch error:', err)
+    return []
+  }
+}
+
 export async function fetchInstallations(
   locale: Locale,
-  type?: CMSInstallation['type'],
+  typeId?: number | string,
 ): Promise<CMSInstallation[]> {
   const base = getCMSBaseUrl()
   if (!base) return []
 
   let url = `${base}/api/installations?where[published][equals]=true&limit=100&sort=-completionDate&${localeQuery(locale)}`
-  if (type) {
-    url += `&where[type][equals]=${type}`
+  if (typeId) {
+    url += `&where[type][equals]=${typeId}`
   }
 
   try {

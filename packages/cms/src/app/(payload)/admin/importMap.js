@@ -26,6 +26,12 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { default as default_4d49c0e876fe8b91da0967b72b1b5566 } from '../../../components/InstallationCompletionNote'
+import { default as default_4ce8058277229447a496aba268739b05 } from '../../../components/InstallationCompletionCell'
+import { default as default_315a986b0a3d6fc335501953219ed625 } from '../../../components/CurrencyAmountCell'
+import { default as default_6944f47f37738ce070de544397292a93 } from '../../../components/EventsCalendar/RaisedSummary'
+import { default as default_965f3be0c09d8572912d94738cd6de5f } from '../../../components/EventsCalendarLink'
+import { default as default_f30da5631108bd7a8d0c0e009c1fd221 } from '../../../components/EventsCalendar'
 import { default as default_f0aa037c5a87f7e694b83a0dfa4aa296 } from '../../../components/MediaUsage'
 import { default as default_b0b2bdd4b42aa03c8eed8050dba2ee22 } from '../../../components/VideoThumbnail'
 import { default as default_a61f4011432dd182d230f12ec130ccf3 } from '../../../components/AdminLogo'
@@ -63,6 +69,12 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  "./components/InstallationCompletionNote#default": default_4d49c0e876fe8b91da0967b72b1b5566,
+  "./components/InstallationCompletionCell#default": default_4ce8058277229447a496aba268739b05,
+  "./components/CurrencyAmountCell#default": default_315a986b0a3d6fc335501953219ed625,
+  "./components/EventsCalendar/RaisedSummary#default": default_6944f47f37738ce070de544397292a93,
+  "./components/EventsCalendarLink#default": default_965f3be0c09d8572912d94738cd6de5f,
+  "./components/EventsCalendar#default": default_f30da5631108bd7a8d0c0e009c1fd221,
   "./components/MediaUsage#default": default_f0aa037c5a87f7e694b83a0dfa4aa296,
   "./components/VideoThumbnail#default": default_b0b2bdd4b42aa03c8eed8050dba2ee22,
   "./components/AdminLogo#default": default_a61f4011432dd182d230f12ec130ccf3,

@@ -12,6 +12,11 @@ export const MediaCategories: CollectionConfig = {
     plural: 'Media Categories',
   },
   admin: {
+    group: {
+      en: 'Website',
+      'zh-CN': '网站',
+      'zh-TW': '網站',
+    },
     useAsTitle: 'title',
     defaultColumns: ['slug', 'label', 'sortOrder', 'showInGallery'],
     description: {

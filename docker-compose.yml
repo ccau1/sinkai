@@ -8,7 +8,9 @@ services:
     environment:
       - PAYLOAD_SECRET=${PAYLOAD_SECRET:-local-dev-secret}
     volumes:
-      - cms-data:/app/packages/cms/.wrangler/state:delegated
+      # Bind-mount the host .wrangler/state so the Docker CMS and host CLI
+      # commands (npm run seed, npm run migrate, etc.) share the same D1 DB.
+      - ./packages/cms/.wrangler/state:/app/packages/cms/.wrangler/state:delegated
     restart: unless-stopped
 
   # Serves the Next.js standalone build produced on the host by `make up`
@@ -32,6 +34,3 @@ services:
     depends_on:
       - cms
     restart: unless-stopped
-
-volumes:
-  cms-data:
