@@ -1,5 +1,5 @@
 import React from 'react'
-import type { AdminViewServerProps } from 'payload'
+import type { BeforeListTableServerProps } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 
 import './index.scss'
@@ -61,7 +61,7 @@ export default async function EventsCalendarView({
   payload,
   searchParams,
   locale,
-}: AdminViewServerProps) {
+}: BeforeListTableServerProps) {
   const adminRoute = payload.config.routes.admin
   const localeTag = locale?.code || 'en'
 
@@ -145,18 +145,29 @@ export default async function EventsCalendarView({
 
   const today = dayUTC(new Date())
 
-  const calendarHref = (date: Date) =>
-    formatAdminURL({
-      adminRoute,
-      path: `/collections/events/calendar?month=${toMonthParam(date)}`,
-    })
+  const currentSearchParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(searchParams || {})) {
+    if (Array.isArray(value)) {
+      value.forEach((item) => currentSearchParams.append(key, item))
+    } else if (typeof value === 'string') {
+      currentSearchParams.append(key, value)
+    }
+  }
 
-  const listHref = formatAdminURL({ adminRoute, path: '/collections/events' })
+  const calendarHref = (date: Date) => {
+    const nextSearchParams = new URLSearchParams(currentSearchParams)
+    nextSearchParams.set('month', toMonthParam(date))
+
+    return formatAdminURL({
+      adminRoute,
+      path: `/collections/events?${nextSearchParams.toString()}`,
+    })
+  }
 
   return (
     <div className="events-calendar">
       <div className="events-calendar__header">
-        <h1 className="events-calendar__title">{monthLabel}</h1>
+        <h2 className="events-calendar__title">{monthLabel}</h2>
         <nav className="events-calendar__nav">
           <a
             className="events-calendar__nav-link"
@@ -172,12 +183,6 @@ export default async function EventsCalendarView({
             href={calendarHref(new Date(Date.UTC(year, month + 1, 1)))}
           >
             Next &rarr;
-          </a>
-          <a
-            className="events-calendar__nav-link events-calendar__nav-link--list"
-            href={listHref}
-          >
-            List view
           </a>
         </nav>
       </div>
@@ -224,13 +229,12 @@ export default async function EventsCalendarView({
               </a>
             ))}
             {hiddenCount > 0 && (
-              <a
+              <span
                 className="events-calendar__more"
-                href={listHref}
                 style={{ gridColumn: '1 / -1', gridRow: MAX_LANES + 2 }}
               >
                 +{hiddenCount} more
-              </a>
+              </span>
             )}
           </div>
         )

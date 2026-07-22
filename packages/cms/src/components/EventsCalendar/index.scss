@@ -1,5 +1,6 @@
 .events-calendar {
-  padding: 0 0 2rem;
+  padding: 0;
+  width: 100%;
 
   &__header {
     align-items: center;
@@ -11,7 +12,7 @@
   }
 
   &__title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     margin: 0;
   }
@@ -31,12 +32,6 @@
 
     &:hover {
       background: var(--theme-elevation-100);
-    }
-
-    &--list {
-      border-color: var(--theme-success-500);
-      color: var(--theme-success-500);
-      margin-left: 0.5rem;
     }
   }
 
@@ -109,10 +104,5 @@
     color: var(--theme-elevation-500);
     font-size: 0.8rem;
     padding: 0.1rem 0.5rem;
-    text-decoration: none;
-
-    &:hover {
-      color: var(--theme-success-500);
-    }
   }
 }

@@ -17,16 +17,7 @@ export const Events: CollectionConfig = {
       'zh-TW': '慈善活動，例如建校行程和籌款活動。活動可以關聯捐款（資金來源）和項目設施（活動成果）。',
     },
     components: {
-      views: {
-        calendar: {
-          Component: './components/EventsCalendar#default',
-          path: '/calendar',
-          exact: true,
-        },
-        list: {
-          actions: ['./components/EventsCalendarLink#default'],
-        },
-      },
+      beforeListTable: ['./components/EventsCalendar#default'],
     },
   },
   access: {
