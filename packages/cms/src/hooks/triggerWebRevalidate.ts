@@ -30,11 +30,16 @@ const isLive = (doc: DocLike | null | undefined): boolean => {
  * Never throws: content saves must not fail because the web worker is down.
  * Skips silently when REVALIDATE_SECRET/WEB_APP_URL are not configured
  * (e.g. local dev), which effectively disables the feature.
+ * Set SKIP_WEB_REVALIDATE=true to disable it explicitly (e.g. bulk seed/scripts).
  */
 async function triggerWebRevalidate(
   payload: Payload,
   context: Record<string, unknown>,
 ): Promise<void> {
+  if (process.env.SKIP_WEB_REVALIDATE === 'true') {
+    return
+  }
+
   try {
     const env = await getCfEnv()
     const secret = env.REVALIDATE_SECRET || process.env.REVALIDATE_SECRET
