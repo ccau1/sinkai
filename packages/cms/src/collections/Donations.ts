@@ -10,6 +10,11 @@ export const Donations: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'amount', 'currency', 'transferDate', 'status', 'updatedAt'],
+    listSearchableFields: ['name', 'email'],
+    pagination: {
+      defaultLimit: 10,
+      limits: [10, 25, 50],
+    },
     description: {
       en: 'Track donations received by the charity, including donor details, amount, transfer date and the installations they support.',
       'zh-CN': '记录慈善机构收到的捐款，包括捐赠者资料、金额、转账日期及其支持的项目。',
@@ -102,6 +107,8 @@ export const Donations: CollectionConfig = {
       hasMany: true,
       admin: {
         description: 'Installations that this donation supports.',
+        disableListColumn: true,
+        disableListFilter: true,
       },
     },
     {
@@ -110,6 +117,8 @@ export const Donations: CollectionConfig = {
       label: 'Donor Message',
       admin: {
         description: 'Optional note or dedication from the donor.',
+        disableListColumn: true,
+        disableListFilter: true,
       },
     },
     {
@@ -121,6 +130,8 @@ export const Donations: CollectionConfig = {
       label: 'Receipt Images',
       admin: {
         description: 'Receipt images uploaded through the donation form.',
+        disableListColumn: true,
+        disableListFilter: true,
       },
     },
     {
@@ -129,6 +140,8 @@ export const Donations: CollectionConfig = {
       label: 'Internal Notes',
       admin: {
         description: 'Staff-only notes about this donation (not shown to the donor).',
+        disableListColumn: true,
+        disableListFilter: true,
       },
     },
     {

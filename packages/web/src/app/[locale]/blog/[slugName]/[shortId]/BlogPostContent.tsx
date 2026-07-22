@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import CmsImage from '@/components/CmsImage';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import type { CMSBlog, CMSMedia } from '@/lib/cms';
@@ -36,6 +36,7 @@ interface LexicalRoot {
 export default function BlogPostContent({ post }: Props) {
   const t = useTranslations('blog');
   const currentLocale = useLocale();
+  const formatter = useFormatter();
   const contentRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
@@ -308,7 +309,11 @@ export default function BlogPostContent({ post }: Props) {
         <div className="absolute inset-0 flex items-end">
           <div className="container-main pb-12">
             <p className="text-label mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {post.date}
+              {formatter.dateTime(new Date(post.date), {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </p>
             <h1 className="text-headline font-bold text-white max-w-3xl">
               {title}

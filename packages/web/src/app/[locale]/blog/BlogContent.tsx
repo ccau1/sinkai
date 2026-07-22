@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import CmsImage from '@/components/CmsImage';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale, useTranslations, useFormatter } from 'next-intl';
 import type { CMSBlog } from '@/lib/cms';
 
 import { getBlogTitle, getBlogExcerpt, getBlogSlugName } from '@/lib/cms';
@@ -14,6 +14,7 @@ interface BlogContentProps {
 export default function BlogContent({ posts }: BlogContentProps) {
   const locale = useLocale();
   const t = useTranslations('blog');
+  const formatter = useFormatter();
 
   return (
     <div>
@@ -69,7 +70,11 @@ export default function BlogContent({ posts }: BlogContentProps) {
                       </div>
                       <div className="p-5 flex-1 flex flex-col">
                         <p className="text-label mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                          {post.date}
+                          {formatter.dateTime(new Date(post.date), {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
                         </p>
                         <h2 className="font-semibold text-base mb-2 flex-1 transition-colors duration-200"
                           style={{ color: 'var(--color-text-primary)' }}>

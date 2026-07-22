@@ -115,4 +115,20 @@ export async function r2ObjectExists(objectKey: string): Promise<boolean> {
   return res.ok
 }
 
+export async function r2GetObject(objectKey: string): Promise<Buffer | null> {
+  const { accountId, token, bucketName } = requireCredentials()
+  const res = await fetch(objectUrl(bucketName, accountId, objectKey), {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (res.status === 404) {
+    return null
+  }
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`R2 get failed for ${objectKey}: ${res.status} ${text}`)
+  }
+  return Buffer.from(await res.arrayBuffer())
+}
+
 export { getMimeType }

@@ -13,6 +13,7 @@ import * as migration_20260720_080827 from './20260720_080827';
 import * as migration_20260720_082055 from './20260720_082055';
 import * as migration_20260720_135618 from './20260720_135618';
 import * as migration_20260720_204638_rename_gallery_categories_to_media_categories from './20260720_204638_rename_gallery_categories_to_media_categories';
+import * as migration_20260722_040531_add_donation_indexes from './20260722_040531_add_donation_indexes';
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20260720_204638_rename_gallery_categories_to_media_categories.up,
     down: migration_20260720_204638_rename_gallery_categories_to_media_categories.down,
     name: '20260720_204638_rename_gallery_categories_to_media_categories'
+  },
+  {
+    up: migration_20260722_040531_add_donation_indexes.up,
+    down: migration_20260722_040531_add_donation_indexes.down,
+    name: '20260722_040531_add_donation_indexes'
   },
 ];
