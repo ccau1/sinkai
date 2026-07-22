@@ -35,6 +35,9 @@ export const Blogs: CollectionConfig = {
       label: 'Slug',
       localized: true,
       required: true,
+      // Prevent duplicate posts for the same slug (seed idempotency relies on
+      // this natural key). Uniqueness is enforced per locale.
+      unique: true,
       admin: {
         description:
           'URL-safe slug, e.g. "mountain-area-reality". Can be translated per locale.',
@@ -73,8 +76,10 @@ export const Blogs: CollectionConfig = {
       name: 'shortId',
       type: 'text',
       admin: {
+        readOnly: true,
+        position: 'sidebar',
         description:
-          'Short URL token shared across all locales. Auto-generated from the English slug if left blank.',
+          'Short URL token shared across all locales. Auto-generated from the slug; managed by the system, not editable.',
       },
     },
     {

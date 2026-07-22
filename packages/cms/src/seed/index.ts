@@ -230,6 +230,14 @@ async function seed() {
         limit: 1,
       })
 
+      if (existing.totalDocs > 1) {
+        console.warn(
+          `⚠️  DUPLICATE BLOGS DETECTED: ${existing.totalDocs} docs share slug "${post.slug}". ` +
+            `Only the first will be updated; the website renders just one. ` +
+            `Run 'npm run remove:duplicate-blogs:remote' (or :production) to clean up.`,
+        )
+      }
+
       // Create or reuse media for cover image.
       let coverImageId: number | string | undefined
       const coverPath = path.join(webPublicDir, post.coverImage)
@@ -410,13 +418,26 @@ async function seedNavigation(payload: import('payload').Payload) {
     return
   }
 
-  // If navigation is empty, create the full default menu.
+  // Convert locale-map labels to plain strings for a specific locale.
+  const buildItemsForLocale = (
+    sourceItems: NavItem[],
+    locale: Locale,
+  ): Omit<NavItem, 'label'> & { label: string }[] =>
+    sourceItems.map(({ label, ...rest }) => ({
+      ...rest,
+      label: typeof label === 'string' ? label : label[locale],
+    })) as unknown as Omit<NavItem, 'label'> & { label: string }[]
+
+  // If navigation is empty, create the full default menu for every locale.
   if (items.length === 0) {
-    await payload.updateGlobal({
-      slug: 'navigation',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: { items: defaultNavItems as unknown as any },
-    })
+    for (const locale of locales) {
+      await payload.updateGlobal({
+        slug: 'navigation',
+        locale,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: { items: buildItemsForLocale(defaultNavItems, locale) as unknown as any },
+      })
+    }
     console.log('Created default navigation.')
     return
   }
@@ -435,11 +456,14 @@ async function seedNavigation(payload: import('payload').Payload) {
         ]
       : [...items, testimoniesItem]
 
-  await payload.updateGlobal({
-    slug: 'navigation',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { items: newItems as unknown as any },
-  })
+  for (const locale of locales) {
+    await payload.updateGlobal({
+      slug: 'navigation',
+      locale,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: { items: buildItemsForLocale(newItems, locale) as unknown as any },
+    })
+  }
   console.log('Inserted testimonies link into navigation.')
 }
 
