@@ -7,6 +7,18 @@
     "nodejs_compat",
     "global_fetch_strictly_public",
   ],
+  "minify": true,
+  "keep_names": false,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  // Give the Payload admin SSR more headroom on cold starts so that heavier
+  // list/edit views don't hit Cloudflare's Worker CPU limit (Error 1102).
+  "limits": {
+    "cpu_ms": 120000,
+    "subrequests": 10000,
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
@@ -46,6 +58,10 @@
   "env": {
     "production": {
       "name": "sinkai-cms-prod",
+      "limits": {
+        "cpu_ms": 120000,
+        "subrequests": 10000,
+      },
       "routes": [
         {
           "pattern": "sinkai-cms.tribalorigin.com",

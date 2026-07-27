@@ -9,7 +9,6 @@ import type { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
-import { aiLocalization } from 'payload-plugin-ai-localization'
 import { defaultLocale, payloadLocales } from './locales'
 
 import { Users } from './collections/Users'
@@ -67,6 +66,40 @@ const useWranglerProxy =
 const cloudflare = useWranglerProxy
   ? await getCloudflareContextFromWrangler()
   : await getCloudflareContext({ async: true })
+
+const aiLocalizationPlugin = process.env.OPENAI_API_KEY
+  ? (
+      await import('payload-plugin-ai-localization')
+    ).aiLocalization({
+        openai: {
+          apiKey: process.env.OPENAI_API_KEY,
+          model: 'gpt-4.1-nano',
+        },
+        collections: {
+          blogs: {
+            fields: ['slugName', 'title', 'excerpt', 'content'],
+          },
+          installations: {
+            fields: ['title', 'location', 'description'],
+          },
+          'installation-types': {
+            fields: ['label'],
+          },
+          pages: {
+            fields: ['title', 'excerpt', 'content'],
+          },
+          media: {
+            fields: ['alt'],
+          },
+          testimonies: {
+            fields: ['name', 'role', 'synopsis', 'content'],
+          },
+          events: {
+            fields: ['title', 'description'],
+          },
+        },
+      })
+  : null
 
 export default buildConfig({
   admin: {
@@ -247,39 +280,7 @@ export default buildConfig({
         },
       },
     }),
-    ...(process.env.OPENAI_API_KEY
-      ? [
-          aiLocalization({
-            openai: {
-              apiKey: process.env.OPENAI_API_KEY,
-              model: 'gpt-4.1-nano',
-            },
-            collections: {
-              blogs: {
-                fields: ['slugName', 'title', 'excerpt', 'content'],
-              },
-              installations: {
-                fields: ['title', 'location', 'description'],
-              },
-              'installation-types': {
-                fields: ['label'],
-              },
-              pages: {
-                fields: ['title', 'excerpt', 'content'],
-              },
-              media: {
-                fields: ['alt'],
-              },
-              testimonies: {
-                fields: ['name', 'role', 'synopsis', 'content'],
-              },
-              events: {
-                fields: ['title', 'description'],
-              },
-            },
-          }),
-        ]
-      : []),
+    ...(aiLocalizationPlugin ? [aiLocalizationPlugin] : []),
 
   ],
 })
