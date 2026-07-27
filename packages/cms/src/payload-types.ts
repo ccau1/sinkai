@@ -554,6 +554,12 @@ export interface Page {
 export interface User {
   id: number;
   roles: ('admin' | 'blog_editor' | 'installation_editor' | 'read_only')[];
+  preferences?: {
+    /**
+     * The language used for CMS menus, buttons, and labels.
+     */
+    language?: ('en' | 'zh-CN' | 'zh-TW') | null;
+  };
   /**
    * Grant additional permissions beyond the user's roles. Permissions override or extend role access.
    */
@@ -1097,6 +1103,11 @@ export interface MediaCategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   roles?: T;
+  preferences?:
+    | T
+    | {
+        language?: T;
+      };
   permissions?:
     | T
     | {

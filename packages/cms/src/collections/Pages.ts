@@ -7,6 +7,18 @@ import {
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  labels: {
+    singular: {
+      en: 'Page',
+      'zh-CN': '页面',
+      'zh-TW': '頁面',
+    },
+    plural: {
+      en: 'Pages',
+      'zh-CN': '页面',
+      'zh-TW': '頁面',
+    },
+  },
   admin: {
     group: {
       en: 'Website',
@@ -39,41 +51,71 @@ export const Pages: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
-      label: 'Slug',
+      label: {
+        en: 'Slug',
+        'zh-CN': 'URL 别名',
+        'zh-TW': 'URL 別名',
+      },
       required: true,
       unique: true,
       admin: {
-        description: 'URL-safe identifier, e.g. "about", "contact", "donate".',
+        description: {
+          en: 'URL-safe identifier, e.g. "about", "contact", "donate".',
+          'zh-CN': 'URL 安全标识符，例如 "about"、"contact"、"donate"。',
+          'zh-TW': 'URL 安全識別碼，例如 "about"、"contact"、"donate"。',
+        },
       },
     },
     {
       name: 'title',
       type: 'text',
-      label: 'Title',
+      label: {
+        en: 'Title',
+        'zh-CN': '标题',
+        'zh-TW': '標題',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'excerpt',
       type: 'textarea',
-      label: 'Excerpt',
+      label: {
+        en: 'Excerpt',
+        'zh-CN': '摘要',
+        'zh-TW': '摘要',
+      },
       localized: true,
     },
     {
       name: 'content',
       type: 'richText',
-      label: 'Content',
+      label: {
+        en: 'Content',
+        'zh-CN': '内容',
+        'zh-TW': '內容',
+      },
       localized: true,
     },
     {
       name: 'coverImage',
       type: 'upload',
+      label: {
+        en: 'Cover Image',
+        'zh-CN': '封面图片',
+        'zh-TW': '封面圖片',
+      },
       relationTo: 'media',
       displayPreview: true,
     },
     {
       name: 'published',
       type: 'checkbox',
+      label: {
+        en: 'Published',
+        'zh-CN': '已发布',
+        'zh-TW': '已發布',
+      },
       defaultValue: false,
       admin: {
         position: 'sidebar',

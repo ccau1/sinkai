@@ -13,10 +13,9 @@
     "enabled": true,
     "head_sampling_rate": 1,
   },
-  // Give the Payload admin SSR more headroom on cold starts so that heavier
-  // list/edit views don't hit Cloudflare's Worker CPU limit (Error 1102).
+  // Cloudflare Workers on the Free plan do not support setting CPU limits
+  // (paid plans only). Keep subrequests configured here.
   "limits": {
-    "cpu_ms": 120000,
     "subrequests": 10000,
   },
   "assets": {
@@ -59,7 +58,6 @@
     "production": {
       "name": "sinkai-cms-prod",
       "limits": {
-        "cpu_ms": 120000,
         "subrequests": 10000,
       },
       "routes": [

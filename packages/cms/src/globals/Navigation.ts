@@ -4,7 +4,11 @@ import { revalidateWebGlobalAfterChange } from '../hooks/triggerWebRevalidate'
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
-  label: 'Navigation',
+  label: {
+    en: 'Navigation',
+    'zh-CN': '导航',
+    'zh-TW': '導覽',
+  },
   admin: {
     group: {
       en: 'Settings',
@@ -23,25 +27,37 @@ export const Navigation: GlobalConfig = {
     {
       name: 'items',
       type: 'array',
-      label: 'Menu Items',
+      label: {
+        en: 'Menu Items',
+        'zh-CN': '菜单项',
+        'zh-TW': '選單項目',
+      },
       minRows: 1,
       fields: [
         {
           name: 'label',
           type: 'text',
-          label: 'Label',
+          label: {
+            en: 'Label',
+            'zh-CN': '标签',
+            'zh-TW': '標籤',
+          },
           localized: true,
           required: true,
         },
         {
           name: 'linkType',
           type: 'radio',
-          label: 'Link Type',
+          label: {
+            en: 'Link Type',
+            'zh-CN': '链接类型',
+            'zh-TW': '連結類型',
+          },
           defaultValue: 'page',
           options: [
-            { label: 'CMS Page', value: 'page' },
-            { label: 'Fixed Path', value: 'fixed' },
-            { label: 'External URL', value: 'external' },
+            { label: { en: 'CMS Page', 'zh-CN': 'CMS 页面', 'zh-TW': 'CMS 頁面' }, value: 'page' },
+            { label: { en: 'Fixed Path', 'zh-CN': '固定路径', 'zh-TW': '固定路徑' }, value: 'fixed' },
+            { label: { en: 'External URL', 'zh-CN': '外部链接', 'zh-TW': '外部連結' }, value: 'external' },
           ],
           required: true,
         },
@@ -56,16 +72,28 @@ export const Navigation: GlobalConfig = {
         {
           name: 'path',
           type: 'text',
-          label: 'Fixed Path',
+          label: {
+            en: 'Fixed Path',
+            'zh-CN': '固定路径',
+            'zh-TW': '固定路徑',
+          },
           admin: {
-            description: 'e.g. "/" for homepage, "/gallery"',
+            description: {
+              en: 'e.g. "/" for homepage, "/gallery"',
+              'zh-CN': '例如 "/" 代表首页，"/gallery" 代表图库',
+              'zh-TW': '例如 "/" 代表首頁，"/gallery" 代表圖庫',
+            },
             condition: (data, siblingData) => siblingData?.linkType === 'fixed',
           },
         },
         {
           name: 'url',
           type: 'text',
-          label: 'External URL',
+          label: {
+            en: 'External URL',
+            'zh-CN': '外部链接',
+            'zh-TW': '外部連結',
+          },
           admin: {
             condition: (data, siblingData) => siblingData?.linkType === 'external',
           },
@@ -73,7 +101,11 @@ export const Navigation: GlobalConfig = {
         {
           name: 'visible',
           type: 'checkbox',
-          label: 'Visible',
+          label: {
+            en: 'Visible',
+            'zh-CN': '可见',
+            'zh-TW': '可見',
+          },
           defaultValue: true,
         },
       ],

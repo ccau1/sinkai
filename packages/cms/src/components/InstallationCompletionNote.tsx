@@ -1,10 +1,19 @@
+import type { I18nClient } from '@payloadcms/translations'
 import React from 'react'
+
+import { t } from '../uiTranslations'
+
+type InstallationCompletionNoteProps = {
+  i18n: I18nClient
+}
 
 /**
  * Helper note shown above the installations completion date field,
  * explaining how the Planning / Upcoming badges are derived.
  */
-export default function InstallationCompletionNote() {
+export default function InstallationCompletionNote({ i18n }: InstallationCompletionNoteProps) {
+  const language = i18n.language
+
   return (
     <div
       style={{
@@ -17,18 +26,12 @@ export default function InstallationCompletionNote() {
         padding: '12px 16px',
       }}
     >
-      <strong>Status badges</strong> (shown in the admin list and on the public installations
-      page) are derived from the completion date:
+      <strong>{t('installationCompletion.noteTitle', language)}</strong>{' '}
+      {t('installationCompletion.noteIntro', language)}
       <ul style={{ margin: '6px 0 0', paddingLeft: '18px' }}>
-        <li>
-          Leave the date <strong>empty</strong> → shown as <strong>Planning</strong>
-        </li>
-        <li>
-          Set a <strong>future</strong> date → shown as <strong>Upcoming</strong>
-        </li>
-        <li>
-          Set a <strong>past</strong> date → no badge (completed)
-        </li>
+        <li>{t('installationCompletion.noteEmpty', language)}</li>
+        <li>{t('installationCompletion.noteFuture', language)}</li>
+        <li>{t('installationCompletion.notePast', language)}</li>
       </ul>
     </div>
   )

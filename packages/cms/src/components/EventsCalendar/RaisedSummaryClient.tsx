@@ -1,7 +1,10 @@
 'use client'
 
+import { useTranslation } from '@payloadcms/ui'
 import React, { useState } from 'react'
 import { CURRENCY_CODES, convertCurrency, formatCurrency, roundToNearest10 } from '../../util/currency'
+
+import { t } from '../../uiTranslations'
 
 type RaisedSummaryClientProps = {
   /** Totals raised, keyed by the currency the donations were made in. */
@@ -22,6 +25,8 @@ export default function RaisedSummaryClient({
   ratesSource,
   ratesUpdatedAt,
 }: RaisedSummaryClientProps) {
+  const { i18n } = useTranslation()
+  const language = i18n.language
   const [viewCurrency, setViewCurrency] = useState(targetCurrency)
 
   const entries = Object.entries(totals)
@@ -71,8 +76,15 @@ export default function RaisedSummaryClient({
     targetAmount !== null ? convertCurrency(targetAmount, targetCurrency, viewCurrency, rates) : null
   const convertedTarget =
     rawTarget !== null && targetCurrency !== viewCurrency ? roundToNearest10(rawTarget) : rawTarget
-  const percent =
-    rawTarget && rawTarget > 0 ? Math.round((rawTotal / rawTarget) * 100) : null
+  const percent = rawTarget && rawTarget > 0 ? Math.round((rawTotal / rawTarget) * 100) : null
+
+  const ratesUpdatedAtText = ratesUpdatedAt
+    ? t('raisedSummary.updatedAt', language, { date: ratesUpdatedAt })
+    : ''
+  const ratesNote =
+    ratesSource === 'live'
+      ? t('raisedSummary.ratesLive', language, { updatedAt: ratesUpdatedAtText })
+      : t('raisedSummary.ratesStatic', language)
 
   return (
     <div
@@ -92,9 +104,11 @@ export default function RaisedSummaryClient({
           marginBottom: '12px',
         }}
       >
-        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Funding progress</h3>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>
+          {t('raisedSummary.title', language)}
+        </h3>
         <label style={{ alignItems: 'center', display: 'flex', fontSize: '13px', gap: '6px' }}>
-          View in
+          {t('raisedSummary.viewIn', language)}
           <select
             onChange={(e) => setViewCurrency(e.target.value)}
             style={{ padding: '2px 4px' }}
@@ -111,17 +125,18 @@ export default function RaisedSummaryClient({
 
       {entries.length === 0 ? (
         <p style={{ color: 'var(--theme-elevation-600, #666)', margin: 0 }}>
-          No donations allocated to this event yet.
+          {t('raisedSummary.noDonations', language)}
         </p>
       ) : (
         <>
           <p style={{ margin: '0 0 8px' }}>
-            Total raised: <strong>{formatCurrency(totalInTargetCurrency, targetCurrency)}</strong>
-            {hasUnconvertible && ' (some donations have no exchange rate and are excluded)'}
+            {t('raisedSummary.totalRaised', language)}{' '}
+            <strong>{formatCurrency(totalInTargetCurrency, targetCurrency)}</strong>
+            {hasUnconvertible && ` ${t('raisedSummary.excluded', language)}`}
           </p>
           {viewCurrency !== targetCurrency && (
             <p style={{ margin: '0 0 8px' }}>
-              Raised in {viewCurrency}:{' '}
+              {t('raisedSummary.raisedIn', language, { currency: viewCurrency })}{' '}
               <strong>{formatCurrency(convertedTotal, viewCurrency)}</strong>
             </p>
           )}
@@ -153,13 +168,13 @@ export default function RaisedSummaryClient({
       {targetAmount !== null && (
         <div style={{ marginTop: '12px' }}>
           <p style={{ margin: '0 0 6px' }}>
-            Target:{' '}
+            {t('raisedSummary.target', language)}{' '}
             <strong>
               {convertedTarget !== null
                 ? formatCurrency(convertedTarget, viewCurrency)
                 : formatCurrency(targetAmount, targetCurrency)}
             </strong>
-            {percent !== null && ` — ${percent}% funded`}
+            {percent !== null && ` — ${percent}% ${t('raisedSummary.funded', language)}`}
           </p>
           <div
             style={{
@@ -188,9 +203,7 @@ export default function RaisedSummaryClient({
           margin: '10px 0 0',
         }}
       >
-        {ratesSource === 'live'
-          ? `Conversions use daily reference rates from open.er-api.com${ratesUpdatedAt ? ` (updated ${ratesUpdatedAt})` : ''}, via HKD as the pivot currency.`
-          : 'Conversions use approximate static fallback rates (live rates unavailable), via HKD as the pivot currency.'}
+        {ratesNote}
       </p>
     </div>
   )

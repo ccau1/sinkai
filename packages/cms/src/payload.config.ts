@@ -10,6 +10,7 @@ import { r2Storage } from '@payloadcms/storage-r2'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { defaultLocale, payloadLocales } from './locales'
+import { defaultAdminLanguage, supportedAdminLanguages } from './adminLanguages'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -115,6 +116,8 @@ export default buildConfig({
       graphics: {
         Logo: './components/AdminLogo#default',
       },
+      providers: ['./components/AdminLanguageCookieSync#default'],
+      settingsMenu: ['./components/UserPreferencesMenuLink#default'],
     },
     meta: {
       titleSuffix: '- 善啓慈善基金會',
@@ -156,6 +159,10 @@ export default buildConfig({
     locales: payloadLocales,
     defaultLocale,
     fallback: true,
+  },
+  i18n: {
+    supportedLanguages: supportedAdminLanguages,
+    fallbackLanguage: defaultAdminLanguage,
   },
   db: sqliteD1Adapter({
     binding: cloudflare.env.D1,
@@ -251,12 +258,19 @@ export default buildConfig({
             name: 'shareableLinks',
             type: 'textarea',
             virtual: true,
-            label: 'Shareable links',
+            label: {
+              en: 'Shareable links',
+              'zh-CN': '可分享链接',
+              'zh-TW': '可分享連結',
+            },
             admin: {
               readOnly: true,
               position: 'sidebar',
-              description:
-                'Copy the link for the locale you need and send it to end users.',
+              description: {
+                en: 'Copy the link for the locale you need and send it to end users.',
+                'zh-CN': '复制所需语系的链接并发送给最终用户。',
+                'zh-TW': '複製所需語系的連結並傳送給最終使用者。',
+              },
               rows: 3,
             },
           },

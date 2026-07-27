@@ -8,8 +8,16 @@ import {
 export const Testimonies: CollectionConfig = {
   slug: 'testimonies',
   labels: {
-    singular: 'Testimony',
-    plural: 'Testimonies',
+    singular: {
+      en: 'Testimony',
+      'zh-CN': '见证',
+      'zh-TW': '見證',
+    },
+    plural: {
+      en: 'Testimonies',
+      'zh-CN': '见证',
+      'zh-TW': '見證',
+    },
   },
   admin: {
     useAsTitle: 'name',
@@ -35,26 +43,46 @@ export const Testimonies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
-      label: 'Name',
+      label: {
+        en: 'Name',
+        'zh-CN': '名称',
+        'zh-TW': '名稱',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'role',
       type: 'text',
-      label: 'Role / Title',
+      label: {
+        en: 'Role / Title',
+        'zh-CN': '角色 / 头衔',
+        'zh-TW': '角色 / 頭銜',
+      },
       localized: true,
       admin: {
-        description: 'E.g. "Actor", "Singer", "Beneficiary", "Volunteer".',
+        description: {
+          en: 'E.g. "Actor", "Singer", "Beneficiary", "Volunteer".',
+          'zh-CN': '例如「演员」、「歌手」、「受益者」、「志愿者」。',
+          'zh-TW': '例如「演員」、「歌手」、「受益者」、「義工」。',
+        },
       },
     },
     {
       name: 'highlighted',
       type: 'checkbox',
-      label: 'Highlighted',
+      label: {
+        en: 'Highlighted',
+        'zh-CN': '重点推荐',
+        'zh-TW': '重點推薦',
+      },
       defaultValue: false,
       admin: {
-        description: 'Mark as a highlighted testimony (e.g. celebrity or VIP).',
+        description: {
+          en: 'Mark as a highlighted testimony (e.g. celebrity or VIP).',
+          'zh-CN': '标记为重点推荐见证（例如名人或贵宾）。',
+          'zh-TW': '標記為重點推薦見證（例如名人或貴賓）。',
+        },
         position: 'sidebar',
       },
     },
@@ -62,7 +90,11 @@ export const Testimonies: CollectionConfig = {
       name: 'photos',
       type: 'upload',
       relationTo: 'media',
-      label: 'Photos',
+      label: {
+        en: 'Photos',
+        'zh-CN': '照片',
+        'zh-TW': '照片',
+      },
       hasMany: true,
       required: true,
       displayPreview: true,
@@ -70,25 +102,46 @@ export const Testimonies: CollectionConfig = {
     {
       name: 'synopsis',
       type: 'textarea',
-      label: 'Synopsis',
+      label: {
+        en: 'Synopsis',
+        'zh-CN': '简介',
+        'zh-TW': '簡介',
+      },
       localized: true,
       required: true,
       admin: {
-        description: 'A short quote or summary shown in listings.',
+        description: {
+          en: 'A short quote or summary shown in listings.',
+          'zh-CN': '在列表中显示的短句或摘要。',
+          'zh-TW': '在列表中顯示的短句或摘要。',
+        },
       },
     },
     {
       name: 'content',
       type: 'richText',
-      label: 'Full Content',
+      label: {
+        en: 'Full Content',
+        'zh-CN': '完整内容',
+        'zh-TW': '完整內容',
+      },
       localized: true,
       admin: {
-        description: 'The full testimony or story.',
+        description: {
+          en: 'The full testimony or story.',
+          'zh-CN': '完整的见证或故事。',
+          'zh-TW': '完整的見證或故事。',
+        },
       },
     },
     {
       name: 'published',
       type: 'checkbox',
+      label: {
+        en: 'Published',
+        'zh-CN': '已发布',
+        'zh-TW': '已發布',
+      },
       defaultValue: false,
       admin: {
         position: 'sidebar',

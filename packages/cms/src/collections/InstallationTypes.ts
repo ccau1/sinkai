@@ -4,8 +4,16 @@ import { isAdmin } from '../util/access'
 export const InstallationTypes: CollectionConfig = {
   slug: 'installation-types',
   labels: {
-    singular: 'Installation Type',
-    plural: 'Installation Types',
+    singular: {
+      en: 'Installation Type',
+      'zh-CN': '援助类型',
+      'zh-TW': '援助類型',
+    },
+    plural: {
+      en: 'Installation Types',
+      'zh-CN': '援助类型',
+      'zh-TW': '援助類型',
+    },
   },
   admin: {
     useAsTitle: 'label',
@@ -28,27 +36,47 @@ export const InstallationTypes: CollectionConfig = {
     {
       name: 'key',
       type: 'text',
-      label: 'Key',
+      label: {
+        en: 'Key',
+        'zh-CN': '键值',
+        'zh-TW': '鍵值',
+      },
       required: true,
       unique: true,
       admin: {
-        description: 'Stable identifier used by code and seeds, e.g. "school".',
+        description: {
+          en: 'Stable identifier used by code and seeds, e.g. "school".',
+          'zh-CN': '代码与种子使用的稳定标识符，例如 "school"。',
+          'zh-TW': '程式碼與種子使用的穩定識別碼，例如 "school"。',
+        },
       },
     },
     {
       name: 'label',
       type: 'text',
-      label: 'Label',
+      label: {
+        en: 'Label',
+        'zh-CN': '标签',
+        'zh-TW': '標籤',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'sortOrder',
       type: 'number',
-      label: 'Sort Order',
+      label: {
+        en: 'Sort Order',
+        'zh-CN': '排序',
+        'zh-TW': '排序',
+      },
       defaultValue: 0,
       admin: {
-        description: 'Controls the order of groups on the installations page (lower first).',
+        description: {
+          en: 'Controls the order of groups on the installations page (lower first).',
+          'zh-CN': '控制援建项目页面上的分组顺序（数字越小越靠前）。',
+          'zh-TW': '控制援建項目頁面上的分組順序（數字越小越靠前）。',
+        },
         position: 'sidebar',
       },
     },

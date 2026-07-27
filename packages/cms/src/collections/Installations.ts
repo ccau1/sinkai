@@ -11,6 +11,18 @@ import {
 
 export const Installations: CollectionConfig = {
   slug: 'installations',
+  labels: {
+    singular: {
+      en: 'Installation',
+      'zh-CN': '援助项目',
+      'zh-TW': '援助項目',
+    },
+    plural: {
+      en: 'Installations',
+      'zh-CN': '援助项目',
+      'zh-TW': '援助項目',
+    },
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'type', 'location', 'completionDate', 'updatedAt'],
@@ -35,21 +47,33 @@ export const Installations: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      label: 'Title',
+      label: {
+        en: 'Title',
+        'zh-CN': '标题',
+        'zh-TW': '標題',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'location',
       type: 'text',
-      label: 'Location',
+      label: {
+        en: 'Location',
+        'zh-CN': '地点',
+        'zh-TW': '地點',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'description',
       type: 'richText',
-      label: 'Description',
+      label: {
+        en: 'Description',
+        'zh-CN': '描述',
+        'zh-TW': '描述',
+      },
       localized: true,
     },
     {
@@ -58,7 +82,11 @@ export const Installations: CollectionConfig = {
       required: true,
       unique: true,
       admin: {
-        description: 'URL-safe identifier, e.g. "hope-primary-school-guizhou"',
+        description: {
+          en: 'URL-safe identifier, e.g. "hope-primary-school-guizhou"',
+          'zh-CN': 'URL 安全标识符，例如 "hope-primary-school-guizhou"',
+          'zh-TW': 'URL 安全識別碼，例如 "hope-primary-school-guizhou"',
+        },
       },
     },
     {
@@ -79,6 +107,11 @@ export const Installations: CollectionConfig = {
     {
       name: 'completionDate',
       type: 'date',
+      label: {
+        en: 'Completion Date',
+        'zh-CN': '竣工日期',
+        'zh-TW': '竣工日期',
+      },
       admin: {
         components: {
           Cell: './components/InstallationCompletionCell#default',
@@ -89,12 +122,22 @@ export const Installations: CollectionConfig = {
       name: 'photos',
       type: 'upload',
       relationTo: 'media',
+      label: {
+        en: 'Photos',
+        'zh-CN': '照片',
+        'zh-TW': '照片',
+      },
       hasMany: true,
       displayPreview: true,
     },
     {
       name: 'published',
       type: 'checkbox',
+      label: {
+        en: 'Published',
+        'zh-CN': '已发布',
+        'zh-TW': '已發布',
+      },
       defaultValue: false,
       admin: {
         position: 'sidebar',

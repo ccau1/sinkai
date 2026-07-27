@@ -3,6 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import { t } from '../../uiTranslations'
 import './CollectionPreviews.scss'
 
 type CollectionDocPreview = {
@@ -36,6 +37,7 @@ function getDocTitle(doc: Record<string, unknown>, collection: CollectionConfig)
 export default async function CollectionPreviews({ req, permissions }: WidgetServerProps) {
   const { i18n, payload } = req
   const { admin: adminRoute } = payload.config.routes
+  const language = i18n.language
 
   const collections = payload.config.collections.filter((collection) => {
     // Skip hidden/internal collections (e.g. Payload migrations, preferences, locked docs).
@@ -95,7 +97,7 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
 
   return (
     <div className="collection-previews">
-      <h2 className="collection-previews__heading">Collections</h2>
+      <h2 className="collection-previews__heading">{t('collectionPreviews.heading', language)}</h2>
       <div className="collection-previews__grid">
         {previews.map((preview) => (
           <div className="collection-previews__card" key={preview.slug}>
@@ -105,7 +107,9 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
               </h3>
               {preview.hasCreatePermission && (
                 <a
-                  aria-label={`Create new ${preview.label}`}
+                  aria-label={t('collectionPreviews.createNewAria', language, {
+                    label: preview.label,
+                  })}
                   className="collection-previews__card-create"
                   href={preview.createHref}
                 >
@@ -129,7 +133,7 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
             </div>
 
             {preview.docs.length === 0 ? (
-              <p className="collection-previews__empty">No items</p>
+              <p className="collection-previews__empty">{t('collectionPreviews.noItems', language)}</p>
             ) : (
               <ul className="collection-previews__list">
                 {preview.docs.map((doc) => (
@@ -150,7 +154,7 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
             )}
 
             <a className="collection-previews__view-all" href={preview.href}>
-              View all
+              {t('collectionPreviews.viewAll', language)}
             </a>
           </div>
         ))}

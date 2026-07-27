@@ -2,6 +2,7 @@ import React from 'react'
 import type { BeforeListTableServerProps } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 
+import { t } from '../../uiTranslations'
 import './index.scss'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -61,9 +62,11 @@ export default async function EventsCalendarView({
   payload,
   searchParams,
   locale,
+  i18n,
 }: BeforeListTableServerProps) {
   const adminRoute = payload.config.routes.admin
   const localeTag = locale?.code || 'en'
+  const language = i18n?.language || localeTag
 
   // Resolve which month to show (?month=YYYY-MM), defaulting to the current month.
   const monthParam = typeof searchParams?.month === 'string' ? searchParams.month : undefined
@@ -113,7 +116,7 @@ export default async function EventsCalendarView({
       const end = doc.endDate ? dayUTC(new Date(doc.endDate as string)) : start
       return {
         id: doc.id,
-        title: (doc.title as string) || `Event ${doc.id}`,
+        title: (doc.title as string) || t('eventsCalendar.untitledEvent', language, { id: doc.id }),
         start,
         end: end >= start ? end : start,
       }
@@ -173,16 +176,16 @@ export default async function EventsCalendarView({
             className="events-calendar__nav-link"
             href={calendarHref(new Date(Date.UTC(year, month - 1, 1)))}
           >
-            &larr; Prev
+            {t('eventsCalendar.prev', language)}
           </a>
           <a className="events-calendar__nav-link" href={calendarHref(new Date())}>
-            Today
+            {t('eventsCalendar.today', language)}
           </a>
           <a
             className="events-calendar__nav-link"
             href={calendarHref(new Date(Date.UTC(year, month + 1, 1)))}
           >
-            Next &rarr;
+            {t('eventsCalendar.next', language)}
           </a>
         </nav>
       </div>
@@ -233,7 +236,7 @@ export default async function EventsCalendarView({
                 className="events-calendar__more"
                 style={{ gridColumn: '1 / -1', gridRow: MAX_LANES + 2 }}
               >
-                +{hiddenCount} more
+                {t('eventsCalendar.more', language, { count: hiddenCount })}
               </span>
             )}
           </div>

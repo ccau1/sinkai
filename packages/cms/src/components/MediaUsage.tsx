@@ -1,9 +1,13 @@
-import React from 'react'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Payload } from 'payload'
+import React from 'react'
+
+import { t } from '../uiTranslations'
 
 interface MediaUsageProps {
   id?: number | string
   payload: Payload
+  i18n: I18nClient
 }
 
 interface Reference {
@@ -11,6 +15,7 @@ interface Reference {
   id: number | string
   label: string
   href: string
+  isInline?: boolean
 }
 
 function findUploadIds(node: unknown, ids: Set<number | string>) {
@@ -29,6 +34,17 @@ function findUploadIds(node: unknown, ids: Set<number | string>) {
       findUploadIds(child, ids)
     }
   }
+}
+
+const collectionLabels: Record<string, { en: string; 'zh-CN': string; 'zh-TW': string }> = {
+  blogs: { en: 'Blog', 'zh-CN': '博客', 'zh-TW': '網誌' },
+  installations: { en: 'Installation', 'zh-CN': '援助项目', 'zh-TW': '援助項目' },
+  testimonies: { en: 'Testimony', 'zh-CN': '见证', 'zh-TW': '見證' },
+  pages: { en: 'Page', 'zh-CN': '页面', 'zh-TW': '頁面' },
+}
+
+function getCollectionLabel(collection: string, language: string): string {
+  return collectionLabels[collection]?.[language as 'en' | 'zh-CN' | 'zh-TW'] ?? collection
 }
 
 async function collectReferences(
@@ -52,7 +68,7 @@ async function collectReferences(
     references.push({
       collection: 'blogs',
       id: doc.id,
-      label: (doc.title as string) || `Blog ${doc.id}`,
+      label: (doc.title as string) || '',
       href: `/admin/collections/blogs/${doc.id}`,
     })
   }
@@ -70,7 +86,7 @@ async function collectReferences(
     references.push({
       collection: 'installations',
       id: doc.id,
-      label: (doc.title as string) || `Installation ${doc.id}`,
+      label: (doc.title as string) || '',
       href: `/admin/collections/installations/${doc.id}`,
     })
   }
@@ -88,7 +104,7 @@ async function collectReferences(
     references.push({
       collection: 'testimonies',
       id: doc.id,
-      label: (doc.name as string) || `Testimony ${doc.id}`,
+      label: (doc.name as string) || '',
       href: `/admin/collections/testimonies/${doc.id}`,
     })
   }
@@ -106,7 +122,7 @@ async function collectReferences(
     references.push({
       collection: 'pages',
       id: doc.id,
-      label: (doc.title as string) || `Page ${doc.id}`,
+      label: (doc.title as string) || '',
       href: `/admin/collections/pages/${doc.id}`,
     })
   }
@@ -120,8 +136,9 @@ async function collectReferences(
       references.push({
         collection: 'blogs',
         id: doc.id,
-        label: `${(doc.title as string) || `Blog ${doc.id}`} (inline content)`,
+        label: (doc.title as string) || '',
         href: `/admin/collections/blogs/${doc.id}`,
+        isInline: true,
       })
     }
   }
@@ -134,8 +151,9 @@ async function collectReferences(
       references.push({
         collection: 'pages',
         id: doc.id,
-        label: `${(doc.title as string) || `Page ${doc.id}`} (inline content)`,
+        label: (doc.title as string) || '',
         href: `/admin/collections/pages/${doc.id}`,
+        isInline: true,
       })
     }
   }
@@ -143,8 +161,9 @@ async function collectReferences(
   return references
 }
 
-export default async function MediaUsage({ id, payload }: MediaUsageProps) {
+export default async function MediaUsage({ id, payload, i18n }: MediaUsageProps) {
   const references = await collectReferences(payload, id)
+  const language = i18n.language
 
   return (
     <div
@@ -157,28 +176,35 @@ export default async function MediaUsage({ id, payload }: MediaUsageProps) {
       }}
     >
       <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600 }}>
-        Used in {references.length} document{references.length === 1 ? '' : 's'}
+        {t('mediaUsage.heading', language, { count: references.length })}
       </h3>
 
       {references.length === 0 ? (
         <p style={{ margin: 0, color: 'var(--theme-elevation-600, #666)' }}>
-          This media is not referenced by any document.
+          {t('mediaUsage.empty', language)}
         </p>
       ) : (
         <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          {references.map((ref) => (
-            <li key={`${ref.collection}-${ref.id}`} style={{ marginBottom: '4px' }}>
-              <a
-                href={ref.href}
-                style={{
-                  color: 'var(--theme-text, #000)',
-                  textDecoration: 'underline',
-                }}
-              >
-                {ref.collection}: {ref.label}
-              </a>
-            </li>
-          ))}
+          {references.map((ref) => {
+            const collectionLabel = getCollectionLabel(ref.collection, language)
+            const inlineSuffix = 'isInline' in ref ? ` ${t('mediaUsage.inlineContent', language)}` : ''
+            const displayLabel = ref.label || `${collectionLabel} ${ref.id}`
+
+            return (
+              <li key={`${ref.collection}-${ref.id}`} style={{ marginBottom: '4px' }}>
+                <a
+                  href={ref.href}
+                  style={{
+                    color: 'var(--theme-text, #000)',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {collectionLabel}: {displayLabel}
+                  {inlineSuffix}
+                </a>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

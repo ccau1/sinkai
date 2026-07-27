@@ -6,12 +6,12 @@
  * donation/target amounts are never converted or rewritten.
  */
 export const CURRENCY_OPTIONS = [
-  { label: 'Hong Kong Dollar (HKD)', value: 'HKD' },
-  { label: 'US Dollar (USD)', value: 'USD' },
-  { label: 'Chinese Yuan (CNY)', value: 'CNY' },
-  { label: 'New Taiwan Dollar (TWD)', value: 'TWD' },
-  { label: 'Euro (EUR)', value: 'EUR' },
-  { label: 'British Pound (GBP)', value: 'GBP' },
+  { label: { en: 'Hong Kong Dollar (HKD)', 'zh-CN': '港元 (HKD)', 'zh-TW': '港元 (HKD)' }, value: 'HKD' },
+  { label: { en: 'US Dollar (USD)', 'zh-CN': '美元 (USD)', 'zh-TW': '美元 (USD)' }, value: 'USD' },
+  { label: { en: 'Chinese Yuan (CNY)', 'zh-CN': '人民币 (CNY)', 'zh-TW': '人民幣 (CNY)' }, value: 'CNY' },
+  { label: { en: 'New Taiwan Dollar (TWD)', 'zh-CN': '新台币 (TWD)', 'zh-TW': '新臺幣 (TWD)' }, value: 'TWD' },
+  { label: { en: 'Euro (EUR)', 'zh-CN': '欧元 (EUR)', 'zh-TW': '歐元 (EUR)' }, value: 'EUR' },
+  { label: { en: 'British Pound (GBP)', 'zh-CN': '英镑 (GBP)', 'zh-TW': '英鎊 (GBP)' }, value: 'GBP' },
 ]
 
 export const CURRENCY_CODES = CURRENCY_OPTIONS.map((option) => option.value)

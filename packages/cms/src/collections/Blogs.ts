@@ -13,6 +13,18 @@ import {
 
 export const Blogs: CollectionConfig = {
   slug: 'blogs',
+  labels: {
+    singular: {
+      en: 'Blog',
+      'zh-CN': '博客',
+      'zh-TW': '網誌',
+    },
+    plural: {
+      en: 'Blogs',
+      'zh-CN': '博客',
+      'zh-TW': '網誌',
+    },
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slugName', 'shortId', 'date', 'updatedAt'],
@@ -33,41 +45,64 @@ export const Blogs: CollectionConfig = {
     {
       name: 'slugName',
       type: 'text',
-      label: 'Slug',
+      label: {
+        en: 'Slug',
+        'zh-CN': 'URL 别名',
+        'zh-TW': 'URL 別名',
+      },
       localized: true,
       required: true,
       // Prevent duplicate posts for the same slug (seed idempotency relies on
       // this natural key). Uniqueness is enforced per locale.
       unique: true,
       admin: {
-        description:
-          'URL-safe slug, e.g. "mountain-area-reality". Must be unique across all blogs. Can be translated per locale (optional).',
+        description: {
+          en: 'URL-safe slug, e.g. "mountain-area-reality". Must be unique across all blogs. Can be translated per locale (optional).',
+          'zh-CN': 'URL 安全别名，例如 "mountain-area-reality"。必须在所有博客中保持唯一。可按语系翻译（可选）。',
+          'zh-TW': 'URL 安全別名，例如 "mountain-area-reality"。必須在所有網誌中保持唯一。可按語系翻譯（可選）。',
+        },
       },
     },
     {
       name: 'title',
       type: 'text',
-      label: 'Title',
+      label: {
+        en: 'Title',
+        'zh-CN': '标题',
+        'zh-TW': '標題',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'excerpt',
       type: 'textarea',
-      label: 'Excerpt',
+      label: {
+        en: 'Excerpt',
+        'zh-CN': '摘要',
+        'zh-TW': '摘要',
+      },
       localized: true,
       required: true,
     },
     {
       name: 'content',
       type: 'richText',
-      label: 'Content',
+      label: {
+        en: 'Content',
+        'zh-CN': '内容',
+        'zh-TW': '內容',
+      },
       localized: true,
     },
     {
       name: 'legacyContent',
       type: 'textarea',
-      label: 'Legacy Content',
+      label: {
+        en: 'Legacy Content',
+        'zh-CN': '旧版内容',
+        'zh-TW': '舊版內容',
+      },
       localized: true,
       admin: {
         hidden: true,
@@ -76,28 +111,49 @@ export const Blogs: CollectionConfig = {
     {
       name: 'shortId',
       type: 'text',
+      label: {
+        en: 'Short Id',
+        'zh-CN': '短 ID',
+        'zh-TW': '短 ID',
+      },
       admin: {
         readOnly: true,
         position: 'sidebar',
-        description:
-          'Short URL token shared across all locales. Auto-generated from the slug; managed by the system, not editable.',
+        description: {
+          en: 'Short URL token shared across all locales. Auto-generated from the slug; managed by the system, not editable.',
+          'zh-CN': '跨所有语系共享的短 URL 标识。根据别名自动生成；由系统管理，不可编辑。',
+          'zh-TW': '跨所有語系共享的短 URL 識別碼。根據別名自動生成；由系統管理，不可編輯。',
+        },
       },
     },
     {
       name: 'coverImage',
       type: 'upload',
       relationTo: 'media',
+      label: {
+        en: 'Cover Image',
+        'zh-CN': '封面图片',
+        'zh-TW': '封面圖片',
+      },
       required: true,
       displayPreview: true,
     },
     {
       name: 'date',
       type: 'date',
+      label: {
+        en: 'Date',
+        'zh-CN': '日期',
+        'zh-TW': '日期',
+      },
       required: true,
       defaultValue: () => new Date().toISOString(),
       admin: {
-        description:
-          'Display date shown on the site. Auto-set to the publish time when a post is published; edit to backdate.',
+        description: {
+          en: 'Display date shown on the site. Auto-set to the publish time when a post is published; edit to backdate.',
+          'zh-CN': '网站上显示的日期。发布文章时自动设为发布时间；可手动修改以回溯日期。',
+          'zh-TW': '網站上顯示的日期。發布文章時自動設為發布時間；可手動修改以回溯日期。',
+        },
       },
     },
     {
@@ -105,13 +161,27 @@ export const Blogs: CollectionConfig = {
       type: 'relationship',
       relationTo: 'installations',
       hasMany: true,
+      label: {
+        en: 'Installations',
+        'zh-CN': '援助项目',
+        'zh-TW': '援助項目',
+      },
       admin: {
-        description: 'Installations mentioned in this blog post',
+        description: {
+          en: 'Installations mentioned in this blog post',
+          'zh-CN': '此博客文章中提及的援助项目',
+          'zh-TW': '此網誌文章中提及的援助項目',
+        },
       },
     },
     {
       name: 'published',
       type: 'checkbox',
+      label: {
+        en: 'Published',
+        'zh-CN': '已发布',
+        'zh-TW': '已發布',
+      },
       defaultValue: false,
       admin: {
         position: 'sidebar',

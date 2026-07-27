@@ -1,7 +1,9 @@
 'use client'
 
+import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useDocumentInfo, useFormFields } from '@payloadcms/ui'
+
+import { t } from '../uiTranslations'
 
 type Status = 'idle' | 'checking' | 'fresh' | 'generating' | 'error'
 
@@ -45,8 +47,7 @@ async function captureFrame(src: string): Promise<Blob> {
   })
 
   const width = THUMB_WIDTH
-  const aspect =
-    video.videoWidth > 0 ? video.videoHeight / video.videoWidth : 9 / 16
+  const aspect = video.videoWidth > 0 ? video.videoHeight / video.videoWidth : 9 / 16
   const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = Math.max(1, Math.round(width * aspect))
@@ -69,6 +70,8 @@ export default function VideoThumbnail() {
   const mimeType = useFormFields(([fields]) => fields?.mimeType?.value as string | undefined)
   const filename = useFormFields(([fields]) => fields?.filename?.value as string | undefined)
   const prefix = useFormFields(([fields]) => fields?.prefix?.value as string | undefined)
+  const { i18n } = useTranslation()
+  const language = i18n.language
 
   const [status, setStatus] = useState<Status>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -146,14 +149,14 @@ export default function VideoThumbnail() {
 
   const statusText =
     status === 'checking'
-      ? 'Checking video thumbnail…'
+      ? t('videoThumbnail.checking', language)
       : status === 'generating'
-        ? 'Generating video thumbnail…'
+        ? t('videoThumbnail.generating', language)
         : status === 'fresh'
-          ? 'Video thumbnail is up to date.'
+          ? t('videoThumbnail.fresh', language)
           : status === 'error'
-            ? `Video thumbnail error: ${errorMessage}`
-            : 'Video thumbnail'
+            ? t('videoThumbnail.error', language, { message: errorMessage })
+            : t('videoThumbnail.default', language)
 
   return (
     <div
@@ -165,7 +168,9 @@ export default function VideoThumbnail() {
         marginTop: '8px',
       }}
     >
-      <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600 }}>Video Thumbnail</h3>
+      <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600 }}>
+        {t('videoThumbnail.heading', language)}
+      </h3>
       <p style={{ margin: 0, color: 'var(--theme-elevation-600, #666)' }}>{statusText}</p>
       <button
         type="button"
@@ -180,7 +185,7 @@ export default function VideoThumbnail() {
           cursor: 'pointer',
         }}
       >
-        Regenerate
+        {t('videoThumbnail.regenerate', language)}
       </button>
     </div>
   )

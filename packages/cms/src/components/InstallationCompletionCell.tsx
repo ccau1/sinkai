@@ -1,6 +1,9 @@
 'use client'
 
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
+
+import { t } from '../uiTranslations'
 
 const badgeBase: React.CSSProperties = {
   borderRadius: '999px',
@@ -19,6 +22,9 @@ const badgeBase: React.CSSProperties = {
  * - past date      -> date only
  */
 export default function InstallationCompletionCell({ cellData }: { cellData?: string | null }) {
+  const { i18n } = useTranslation()
+  const language = i18n.language
+
   if (!cellData) {
     return (
       <span
@@ -28,7 +34,7 @@ export default function InstallationCompletionCell({ cellData }: { cellData?: st
           color: 'var(--theme-elevation-600, #666)',
         }}
       >
-        Planning
+        {t('installationCompletion.planning', language)}
       </span>
     )
   }
@@ -47,7 +53,7 @@ export default function InstallationCompletionCell({ cellData }: { cellData?: st
             color: 'var(--theme-elevation-0, #fff)',
           }}
         >
-          Upcoming
+          {t('installationCompletion.upcoming', language)}
         </span>
       )}
     </span>
