@@ -13,11 +13,6 @@
     "enabled": true,
     "head_sampling_rate": 1,
   },
-  // Cloudflare Workers on the Free plan do not support setting CPU limits
-  // (paid plans only). Keep subrequests configured here.
-  "limits": {
-    "subrequests": 10000,
-  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
@@ -57,9 +52,6 @@
   "env": {
     "production": {
       "name": "sinkai-cms-prod",
-      "limits": {
-        "subrequests": 10000,
-      },
       "routes": [
         {
           "pattern": "sinkai-cms.tribalorigin.com",
