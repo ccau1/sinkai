@@ -36,15 +36,15 @@ function findUploadIds(node: unknown, ids: Set<number | string>) {
   }
 }
 
-const collectionLabels: Record<string, { en: string; 'zh-CN': string; 'zh-TW': string }> = {
-  blogs: { en: 'Blog', 'zh-CN': '博客', 'zh-TW': '網誌' },
-  installations: { en: 'Installation', 'zh-CN': '援助项目', 'zh-TW': '援助項目' },
-  testimonies: { en: 'Testimony', 'zh-CN': '见证', 'zh-TW': '見證' },
-  pages: { en: 'Page', 'zh-CN': '页面', 'zh-TW': '頁面' },
+const collectionLabels: Record<string, string> = {
+  blogs: '網誌',
+  installations: '援助項目',
+  testimonies: '見證',
+  pages: '頁面',
 }
 
-function getCollectionLabel(collection: string, language: string): string {
-  return collectionLabels[collection]?.[language as 'en' | 'zh-CN' | 'zh-TW'] ?? collection
+function getCollectionLabel(collection: string): string {
+  return collectionLabels[collection] ?? collection
 }
 
 async function collectReferences(
@@ -186,7 +186,7 @@ export default async function MediaUsage({ id, payload, i18n }: MediaUsageProps)
       ) : (
         <ul style={{ margin: 0, paddingLeft: '20px' }}>
           {references.map((ref) => {
-            const collectionLabel = getCollectionLabel(ref.collection, language)
+            const collectionLabel = getCollectionLabel(ref.collection)
             const inlineSuffix = 'isInline' in ref ? ` ${t('mediaUsage.inlineContent', language)}` : ''
             const displayLabel = ref.label || `${collectionLabel} ${ref.id}`
 

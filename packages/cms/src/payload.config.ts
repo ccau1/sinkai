@@ -68,39 +68,10 @@ const cloudflare = useWranglerProxy
   ? await getCloudflareContextFromWrangler()
   : await getCloudflareContext({ async: true })
 
-const aiLocalizationPlugin = process.env.OPENAI_API_KEY
-  ? (
-      await import('payload-plugin-ai-localization')
-    ).aiLocalization({
-        openai: {
-          apiKey: process.env.OPENAI_API_KEY,
-          model: 'gpt-4.1-nano',
-        },
-        collections: {
-          blogs: {
-            fields: ['slugName', 'title', 'excerpt', 'content'],
-          },
-          installations: {
-            fields: ['title', 'location', 'description'],
-          },
-          'installation-types': {
-            fields: ['label'],
-          },
-          pages: {
-            fields: ['title', 'excerpt', 'content'],
-          },
-          media: {
-            fields: ['alt'],
-          },
-          testimonies: {
-            fields: ['name', 'role', 'synopsis', 'content'],
-          },
-          events: {
-            fields: ['title', 'description'],
-          },
-        },
-      })
-  : null
+// AI localization plugin removed from the worker bundle to stay under the
+// Cloudflare Free plan 3 MiB limit. It was gated on OPENAI_API_KEY and not
+// currently used in production.
+// TODO: re-enable via a separate non-worker service if AI localization is needed.
 
 export default buildConfig({
   admin: {
@@ -116,8 +87,6 @@ export default buildConfig({
       graphics: {
         Logo: './components/AdminLogo#default',
       },
-      providers: ['./components/AdminLanguageCookieSync#default'],
-      settingsMenu: ['./components/UserPreferencesMenuLink#default'],
     },
     meta: {
       titleSuffix: '- 善啓慈善基金會',
@@ -246,11 +215,7 @@ export default buildConfig({
       uploadCollections: ['media'],
       formOverrides: {
         admin: {
-          group: {
-            en: 'Website',
-            'zh-CN': '网站',
-            'zh-TW': '網站',
-          },
+          group: '網站',
         },
         fields: ({ defaultFields }) => [
           ...defaultFields,
@@ -258,19 +223,11 @@ export default buildConfig({
             name: 'shareableLinks',
             type: 'textarea',
             virtual: true,
-            label: {
-              en: 'Shareable links',
-              'zh-CN': '可分享链接',
-              'zh-TW': '可分享連結',
-            },
+            label: '可分享連結',
             admin: {
               readOnly: true,
               position: 'sidebar',
-              description: {
-                en: 'Copy the link for the locale you need and send it to end users.',
-                'zh-CN': '复制所需语系的链接并发送给最终用户。',
-                'zh-TW': '複製所需語系的連結並傳送給最終使用者。',
-              },
+              description: '複製所需語系的連結並傳送給最終使用者。',
               rows: 3,
             },
           },
@@ -283,19 +240,13 @@ export default buildConfig({
       },
       formSubmissionOverrides: {
         admin: {
-          group: {
-            en: 'Website',
-            'zh-CN': '网站',
-            'zh-TW': '網站',
-          },
+          group: '網站',
         },
         hooks: {
           afterChange: [handleFormSubmission],
         },
       },
     }),
-    ...(aiLocalizationPlugin ? [aiLocalizationPlugin] : []),
-
   ],
 })
 

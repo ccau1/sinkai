@@ -162,7 +162,7 @@ export interface UserAuthOperations {
       };
 }
 /**
- * News, stories and articles about the charity's work and impact.
+ * 關於慈善機構工作與影響的新聞、故事和文章。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blogs".
@@ -170,7 +170,7 @@ export interface UserAuthOperations {
 export interface Blog {
   id: number;
   /**
-   * URL-safe slug, e.g. "mountain-area-reality". Must be unique across all blogs. Can be translated per locale (optional).
+   * URL 安全別名，例如 "mountain-area-reality"。必須在所有網誌中保持唯一。可按語系翻譯（可選）。
    */
   slugName: string;
   title: string;
@@ -192,16 +192,16 @@ export interface Blog {
   } | null;
   legacyContent?: string | null;
   /**
-   * Short URL token shared across all locales. Auto-generated from the slug; managed by the system, not editable.
+   * 跨所有語系共享的短 URL 識別碼。根據別名自動生成；由系統管理，不可編輯。
    */
   shortId?: string | null;
   coverImage: number | Media;
   /**
-   * Display date shown on the site. Auto-set to the publish time when a post is published; edit to backdate.
+   * 網站上顯示的日期。發布文章時自動設為發布時間；可手動修改以回溯日期。
    */
   date: string;
   /**
-   * Installations mentioned in this blog post
+   * 此網誌文章中提及的援助項目
    */
   installations?: (number | Installation)[] | null;
   published?: boolean | null;
@@ -217,7 +217,7 @@ export interface Blog {
   createdAt: string;
 }
 /**
- * Images and files uploaded for use across the website.
+ * 上傳至網站使用的圖片與檔案。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -226,23 +226,23 @@ export interface Media {
   id: number;
   alt?: string | null;
   /**
-   * Used to organize media files. Media in this category can be shown on the gallery page.
+   * 用於整理媒體檔案。該分類下的媒體可顯示在圖庫頁面。
    */
   category?: (number | null) | MediaCategory;
   /**
-   * Optional tags for future filtering and grouping.
+   * 可選標籤，用於後續篩選與分組。
    */
   tags?: string[] | null;
   /**
-   * Position within the media category. Lower numbers appear first.
+   * 在該媒體分類中的位置。數字越小越靠前。
    */
   sortOrder?: number | null;
   /**
-   * Hide this media from the public gallery page without deleting it.
+   * 在不刪除的情況下，在公共圖庫頁面隱藏此媒體。
    */
   hidden?: boolean | null;
   /**
-   * Private files are only served through the CMS to logged-in users.
+   * 私密檔案僅透過 CMS 提供給已登入使用者。
    */
   visibility: 'public' | 'private';
   prefix?: string | null;
@@ -257,7 +257,7 @@ export interface Media {
   height?: number | null;
 }
 /**
- * Categories used to organize media files. Categories can be shown on the public gallery page.
+ * 用於整理媒體檔案的分類。分類可以顯示在公共圖庫頁面。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-categories".
@@ -265,31 +265,31 @@ export interface Media {
 export interface MediaCategory {
   id: number;
   /**
-   * Stable identifier used in code, e.g. snow-disaster.
+   * 程式碼中使用的穩定識別碼，例如 snow-disaster。
    */
   slug: string;
   /**
-   * Small uppercase eyebrow text above the section title.
+   * 區塊標題上方的小號大寫眉題文字。
    */
   label: string;
   title: string;
   /**
-   * Optional paragraph shown under the section title.
+   * 顯示在區塊標題下方的可選段落。
    */
   description?: string | null;
   /**
-   * Position of this category on the public gallery page. Lower numbers appear first.
+   * 該分類在公共圖庫頁面上的位置。數字越小越靠前。
    */
   sortOrder?: number | null;
   /**
-   * Uncheck to hide this category from the public gallery page.
+   * 取消勾選以在公共圖庫頁面隱藏此分類。
    */
   showInGallery?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Infrastructure and equipment built or donated by the charity, such as schools, bridges, roads and water tanks. This collection shows the physical contributions made to communities.
+ * 慈善機構建造或捐贈的基礎設施與設備，例如學校、橋樑、道路和水塔。此集合展示了為社區提供的實物貢獻。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "installations".
@@ -314,7 +314,7 @@ export interface Installation {
     [k: string]: unknown;
   } | null;
   /**
-   * URL-safe identifier, e.g. "hope-primary-school-guizhou"
+   * URL 安全識別碼，例如 "hope-primary-school-guizhou"
    */
   slug: string;
   type: number | InstallationType;
@@ -333,7 +333,7 @@ export interface Installation {
   createdAt: string;
 }
 /**
- * Types of installations (e.g. schools, bridges, water tanks). Types drive the groups shown on the public installations page.
+ * 項目設施類型（例如學校、橋樑、水窖）。類型決定網站援建項目頁面的分組。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "installation-types".
@@ -341,19 +341,19 @@ export interface Installation {
 export interface InstallationType {
   id: number;
   /**
-   * Stable identifier used by code and seeds, e.g. "school".
+   * 程式碼與種子使用的穩定識別碼，例如 "school"。
    */
   key: string;
   label: string;
   /**
-   * Controls the order of groups on the installations page (lower first).
+   * 控制援建項目頁面上的分組順序（數字越小越靠前）。
    */
   sortOrder?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Stories and testimonials from beneficiaries, volunteers, donors and supporters.
+ * 受益者、義工、捐贈者與支持者的故事和見證。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonies".
@@ -362,20 +362,20 @@ export interface Testimony {
   id: number;
   name: string;
   /**
-   * E.g. "Actor", "Singer", "Beneficiary", "Volunteer".
+   * 例如「演員」、「歌手」、「受益者」、「義工」。
    */
   role?: string | null;
   /**
-   * Mark as a highlighted testimony (e.g. celebrity or VIP).
+   * 標記為重點推薦見證（例如名人或貴賓）。
    */
   highlighted?: boolean | null;
   photos: (number | Media)[];
   /**
-   * A short quote or summary shown in listings.
+   * 在列表中顯示的短句或摘要。
    */
   synopsis: string;
   /**
-   * The full testimony or story.
+   * 完整的見證或故事。
    */
   content?: {
     root: {
@@ -397,7 +397,7 @@ export interface Testimony {
   createdAt: string;
 }
 /**
- * Charity events such as school building trips and fundraising campaigns. Events can be linked to donations (funding sources) and installations (what the event built).
+ * 慈善活動，例如建校行程和籌款活動。活動可以關聯捐款（資金來源）和項目設施（活動成果）。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "events".
@@ -407,7 +407,7 @@ export interface Event {
   title: string;
   startDate: string;
   /**
-   * Leave empty for single-day events.
+   * 單日活動請留空。
    */
   endDate?: string | null;
   description?: {
@@ -433,16 +433,16 @@ export interface Event {
       }[]
     | null;
   /**
-   * Donation amount required to fund this event.
+   * 資助該活動所需的捐款金額。
    */
   targetAmount?: number | null;
   targetCurrency?: ('HKD' | 'USD' | 'CNY' | 'TWD' | 'EUR' | 'GBP') | null;
   /**
-   * Installations funded or created by this event.
+   * 該活動資助或建成的援助項目。
    */
   installations?: (number | Installation)[] | null;
   /**
-   * Donations allocated to this event.
+   * 分配到該活動的捐款。
    */
   donations?: {
     docs?: (number | Donation)[];
@@ -454,7 +454,7 @@ export interface Event {
   createdAt: string;
 }
 /**
- * Track donations received by the charity, including donor details, amount, transfer date and the installations they support.
+ * 記錄慈善機構收到的捐款，包括捐贈者資料、金額、轉賬日期及其支持的項目。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "donations".
@@ -463,47 +463,47 @@ export interface Donation {
   id: number;
   name: string;
   /**
-   * Email address for donation receipt and follow-up.
+   * 用於發送捐款收據及後續聯絡的電子郵件地址。
    */
   email?: string | null;
   phone?: string | null;
   /**
-   * Donation amount in the selected currency.
+   * 所選貨幣的捐款金額。
    */
   amount: number;
   currency: 'HKD' | 'USD' | 'CNY' | 'TWD' | 'EUR' | 'GBP';
   transferDate: string;
   paymentMethod?: ('bank-transfer' | 'fps' | 'payme' | 'cheque' | 'cash' | 'other') | null;
   /**
-   * Installations that this donation supports.
+   * 該捐款支持的援助項目。
    */
   installations?: (number | Installation)[] | null;
   /**
-   * Events that this donation is allocated to.
+   * 該捐款分配到的活動。
    */
   events?: (number | Event)[] | null;
   /**
-   * Optional note or dedication from the donor.
+   * 捐贈者的可選留言或寄語。
    */
   message?: string | null;
   /**
-   * Receipt images uploaded through the donation form.
+   * 透過捐款表單上傳的收據圖片。
    */
   receipts?: (number | Media)[] | null;
   /**
-   * Staff-only notes about this donation (not shown to the donor).
+   * 僅限工作人員查看的捐款備註（不顯示給捐贈者）。
    */
   notes?: string | null;
   status: 'confirmed' | 'pending' | 'refunded' | 'cancelled';
   /**
-   * Whether a donation receipt has been sent to the donor.
+   * 是否已向捐贈者發送捐款收據。
    */
   receiptSent?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Static content pages such as About, Contact and Donate.
+ * 靜態內容頁面，例如關於我們、聯絡我們與捐助頁面。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
@@ -511,7 +511,7 @@ export interface Donation {
 export interface Page {
   id: number;
   /**
-   * URL-safe identifier, e.g. "about", "contact", "donate".
+   * URL 安全識別碼，例如 "about"、"contact"、"donate"。
    */
   slug: string;
   title: string;
@@ -546,7 +546,7 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Administrative users who can access the CMS and their assigned roles.
+ * 可存取內容管理系統的管理用戶及其分配的角色。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -554,14 +554,8 @@ export interface Page {
 export interface User {
   id: number;
   roles: ('admin' | 'blog_editor' | 'installation_editor' | 'read_only')[];
-  preferences?: {
-    /**
-     * The language used for CMS menus, buttons, and labels.
-     */
-    language?: ('en' | 'zh-CN' | 'zh-TW') | null;
-  };
   /**
-   * Grant additional permissions beyond the user's roles. Permissions override or extend role access.
+   * 授予使用者角色之外的額外權限。權限可覆蓋或擴展角色存取範圍。
    */
   permissions?: {
     manageUsers?: boolean | null;
@@ -772,7 +766,7 @@ export interface Form {
       }[]
     | null;
   /**
-   * Copy the link for the locale you need and send it to end users.
+   * 複製所需語系的連結並傳送給最終使用者。
    */
   shareableLinks?: string | null;
   updatedAt: string;
@@ -1103,11 +1097,6 @@ export interface MediaCategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   roles?: T;
-  preferences?:
-    | T
-    | {
-        language?: T;
-      };
   permissions?:
     | T
     | {
@@ -1364,7 +1353,7 @@ export interface Navigation {
         linkType: 'page' | 'fixed' | 'external';
         page?: (number | null) | Page;
         /**
-         * e.g. "/" for homepage, "/gallery"
+         * 例如 "/" 代表首頁，"/gallery" 代表圖庫
          */
         path?: string | null;
         url?: string | null;
