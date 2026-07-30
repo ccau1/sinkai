@@ -25,6 +25,7 @@ import { Events } from './collections/Events'
 import { Navigation } from './globals/Navigation'
 import { ContactSettings } from './globals/ContactSettings'
 import { handleFormSubmission } from './hooks/handleFormSubmission'
+import { collectionPreviewsEndpoint } from './endpoints/collectionPreviews'
 import { populateShareableLinks } from './hooks/populateShareableLinks'
 import {
   revalidateWebAfterChange,
@@ -115,6 +116,7 @@ export default buildConfig({
     Users,
   ],
   globals: [Navigation, ContactSettings],
+  endpoints: [collectionPreviewsEndpoint],
   graphQL: {
     disable: true,
   },

@@ -16,6 +16,10 @@ import {
   revalidateWebAfterDelete,
 } from '../hooks/triggerWebRevalidate'
 import { checkVideoThumb, postVideoThumb } from '../endpoints/videoThumb'
+import {
+  mediaUsageDirectEndpoint,
+  mediaUsageInlineEndpoint,
+} from '../endpoints/mediaUsage'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -54,6 +58,8 @@ export const Media: CollectionConfig = {
       method: 'post',
       handler: postVideoThumb,
     },
+    mediaUsageDirectEndpoint,
+    mediaUsageInlineEndpoint,
   ],
   fields: [
     {

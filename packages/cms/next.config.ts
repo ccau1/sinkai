@@ -1,5 +1,6 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+import withBundleAnalyzer from '@next/bundle-analyzer'
 import type { NextConfig } from 'next'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -26,7 +27,11 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['jose', 'pg-cloudflare'],
 
   outputFileTracingExcludes: {
-    '*': ['**/node_modules/next/dist/compiled/@vercel/og/**/*'],
+    '*': [
+      '**/node_modules/next/dist/compiled/@vercel/og/**/*',
+      '**/node_modules/sass/**/*',
+      '**/node_modules/next/dist/compiled/next-devtools/**/*',
+    ],
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,4 +57,6 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+const analyzedConfig = process.env.ANALYZE === 'true' ? withBundleAnalyzer({ openAnalyzer: false })(nextConfig) : nextConfig
+
+export default withPayload(analyzedConfig, { devBundleServerPackages: false })

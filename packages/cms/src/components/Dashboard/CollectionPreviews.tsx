@@ -1,17 +1,17 @@
-import type { CollectionConfig, WidgetServerProps } from 'payload'
-import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
-import React from 'react'
+'use client'
+
+import { useTranslation } from '@payloadcms/ui'
+import React, { useEffect, useState } from 'react'
 
 import { t } from '../../uiTranslations'
 import './CollectionPreviews.scss'
 
-type CollectionDocPreview = {
+interface CollectionDocPreview {
   id: number | string
   title: string
 }
 
-type CollectionPreview = {
+interface CollectionPreview {
   slug: string
   label: string
   href: string
@@ -20,76 +20,57 @@ type CollectionPreview = {
   docs: CollectionDocPreview[]
 }
 
-function getDocTitle(doc: Record<string, unknown>, collection: CollectionConfig): string {
-  const useAsTitle = collection.admin?.useAsTitle
-
-  if (useAsTitle && typeof doc[useAsTitle] === 'string' && doc[useAsTitle]) {
-    return doc[useAsTitle] as string
-  }
-
-  if (typeof doc.filename === 'string' && doc.filename) {
-    return doc.filename
-  }
-
-  return String(doc.id)
-}
-
-export default async function CollectionPreviews({ req, permissions }: WidgetServerProps) {
-  const { i18n, payload } = req
-  const { admin: adminRoute } = payload.config.routes
+export default function CollectionPreviews() {
+  const { i18n } = useTranslation()
   const language = i18n.language
 
-  const collections = payload.config.collections.filter((collection) => {
-    // Skip hidden/internal collections (e.g. Payload migrations, preferences, locked docs).
-    if (collection.admin?.hidden) {
-      return false
+  const [previews, setPreviews] = useState<CollectionPreview[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const run = async () => {
+      try {
+        const res = await fetch('/api/dashboard/collection-previews')
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`)
+        }
+        const data = (await res.json()) as { previews: CollectionPreview[] }
+        if (!cancelled) {
+          setPreviews(data.previews ?? [])
+        }
+      } catch (err) {
+        console.error('[CollectionPreviews] failed to load previews:', err)
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'unknown error')
+        }
+      }
     }
 
-    // Only show collections the current user is allowed to read in the admin panel.
-    const collectionPerms = permissions?.collections?.[collection.slug]
-    return Boolean(collectionPerms?.read)
-  })
+    void run()
 
-  const previews = await Promise.all(
-    collections.map(async (collection): Promise<CollectionPreview> => {
-      const slug = collection.slug
-      const label = getTranslation(
-        collection.labels?.plural ?? collection.labels?.singular ?? slug,
-        i18n,
-      )
-      const href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
-      const createHref = formatAdminURL({ adminRoute, path: `/collections/${slug}/create` })
-      const hasCreatePermission = Boolean(permissions?.collections?.[slug]?.create)
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-      let docs: CollectionDocPreview[] = []
+  if (error) {
+    return (
+      <div className="collection-previews">
+        <p style={{ color: 'var(--theme-error-500, #c00)' }}>{t('collectionPreviews.error', language, { message: error })}</p>
+      </div>
+    )
+  }
 
-      try {
-        const result = await payload.find({
-          collection: slug,
-          depth: 0,
-          limit: 6,
-          sort: '-updatedAt',
-          req,
-        })
-
-        docs = result.docs.map((doc) => ({
-          id: doc.id,
-          title: getDocTitle(doc as unknown as Record<string, unknown>, collection),
-        }))
-      } catch {
-        // If the collection cannot be read, leave the list empty.
-      }
-
-      return {
-        slug,
-        label,
-        href,
-        createHref,
-        hasCreatePermission,
-        docs,
-      }
-    }),
-  )
+  if (!previews) {
+    return (
+      <div className="collection-previews">
+        <h2 className="collection-previews__heading">{t('collectionPreviews.heading', language)}</h2>
+        <p>{t('collectionPreviews.checking', language)}</p>
+      </div>
+    )
+  }
 
   if (previews.length === 0) {
     return null
@@ -140,10 +121,7 @@ export default async function CollectionPreviews({ req, permissions }: WidgetSer
                   <li className="collection-previews__item" key={String(doc.id)}>
                     <a
                       className="collection-previews__item-link"
-                      href={formatAdminURL({
-                        adminRoute,
-                        path: `/collections/${preview.slug}/${doc.id}`,
-                      })}
+                      href={`${preview.href}/${doc.id}`}
                       title={doc.title}
                     >
                       {doc.title}

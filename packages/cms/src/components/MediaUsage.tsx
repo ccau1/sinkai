@@ -1,14 +1,9 @@
-import type { I18nClient } from '@payloadcms/translations'
-import type { Payload } from 'payload'
-import React from 'react'
+'use client'
+
+import { useDocumentInfo, useTranslation } from '@payloadcms/ui'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { t } from '../uiTranslations'
-
-interface MediaUsageProps {
-  id?: number | string
-  payload: Payload
-  i18n: I18nClient
-}
 
 interface Reference {
   collection: string
@@ -16,24 +11,6 @@ interface Reference {
   label: string
   href: string
   isInline?: boolean
-}
-
-function findUploadIds(node: unknown, ids: Set<number | string>) {
-  if (!node || typeof node !== 'object') return
-  const n = node as Record<string, unknown>
-
-  if (n.type === 'upload' && n.value && typeof n.value === 'object') {
-    const value = n.value as Record<string, unknown>
-    if (value.id !== undefined) {
-      ids.add(value.id as number | string)
-    }
-  }
-
-  if (Array.isArray(n.children)) {
-    for (const child of n.children) {
-      findUploadIds(child, ids)
-    }
-  }
 }
 
 const collectionLabels: Record<string, string> = {
@@ -47,123 +24,103 @@ function getCollectionLabel(collection: string): string {
   return collectionLabels[collection] ?? collection
 }
 
-async function collectReferences(
-  payload: Payload,
-  mediaId?: number | string,
-): Promise<Reference[]> {
-  if (!mediaId) return []
+function renderReference(ref: Reference): React.ReactNode {
+  const collectionLabel = getCollectionLabel(ref.collection)
+  const inlineSuffix = ref.isInline ? ` ${t('mediaUsage.inlineContent')}` : ''
+  const displayLabel = ref.label || `${collectionLabel} ${ref.id}`
 
-  const references: Reference[] = []
-
-  // Blogs: coverImage
-  const blogs = await payload.find({
-    collection: 'blogs',
-    depth: 0,
-    limit: 1000,
-    where: {
-      coverImage: { equals: mediaId },
-    },
-  })
-  for (const doc of blogs.docs) {
-    references.push({
-      collection: 'blogs',
-      id: doc.id,
-      label: (doc.title as string) || '',
-      href: `/admin/collections/blogs/${doc.id}`,
-    })
-  }
-
-  // Installations: photos (hasMany upload)
-  const installations = await payload.find({
-    collection: 'installations',
-    depth: 0,
-    limit: 1000,
-    where: {
-      photos: { contains: mediaId },
-    },
-  })
-  for (const doc of installations.docs) {
-    references.push({
-      collection: 'installations',
-      id: doc.id,
-      label: (doc.title as string) || '',
-      href: `/admin/collections/installations/${doc.id}`,
-    })
-  }
-
-  // Testimonies: photos (hasMany upload)
-  const testimonies = await payload.find({
-    collection: 'testimonies',
-    depth: 0,
-    limit: 1000,
-    where: {
-      photos: { contains: mediaId },
-    },
-  })
-  for (const doc of testimonies.docs) {
-    references.push({
-      collection: 'testimonies',
-      id: doc.id,
-      label: (doc.name as string) || '',
-      href: `/admin/collections/testimonies/${doc.id}`,
-    })
-  }
-
-  // Pages: coverImage
-  const pages = await payload.find({
-    collection: 'pages',
-    depth: 0,
-    limit: 1000,
-    where: {
-      coverImage: { equals: mediaId },
-    },
-  })
-  for (const doc of pages.docs) {
-    references.push({
-      collection: 'pages',
-      id: doc.id,
-      label: (doc.title as string) || '',
-      href: `/admin/collections/pages/${doc.id}`,
-    })
-  }
-
-  // Scan rich text content in blogs and pages for inline uploads.
-  const allBlogs = await payload.find({ collection: 'blogs', depth: 0, limit: 1000 })
-  for (const doc of allBlogs.docs) {
-    const ids = new Set<number | string>()
-    findUploadIds(doc.content, ids)
-    if (ids.has(mediaId)) {
-      references.push({
-        collection: 'blogs',
-        id: doc.id,
-        label: (doc.title as string) || '',
-        href: `/admin/collections/blogs/${doc.id}`,
-        isInline: true,
-      })
-    }
-  }
-
-  const allPages = await payload.find({ collection: 'pages', depth: 0, limit: 1000 })
-  for (const doc of allPages.docs) {
-    const ids = new Set<number | string>()
-    findUploadIds(doc.content, ids)
-    if (ids.has(mediaId)) {
-      references.push({
-        collection: 'pages',
-        id: doc.id,
-        label: (doc.title as string) || '',
-        href: `/admin/collections/pages/${doc.id}`,
-        isInline: true,
-      })
-    }
-  }
-
-  return references
+  return (
+    <a
+      href={ref.href}
+      style={{
+        color: 'var(--theme-text, #000)',
+        textDecoration: 'underline',
+      }}
+    >
+      {collectionLabel}: {displayLabel}
+      {inlineSuffix}
+    </a>
+  )
 }
 
-export default async function MediaUsage({ id, payload, i18n }: MediaUsageProps) {
-  const references = await collectReferences(payload, id)
+async function fetchReferences(
+  id: string | number,
+  mode: 'direct' | 'inline',
+  signal: AbortSignal,
+): Promise<Reference[]> {
+  const res = await fetch(`/api/media/media-usage/${mode}?id=${encodeURIComponent(String(id))}`, {
+    signal,
+  })
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`)
+  }
+  const data = (await res.json()) as { references: Reference[] }
+  return data.references ?? []
+}
+
+export default function MediaUsage() {
+  const { id } = useDocumentInfo()
+  const { i18n } = useTranslation()
   const language = i18n.language
+
+  const [direct, setDirect] = useState<Reference[] | null>(null)
+  const [inline, setInline] = useState<Reference[] | null>(null)
+  const [directLoading, setDirectLoading] = useState(false)
+  const [inlineLoading, setInlineLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const references = useMemo<Reference[]>(() => {
+    const all: Reference[] = []
+    if (direct) all.push(...direct)
+    if (inline) all.push(...inline)
+    return all
+  }, [direct, inline])
+
+  useEffect(() => {
+    if (!id) return
+
+    const directController = new AbortController()
+    const inlineController = new AbortController()
+
+    const run = async () => {
+      // Reset UI state from within the async task so React Compiler does not
+      // see a synchronous setState during the effect body.
+      await Promise.resolve()
+      setError(null)
+      setDirect(null)
+      setInline(null)
+      setDirectLoading(true)
+      setInlineLoading(true)
+
+      try {
+        const [directRefs, inlineRefs] = await Promise.all([
+          fetchReferences(id, 'direct', directController.signal),
+          fetchReferences(id, 'inline', inlineController.signal),
+        ])
+        setDirect(directRefs)
+        setInline(inlineRefs)
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
+        console.error('[MediaUsage] failed to load references:', err)
+        setError(err instanceof Error ? err.message : 'unknown error')
+      } finally {
+        setDirectLoading(false)
+        setInlineLoading(false)
+      }
+    }
+
+    void run()
+
+    return () => {
+      directController.abort()
+      inlineController.abort()
+    }
+  }, [id])
+
+  if (!id) return null
+
+  const isLoading = directLoading || inlineLoading
+  const hasInlineOnly = inlineLoading && !directLoading
 
   return (
     <div
@@ -179,33 +136,32 @@ export default async function MediaUsage({ id, payload, i18n }: MediaUsageProps)
         {t('mediaUsage.heading', language, { count: references.length })}
       </h3>
 
-      {references.length === 0 ? (
+      {isLoading && references.length === 0 ? (
+        <p style={{ margin: 0, color: 'var(--theme-elevation-600, #666)' }}>
+          {t('mediaUsage.checking', language)}
+        </p>
+      ) : error ? (
+        <p style={{ margin: 0, color: 'var(--theme-error-500, #c00)' }}>
+          {t('mediaUsage.error', language, { message: error })}
+        </p>
+      ) : references.length === 0 ? (
         <p style={{ margin: 0, color: 'var(--theme-elevation-600, #666)' }}>
           {t('mediaUsage.empty', language)}
         </p>
       ) : (
         <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          {references.map((ref) => {
-            const collectionLabel = getCollectionLabel(ref.collection)
-            const inlineSuffix = 'isInline' in ref ? ` ${t('mediaUsage.inlineContent', language)}` : ''
-            const displayLabel = ref.label || `${collectionLabel} ${ref.id}`
-
-            return (
-              <li key={`${ref.collection}-${ref.id}`} style={{ marginBottom: '4px' }}>
-                <a
-                  href={ref.href}
-                  style={{
-                    color: 'var(--theme-text, #000)',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  {collectionLabel}: {displayLabel}
-                  {inlineSuffix}
-                </a>
-              </li>
-            )
-          })}
+          {references.map((ref) => (
+            <li key={`${ref.collection}-${ref.id}`} style={{ marginBottom: '4px' }}>
+              {renderReference(ref)}
+            </li>
+          ))}
         </ul>
+      )}
+
+      {hasInlineOnly && (
+        <p style={{ margin: '8px 0 0', color: 'var(--theme-elevation-600, #666)', fontSize: '12px' }}>
+          {t('mediaUsage.inlineChecking', language)}
+        </p>
       )}
     </div>
   )

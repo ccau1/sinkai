@@ -74,6 +74,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260718.1",
+    "@next/bundle-analyzer": "^16.2.12",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
