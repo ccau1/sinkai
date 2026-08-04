@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export interface PuckHeroProps {
-  title: string
+  title?: string
   subtitle?: string
   backgroundImage?: string
   primaryCtaLabel?: string
@@ -17,7 +17,7 @@ export interface PuckHeroProps {
 }
 
 export function PuckHero({
-  title,
+  title = 'Hero Title',
   subtitle,
   backgroundImage = '/gallery/mountain/01_48.jpg',
   primaryCtaLabel,

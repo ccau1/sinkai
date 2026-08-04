@@ -1,5 +1,6 @@
 'use client'
 
+import type { ComponentType } from 'react'
 import type { Config, PuckContext } from '@puckeditor/core'
 import { PuckHero } from './components/Hero'
 import { PuckText } from './components/Text'
@@ -11,6 +12,20 @@ type PuckRenderProps = {
   puck: PuckContext
   editMode?: boolean
   [key: string]: unknown
+}
+
+function RenderSlot({ content }: { content?: unknown }) {
+  if (!content) return null
+  const Slot = content as ComponentType
+  return <Slot />
+}
+
+function cleanRenderProps(props: PuckRenderProps): Record<string, unknown> {
+  const rest = { ...props }
+  delete (rest as Record<string, unknown>).id
+  delete (rest as Record<string, unknown>).puck
+  delete (rest as Record<string, unknown>).editMode
+  return rest
 }
 
 export const editorPuckConfig = {
@@ -54,7 +69,7 @@ export const editorPuckConfig = {
         minHeight: '80vh',
       },
       render: (props: PuckRenderProps) => {
-        const { id: _id, puck: _puck, editMode: _editMode, ...rest } = props
+        const rest = cleanRenderProps(props)
         return <PuckHero {...rest} />
       },
     },
@@ -100,7 +115,7 @@ export const editorPuckConfig = {
         background: 'base',
       },
       render: (props: PuckRenderProps) => {
-        const { id: _id, puck: _puck, editMode: _editMode, ...rest } = props
+        const rest = cleanRenderProps(props)
         return <PuckText {...rest} />
       },
     },
@@ -159,7 +174,7 @@ export const editorPuckConfig = {
         maxWidth: 'wide',
       },
       render: (props: PuckRenderProps) => {
-        const { id: _id, puck: _puck, editMode: _editMode, ...rest } = props
+        const rest = cleanRenderProps(props)
         return <PuckImage {...rest} />
       },
     },
@@ -197,10 +212,12 @@ export const editorPuckConfig = {
         verticalPadding: 'xl',
       },
       render: (props: PuckRenderProps) => {
-        const { id: _id, puck: _puck, editMode: _editMode, content: Content, ...rest } = props
+        const rest = cleanRenderProps(props)
+        const content = rest.content as unknown
+        delete rest.content
         return (
           <PuckAnimatedSection {...rest}>
-            <Content />
+            <RenderSlot content={content} />
           </PuckAnimatedSection>
         )
       },
