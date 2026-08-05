@@ -13,6 +13,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     group: '網站',
+    hidden: true,
     useAsTitle: 'title',
     defaultColumns: ['slug', 'title', 'updatedAt'],
     description: '靜態內容頁面，例如關於我們、聯絡我們與捐助頁面。',

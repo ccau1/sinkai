@@ -34,7 +34,9 @@ import { default as default_f30da5631108bd7a8d0c0e009c1fd221 } from '../../../co
 import { default as default_f0aa037c5a87f7e694b83a0dfa4aa296 } from '../../../components/MediaUsage'
 import { default as default_b0b2bdd4b42aa03c8eed8050dba2ee22 } from '../../../components/VideoThumbnail'
 import { default as default_a61f4011432dd182d230f12ec130ccf3 } from '../../../components/AdminLogo'
+import { default as default_afb9f2f3082634930064e9413639f54e } from '../../../components/AdminDocsAction'
 import { R2ClientUploadHandler as R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d } from '@payloadcms/storage-r2/client'
+import { default as default_568269ef92ba45193d31752fe6da39f1 } from '../../../components/AdminDocs'
 import { default as default_393501ca467d3629e0d4c6725069402c } from '../../../components/Dashboard/CollectionPreviews'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -76,7 +78,9 @@ export const importMap = {
   "./components/MediaUsage#default": default_f0aa037c5a87f7e694b83a0dfa4aa296,
   "./components/VideoThumbnail#default": default_b0b2bdd4b42aa03c8eed8050dba2ee22,
   "./components/AdminLogo#default": default_a61f4011432dd182d230f12ec130ccf3,
+  "./components/AdminDocsAction#default": default_afb9f2f3082634930064e9413639f54e,
   "@payloadcms/storage-r2/client#R2ClientUploadHandler": R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d,
+  "./components/AdminDocs#default": default_568269ef92ba45193d31752fe6da39f1,
   "./components/Dashboard/CollectionPreviews#default": default_393501ca467d3629e0d4c6725069402c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

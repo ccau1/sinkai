@@ -33,20 +33,21 @@ export const Navigation: GlobalConfig = {
           name: 'linkType',
           type: 'radio',
           label: '連結類型',
-          defaultValue: 'page',
+          defaultValue: 'fixed',
           options: [
-            { label: 'CMS 頁面', value: 'page' },
             { label: '固定路徑', value: 'fixed' },
             { label: '外部連結', value: 'external' },
           ],
           required: true,
         },
+        // CMS page links are hidden while the Pages collection is disabled in admin.
         {
           name: 'page',
           type: 'relationship',
           relationTo: 'pages',
           admin: {
-            condition: (data, siblingData) => siblingData?.linkType === 'page',
+            hidden: true,
+            condition: () => false,
           },
         },
         {

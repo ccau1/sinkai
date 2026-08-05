@@ -88,6 +88,16 @@ export default buildConfig({
       graphics: {
         Logo: './components/AdminLogo#default',
       },
+      actions: ['./components/AdminDocsAction#default'],
+      views: {
+        docs: {
+          Component: './components/AdminDocs#default',
+          path: '/docs',
+          meta: {
+            title: '管理員說明文件',
+          },
+        },
+      },
     },
     meta: {
       titleSuffix: '- 善啓慈善基金會',
